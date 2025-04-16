@@ -11,15 +11,15 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [apiKey, setApiKey] = useState<string>('');
+  
+  // Using a fixed API key - replace with environment variable in production
+  const googleMapsApiKey = "AIzaSyA-TolBj_kkSJZ5m50SBYn_MjKDbJVmdpk";
 
   useEffect(() => {
-    // In a real implementation, this would be fetched from a secure environment variable
-    // For demo purposes, we'll use a temporary state value that the user can set
-    if (!apiKey) return;
+    if (!googleMapsApiKey) return;
 
     const loader = new Loader({
-      apiKey,
+      apiKey: googleMapsApiKey,
       version: 'weekly',
     });
 
@@ -28,7 +28,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
     }).catch(err => {
       console.error('Error loading Google Maps API:', err);
     });
-  }, [apiKey]);
+  }, [googleMapsApiKey]);
 
   useEffect(() => {
     if (!isLoaded || !mapRef.current) return;
@@ -112,28 +112,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
     });
   }, [address, map, marker, isLoaded]);
 
-  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setApiKey(e.target.value);
-  };
-
   return (
     <div className="w-full">
-      {!apiKey && (
-        <div className="mb-4 p-4 bg-yellow-100 text-yellow-800 rounded-lg">
-          <p className="mb-2 font-medium">Google Maps API Key Required</p>
-          <p className="text-sm mb-3">For this demo, please enter your Google Maps API key:</p>
-          <input
-            type="text"
-            placeholder="Enter Google Maps API Key"
-            className="w-full p-2 border border-yellow-300 rounded"
-            value={apiKey}
-            onChange={handleApiKeyChange}
-          />
-          <p className="text-xs mt-2">
-            In a production environment, this would be securely stored in environment variables.
-          </p>
-        </div>
-      )}
       <div 
         ref={mapRef} 
         className="w-full h-80 rounded-lg shadow-md border border-gray-200"
@@ -144,7 +124,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
       />
       {!isLoaded && (
         <div className="mt-2 text-center text-sm text-gray-500">
-          {apiKey ? 'Loading map...' : 'Enter your API key to load the map'}
+          Loading map...
         </div>
       )}
     </div>

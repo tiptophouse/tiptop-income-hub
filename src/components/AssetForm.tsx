@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import GoogleMapComponent from './GoogleMapComponent';
+import PropertyInsights from './PropertyInsights';
 import { Search } from 'lucide-react';
 
 interface FormData {
@@ -125,8 +126,11 @@ const AssetForm = () => {
           </form>
         ) : (
           <div className="mb-10">
-            <div ref={mapRef} className="mb-8">
-              <GoogleMapComponent address={formData.address} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div ref={mapRef}>
+                <GoogleMapComponent address={formData.address} />
+              </div>
+              <PropertyInsights address={formData.address} />
             </div>
             
             <form onSubmit={handleSubmit}>
