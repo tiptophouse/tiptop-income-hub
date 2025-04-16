@@ -9,7 +9,7 @@ export function useGoogleMap({ mapRef }: UseGoogleMapProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const roofOverlayRef = useRef<google.maps.Polygon | null>(null);
+  const roofOverlayRef = useRef<any | null>(null);
 
   useEffect(() => {
     // Initialize the map
@@ -42,7 +42,7 @@ export function useGoogleMap({ mapRef }: UseGoogleMapProps) {
   };
 
   const addRoofOverlay = (center: { lat: number; lng: number }) => {
-    if (!map) return;
+    if (!map || !window.google) return;
 
     // Remove previous overlay if it exists
     if (roofOverlayRef.current) {
@@ -57,17 +57,22 @@ export function useGoogleMap({ mapRef }: UseGoogleMapProps) {
       { lat: center.lat - 0.0002, lng: center.lng + 0.0003 },
     ];
 
-    const roofOverlay = new window.google.maps.Polygon({
-      paths: roofCoordinates,
-      strokeColor: '#AA94E2',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#AA94E2',
-      fillOpacity: 0.35,
-    });
+    // Check if Polygon exists in window.google.maps
+    if (window.google.maps.Polygon) {
+      const roofOverlay = new window.google.maps.Polygon({
+        paths: roofCoordinates,
+        strokeColor: '#AA94E2',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: '#AA94E2',
+        fillOpacity: 0.35,
+      });
 
-    roofOverlay.setMap(map);
-    roofOverlayRef.current = roofOverlay;
+      roofOverlay.setMap(map);
+      roofOverlayRef.current = roofOverlay;
+    } else {
+      console.warn('Google Maps Polygon is not available');
+    }
   };
 
   return { map, marker, isLoaded, setMapCenter, addRoofOverlay };

@@ -14,6 +14,7 @@ declare global {
         Rectangle: any;
         LatLng: any;
         LatLngBounds: any;
+        Polygon: any;
       }
     };
   }
@@ -40,6 +41,11 @@ declare namespace google {
     
     class Rectangle {
       constructor(opts?: RectangleOptions);
+    }
+    
+    class Polygon {
+      constructor(opts?: PolygonOptions);
+      setMap(map: Map | null): void;
     }
     
     class LatLng {
@@ -73,6 +79,17 @@ declare namespace google {
         east: number;
         west: number;
       };
+      map?: Map;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWeight?: number;
+      fillColor?: string;
+      fillOpacity?: number;
+      [key: string]: any;
+    }
+    
+    interface PolygonOptions {
+      paths?: LatLng[] | LatLngLiteral[] | Array<LatLng[] | LatLngLiteral[]>;
       map?: Map;
       strokeColor?: string;
       strokeOpacity?: number;
