@@ -6,8 +6,8 @@ interface UseGoogleMapProps {
 }
 
 export function useGoogleMap({ mapRef }: UseGoogleMapProps) {
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
+  const [map, setMap] = useState<any | null>(null);
+  const [marker, setMarker] = useState<any | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const roofOverlayRef = useRef<any | null>(null);
 
