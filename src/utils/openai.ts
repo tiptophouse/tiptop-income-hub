@@ -1,7 +1,7 @@
 
 import { toast } from "@/components/ui/use-toast";
 
-// Replace with environment variable in production
+// Using the provided OpenAI API key
 const OPENAI_API_KEY = "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";
 
 /**
@@ -24,7 +24,7 @@ export const getPropertyInsights = async (address: string): Promise<string> => {
           },
           {
             role: "user", 
-            content: `Provide a brief market analysis and investment potential for a property at ${address}. Include information about the neighborhood, potential rental income, and any emerging market trends.`
+            content: `Provide a brief market analysis and investment potential for a property at ${address}. Include information about the neighborhood, potential rental income, and any emerging market trends. Format your response with clear sections and bullet points where appropriate.`
           }
         ],
         max_tokens: 500,

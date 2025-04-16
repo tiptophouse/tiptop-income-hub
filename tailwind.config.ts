@@ -19,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'fahkwang': ['Fahkwang', 'sans-serif'],
+				'work-sans': ['Work Sans', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -66,7 +70,7 @@ export default {
 				tiptop: {
 					"light": "#FFFDED",
 					"accent": "#AA94E2",
-					"dark": "#4A3F68"
+					"dark": "#552B1B"
 				}
 			},
 			borderRadius: {

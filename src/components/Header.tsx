@@ -36,8 +36,8 @@ const Header = () => {
       addressInput.dispatchEvent(event);
       
       // Trigger a submit event on the form
-      const submitButton = addressInput.form?.querySelector('button[type="submit"]');
-      if (submitButton) {
+      const submitButton = document.querySelector('#asset-form form button[type="submit"]');
+      if (submitButton && submitButton instanceof HTMLElement) {
         submitButton.click();
       }
     }

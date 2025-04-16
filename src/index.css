@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Fahkwang:wght@400;500;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -73,8 +75,21 @@
   }
 
   body {
-    @apply bg-tiptop-light text-tiptop-dark font-sans;
+    @apply bg-[#FFFDED] text-[#552B1B] font-work-sans;
   }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-fahkwang text-tiptop-accent;
+  }
+}
+
+/* Custom fonts */
+.font-fahkwang {
+  font-family: 'Fahkwang', sans-serif;
+}
+
+.font-work-sans {
+  font-family: 'Work Sans', sans-serif;
 }
 
 /* Custom scrollbar */
