@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -25,13 +24,13 @@ const Hero = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const geocoder = new google.maps.Geocoder();
+          const geocoder = new window.google.maps.Geocoder();
           const latlng = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
           
-          geocoder.geocode({ 'location': latlng }, (results, status) => {
+          geocoder.geocode({ location: latlng }, (results, status) => {
             if (status === "OK" && results && results[0]) {
               const detectedAddress = results[0].formatted_address;
               setAddress(detectedAddress);

@@ -37,7 +37,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
 
     const defaultLocation = { lat: 34.0522, lng: -118.2437 }; // Los Angeles as default
     
-    const mapInstance = new google.maps.Map(mapRef.current, {
+    const mapInstance = new window.google.maps.Map(mapRef.current, {
       center: defaultLocation,
       zoom: 12,
       mapTypeControl: false,
@@ -71,10 +71,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
 
     setMap(mapInstance);
 
-    const markerInstance = new google.maps.Marker({
+    const markerInstance = new window.google.maps.Marker({
       map: mapInstance,
       position: defaultLocation,
-      animation: google.maps.Animation.DROP,
+      animation: window.google.maps.Animation.DROP,
     });
 
     setMarker(markerInstance);
@@ -83,7 +83,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
   useEffect(() => {
     if (!map || !marker || !address || !isLoaded) return;
 
-    const geocoder = new google.maps.Geocoder();
+    const geocoder = new window.google.maps.Geocoder();
     geocoder.geocode({ address }, (results, status) => {
       if (status === "OK" && results && results[0]) {
         const location = results[0].geometry.location;
@@ -91,10 +91,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
         marker.setPosition(location);
         
         // Add a visual effect
-        marker.setAnimation(google.maps.Animation.DROP);
+        marker.setAnimation(window.google.maps.Animation.DROP);
         
         // Add the roof overlay simulation
-        const roofOverlay = new google.maps.Rectangle({
+        const roofOverlay = new window.google.maps.Rectangle({
           strokeColor: '#AA94E2',
           strokeOpacity: 0.8,
           strokeWeight: 2,
@@ -130,10 +130,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
           
           map.setCenter(userLocation);
           marker.setPosition(userLocation);
-          marker.setAnimation(google.maps.Animation.DROP);
+          marker.setAnimation(window.google.maps.Animation.DROP);
           
           // Add the roof overlay simulation
-          const roofOverlay = new google.maps.Rectangle({
+          const roofOverlay = new window.google.maps.Rectangle({
             strokeColor: '#AA94E2',
             strokeOpacity: 0.8,
             strokeWeight: 2,
@@ -149,7 +149,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
           });
           
           // Reverse geocode to get address
-          const geocoder = new google.maps.Geocoder();
+          const geocoder = new window.google.maps.Geocoder();
           geocoder.geocode({ location: userLocation }, (results, status) => {
             if (status === "OK" && results && results[0]) {
               const address = results[0].formatted_address;
