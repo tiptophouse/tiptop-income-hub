@@ -49,12 +49,14 @@ declare namespace google {
 
     interface GeocoderRequest {
       address?: string;
+      location?: LatLng | LatLngLiteral;
     }
 
     interface GeocoderResult {
       geometry: {
         location: LatLng;
       };
+      formatted_address: string;
     }
 
     interface RectangleOptions {
