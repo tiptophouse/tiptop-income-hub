@@ -1,15 +1,18 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, LogIn } from 'lucide-react';
+import { Search, LogIn, Menu, X } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { CommandDialog, CommandInput } from '@/components/ui/command';
 import { useNavigate } from 'react-router-dom';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -44,8 +47,14 @@ const Header = () => {
     }
   };
 
+  // Navigation items for both desktop and mobile
+  const navItems = [
+    { label: "How It Works", onClick: () => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }) },
+    { label: "Earning Quiz", onClick: () => document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' }) },
+  ];
+
   return (
-    <header className="flex justify-between items-center py-4 px-6 md:px-12 max-w-7xl mx-auto">
+    <header className="flex justify-between items-center py-4 px-4 md:px-6 lg:px-12 max-w-7xl mx-auto">
       <motion.div 
         className="flex items-center gap-2"
         initial={{ opacity: 0, x: -20 }}
@@ -58,14 +67,15 @@ const Header = () => {
         <span className="font-bold text-xl">Tiptop</span>
       </motion.div>
       
+      {/* Desktop search bar */}
       <motion.form
-        className="flex-1 max-w-md mx-auto"
+        className="hidden md:flex flex-1 max-w-md mx-auto"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         onSubmit={handleSearch}
       >
-        <div className="relative">
+        <div className="relative w-full">
           <Input
             type="text"
             placeholder="Search property address..."
@@ -84,26 +94,23 @@ const Header = () => {
         </div>
       </motion.form>
       
+      {/* Desktop navigation */}
       <motion.div
-        className="space-x-2 flex items-center"
+        className="hidden md:flex space-x-2 items-center"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <Button 
-          variant="ghost" 
-          className="hidden md:inline-flex"
-          onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          How It Works
-        </Button>
-        <Button 
-          variant="ghost" 
-          className="hidden md:inline-flex"
-          onClick={() => document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          Earning Quiz
-        </Button>
+        {navItems.map((item, index) => (
+          <Button 
+            key={index}
+            variant="ghost" 
+            className="hidden md:inline-flex"
+            onClick={item.onClick}
+          >
+            {item.label}
+          </Button>
+        ))}
         <Button 
           variant="outline"
           className="hidden sm:flex"
@@ -119,6 +126,73 @@ const Header = () => {
           Sign Up
         </Button>
       </motion.div>
+      
+      {/* Mobile hamburger menu */}
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="md:hidden">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-[80%] max-w-sm">
+          <div className="flex flex-col h-full pt-6">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-4">Search</h2>
+              <form onSubmit={handleSearch} className="space-y-2">
+                <Input
+                  type="text"
+                  placeholder="Search property address..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Button 
+                  type="submit" 
+                  className="w-full bg-tiptop-accent hover:bg-tiptop-accent/90"
+                >
+                  Search
+                </Button>
+              </form>
+            </div>
+            
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Navigation</h2>
+              <div className="flex flex-col space-y-2">
+                {navItems.map((item, index) => (
+                  <Button 
+                    key={index}
+                    variant="ghost" 
+                    className="justify-start"
+                    onClick={() => {
+                      item.onClick();
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="mt-auto space-y-2 pt-6">
+              <Button 
+                className="w-full bg-tiptop-accent hover:bg-tiptop-accent/90"
+                onClick={() => navigate('/signup')}
+              >
+                Sign Up
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate('/login')}
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
       
       <CommandDialog open={isCommandOpen} onOpenChange={setIsCommandOpen}>
         <CommandInput placeholder="Search properties..." />
