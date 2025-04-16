@@ -12,8 +12,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   
-  // Using a fixed API key - replace with environment variable in production
-  const googleMapsApiKey = "AIzaSyA-TolBj_kkSJZ5m50SBYn_MjKDbJVmdpk";
+  // Using the provided Google Maps API key
+  const googleMapsApiKey = "AIzaSyBbclc8qxh5NVR9skf6XCz_xRJCZsnmUGA";
 
   useEffect(() => {
     if (!googleMapsApiKey) return;
