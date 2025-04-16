@@ -4,6 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useGoogleMap } from '@/hooks/useGoogleMap';
 import { geocodeAddress, reverseGeocode, getCurrentLocation } from '@/utils/geocodingService';
 import LocationButton from '@/components/LocationButton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GoogleMapComponentProps {
   address?: string;
@@ -12,6 +13,7 @@ interface GoogleMapComponentProps {
 const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const isMobile = useIsMobile();
   
   // Use our custom hook for Google Maps
   const { map, marker, isLoaded, setMapCenter, addRoofOverlay } = useGoogleMap({
@@ -64,10 +66,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full px-2 sm:px-0">
       <div 
         ref={mapRef} 
-        className="w-full h-80 rounded-lg shadow-md border border-gray-200"
+        className={`w-full ${isMobile ? 'h-64' : 'h-80'} rounded-lg shadow-md border border-gray-200`}
         style={{ 
           opacity: isLoaded ? 1 : 0.5,
           transition: 'opacity 0.3s ease'
