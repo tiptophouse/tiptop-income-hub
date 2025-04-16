@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -60,6 +59,24 @@ const AssetForm = () => {
   const [requireSignIn, setRequireSignIn] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const handleAddressFound = (e: CustomEvent<{ address: string }>) => {
+      setFormData(prev => ({ ...prev, address: e.detail.address }));
+      setAddressSubmitted(true);
+      
+      // Scroll to map
+      setTimeout(() => {
+        mapRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    };
+    
+    document.addEventListener('addressFound', handleAddressFound as EventListener);
+    
+    return () => {
+      document.removeEventListener('addressFound', handleAddressFound as EventListener);
+    };
+  }, []);
+
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, address: e.target.value }));
   };
@@ -97,11 +114,6 @@ const AssetForm = () => {
     
     console.log("Address submitted:", formData.address);
     setAddressSubmitted(true);
-    
-    // Scroll to map
-    setTimeout(() => {
-      mapRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
   };
 
   const handleContinue = (e: React.FormEvent) => {

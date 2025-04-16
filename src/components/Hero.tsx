@@ -1,17 +1,84 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 const Hero = () => {
+  const [address, setAddress] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
     const formElement = document.getElementById('asset-form');
     if (formElement) {
       formElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleLocationDetection = () => {
+    setIsLocating(true);
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const geocoder = new google.maps.Geocoder();
+          const latlng = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          
+          geocoder.geocode({ location: latlng }, (results, status) => {
+            if (status === "OK" && results && results[0]) {
+              const detectedAddress = results[0].formatted_address;
+              setAddress(detectedAddress);
+              
+              toast({
+                title: "Location Detected",
+                description: `Your location: ${detectedAddress}`,
+              });
+              
+              // Scroll to asset form
+              const formElement = document.getElementById('asset-form');
+              if (formElement) {
+                formElement.scrollIntoView({ behavior: 'smooth' });
+              }
+              
+              // Dispatch address event
+              const addressEvent = new CustomEvent('addressFound', { 
+                detail: { address: detectedAddress } 
+              });
+              document.dispatchEvent(addressEvent);
+            } else {
+              toast({
+                title: "Location Error",
+                description: "Unable to determine your address.",
+                variant: "destructive"
+              });
+            }
+            setIsLocating(false);
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          toast({
+            title: "Location Error",
+            description: "Unable to get your location. Please check your browser permissions.",
+            variant: "destructive"
+          });
+          setIsLocating(false);
+        }
+      );
+    } else {
+      toast({
+        title: "Geolocation Not Supported",
+        description: "Your browser does not support geolocation.",
+        variant: "destructive"
+      });
+      setIsLocating(false);
     }
   };
 
@@ -48,14 +115,36 @@ const Hero = () => {
             type="text"
             placeholder="Enter your property address..."
             className="pl-10 pr-20 py-6 w-full rounded-lg text-lg"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Button 
-            type="submit" 
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-tiptop-accent hover:bg-tiptop-accent/90 text-white px-4 py-2 rounded-md"
-          >
-            Analyze Property
-          </Button>
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-2">
+            <Button 
+              type="button" 
+              variant="outline"
+              className="px-2 py-1 h-auto"
+              onClick={handleLocationDetection}
+              disabled={isLocating}
+            >
+              {isLocating ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </span>
+              ) : (
+                <MapPin className="h-4 w-4" />
+              )}
+            </Button>
+            <Button 
+              type="submit" 
+              className="bg-tiptop-accent hover:bg-tiptop-accent/90 text-white px-4 py-1 h-auto"
+            >
+              Analyze Property
+            </Button>
+          </div>
         </div>
       </motion.form>
       
