@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Fahkwang:wght@400;500;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,65 +7,65 @@
 
 @layer base {
   :root {
-    --background: 60 100% 97%;
-    --foreground: 273 26% 33%;
+    --background: 210 17% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 273 26% 33%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 273 26% 33%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 273 59% 73%;
+    --primary: 227 84% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 60 100% 97%;
-    --secondary-foreground: 273 26% 33%;
+    --secondary: 210 17% 98%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 273 26% 95%;
-    --muted-foreground: 273 10% 40%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 273 26% 95%;
-    --accent-foreground: 273 26% 33%;
+    --accent: 210 20% 96%;
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 273 26% 90%;
-    --input: 273 26% 90%;
-    --ring: 273 59% 73%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 227 84% 60%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 273 26% 15%;
+    --background: 222 47% 11%;
     --foreground: 0 0% 98%;
 
-    --card: 273 26% 18%;
+    --card: 222 47% 11%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 273 26% 18%;
+    --popover: 222 47% 11%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 273 59% 73%;
-    --primary-foreground: 273 26% 15%;
+    --primary: 227 84% 60%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 273 26% 22%;
+    --secondary: 217 33% 17%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 273 26% 25%;
-    --muted-foreground: 273 10% 80%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 16% 65%;
 
-    --accent: 273 26% 25%;
+    --accent: 217 33% 17%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 273 26% 30%;
-    --input: 273 26% 30%;
-    --ring: 273 59% 73%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 227 84% 60%;
   }
 }
 
@@ -75,39 +75,39 @@
   }
 
   body {
-    @apply bg-[#FFFDED] text-[#552B1B] font-work-sans;
+    @apply bg-background text-foreground font-inter;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-fahkwang text-tiptop-accent;
+    @apply font-poppins text-tiptop-dark;
   }
 }
 
 /* Custom fonts */
-.font-fahkwang {
-  font-family: 'Fahkwang', sans-serif;
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
 }
 
-.font-work-sans {
-  font-family: 'Work Sans', sans-serif;
+.font-inter {
+  font-family: 'Inter', sans-serif;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(170, 148, 226, 0.1);
+  background: rgba(67, 97, 238, 0.05);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(170, 148, 226, 0.5);
+  background: rgba(67, 97, 238, 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(170, 148, 226, 0.8);
+  background: rgba(67, 97, 238, 0.5);
 }

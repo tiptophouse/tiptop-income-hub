@@ -81,9 +81,9 @@ const Hero = () => {
   };
 
   return (
-    <section className="py-8 md:py-16 px-4 md:px-8 lg:px-12 flex flex-col items-center text-center max-w-5xl mx-auto">
+    <section className="pt-16 pb-24 px-4 md:px-8 lg:px-12 flex flex-col items-center text-center max-w-6xl mx-auto">
       <motion.h1 
-        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight font-fahkwang text-tiptop-accent"
+        className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight font-poppins"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
@@ -93,7 +93,7 @@ const Hero = () => {
       </motion.h1>
       
       <motion.p 
-        className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-10 text-[#552B1B] max-w-2xl font-work-sans"
+        className="text-lg sm:text-xl mb-10 text-muted-foreground max-w-2xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.2 }}
@@ -102,7 +102,7 @@ const Hero = () => {
       </motion.p>
       
       <motion.form
-        className="w-full max-w-md mb-6 md:mb-10"
+        className="w-full max-w-xl mb-12"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.4 }}
@@ -112,16 +112,17 @@ const Hero = () => {
           <Input
             type="text"
             placeholder="Enter your property address..."
-            className="pl-10 pr-16 sm:pr-20 py-4 sm:py-6 w-full rounded-lg text-base sm:text-lg"
+            className="pl-12 pr-16 sm:pr-28 py-6 w-full rounded-full text-base sm:text-lg shadow-sm"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1 sm:gap-2">
+          <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
             <Button 
               type="button" 
-              variant="outline"
-              className="px-1 sm:px-2 py-1 h-auto"
+              variant="ghost"
+              size="icon"
+              className="p-1 h-9 w-9 rounded-full"
               onClick={handleLocationDetection}
               disabled={isLocating}
             >
@@ -138,16 +139,16 @@ const Hero = () => {
             </Button>
             <Button 
               type="submit" 
-              className="bg-tiptop-accent hover:bg-tiptop-accent/90 text-white px-2 sm:px-4 py-1 h-auto text-xs sm:text-sm whitespace-nowrap"
+              className="bg-tiptop-accent hover:bg-tiptop-accent/90 text-white px-6 py-3 h-auto rounded-full text-sm font-medium"
             >
-              Analyze
+              Analyze Now
             </Button>
           </div>
         </div>
       </motion.form>
       
       <motion.div 
-        className="mt-4 md:mt-8 w-full max-w-3xl bg-white/50 backdrop-blur-sm rounded-xl md:rounded-3xl p-2 md:p-4 shadow-lg"
+        className="mt-8 w-full max-w-4xl bg-white rounded-2xl p-4 shadow-md"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.6 }}
@@ -155,7 +156,7 @@ const Hero = () => {
         <img 
           src="/lovable-uploads/0716fc81-957a-490a-b8a1-100fda17e403.png"
           alt="House Potential and New Paradigms" 
-          className="w-full h-auto rounded-lg md:rounded-2xl" 
+          className="w-full h-auto rounded-xl" 
         />
       </motion.div>
     </section>

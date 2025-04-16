@@ -68,9 +68,9 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				tiptop: {
-					"light": "#FFFDED",
-					"accent": "#AA94E2",
-					"dark": "#552B1B"
+					"light": "#F8F9FA",
+					"accent": "#4361EE",
+					"dark": "#212529"
 				}
 			},
 			borderRadius: {
