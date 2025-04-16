@@ -1,15 +1,16 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, LogIn } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { CommandDialog, CommandInput } from '@/components/ui/command';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +85,7 @@ const Header = () => {
       </motion.form>
       
       <motion.div
-        className="space-x-4"
+        className="space-x-2 flex items-center"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
@@ -102,6 +103,20 @@ const Header = () => {
           onClick={() => document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' })}
         >
           Earning Quiz
+        </Button>
+        <Button 
+          variant="outline"
+          className="hidden sm:flex"
+          onClick={() => navigate('/login')}
+        >
+          <LogIn className="mr-2 h-4 w-4" />
+          Sign In
+        </Button>
+        <Button 
+          className="bg-tiptop-accent hover:bg-tiptop-accent/90"
+          onClick={() => navigate('/signup')}
+        >
+          Sign Up
         </Button>
       </motion.div>
       
