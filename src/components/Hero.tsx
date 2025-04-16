@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -152,8 +153,8 @@ const Hero = () => {
         transition={{ duration: 0.7, delay: 0.6 }}
       >
         <img 
-          src="/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png"
-          alt="Tiptop Dashboard Preview" 
+          src="/lovable-uploads/0716fc81-957a-490a-b8a1-100fda17e403.png"
+          alt="House Potential and New Paradigms" 
           className="w-full h-auto rounded-lg md:rounded-2xl" 
         />
       </motion.div>
