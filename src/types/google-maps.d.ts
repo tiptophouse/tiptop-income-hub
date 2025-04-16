@@ -5,32 +5,99 @@ declare global {
   interface Window {
     google: {
       maps: {
-        Map: typeof google.maps.Map;
-        Marker: typeof google.maps.Marker;
-        Geocoder: typeof google.maps.Geocoder;
+        Map: any;
+        Marker: any;
+        Geocoder: any;
         Animation: {
           DROP: number;
         };
-        Rectangle: typeof google.maps.Rectangle;
-        LatLng: typeof google.maps.LatLng;
-        LatLngBounds: typeof google.maps.LatLngBounds;
+        Rectangle: any;
+        LatLng: any;
+        LatLngBounds: any;
       }
     };
   }
 }
 
-// Additional type definitions for Google Maps geocoding
-declare namespace google.maps {
-  interface GeocoderRequest {
-    address?: string;
-    location?: LatLng | LatLngLiteral;
-  }
+// Define the google namespace and common types
+declare namespace google {
+  namespace maps {
+    class Map {
+      constructor(mapDiv: Element, opts?: MapOptions);
+      setCenter(latLng: LatLng | LatLngLiteral): void;
+    }
+    
+    class Marker {
+      constructor(opts?: MarkerOptions);
+      setPosition(latLng: LatLng | LatLngLiteral): void;
+      setAnimation(animation: number): void;
+    }
+    
+    class Geocoder {
+      constructor();
+      geocode(request: GeocoderRequest, callback: (results: GeocoderResult[], status: string) => void): void;
+    }
+    
+    class Rectangle {
+      constructor(opts?: RectangleOptions);
+    }
+    
+    class LatLng {
+      constructor(lat: number, lng: number);
+      lat(): number;
+      lng(): number;
+    }
+    
+    class LatLngBounds {
+      constructor(sw?: LatLng | LatLngLiteral, ne?: LatLng | LatLngLiteral);
+    }
 
-  interface GeocoderResult {
-    geometry: {
-      location: LatLng;
-    };
-    formatted_address: string;
+    // Interface definitions
+    interface MapOptions {
+      center?: LatLng | LatLngLiteral;
+      zoom?: number;
+      [key: string]: any;
+    }
+    
+    interface MarkerOptions {
+      position?: LatLng | LatLngLiteral;
+      map?: Map;
+      animation?: number;
+      [key: string]: any;
+    }
+    
+    interface RectangleOptions {
+      bounds?: {
+        north: number;
+        south: number;
+        east: number;
+        west: number;
+      };
+      map?: Map;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWeight?: number;
+      fillColor?: string;
+      fillOpacity?: number;
+      [key: string]: any;
+    }
+    
+    interface LatLngLiteral {
+      lat: number;
+      lng: number;
+    }
+    
+    interface GeocoderRequest {
+      address?: string;
+      location?: LatLng | LatLngLiteral;
+    }
+    
+    interface GeocoderResult {
+      geometry: {
+        location: LatLng;
+      };
+      formatted_address: string;
+    }
   }
 }
 

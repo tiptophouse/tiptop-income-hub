@@ -40,13 +40,11 @@ const Hero = () => {
                 description: `Your location: ${detectedAddress}`,
               });
               
-              // Scroll to asset form
               const formElement = document.getElementById('asset-form');
               if (formElement) {
                 formElement.scrollIntoView({ behavior: 'smooth' });
               }
               
-              // Dispatch address event
               const addressEvent = new CustomEvent('addressFound', { 
                 detail: { address: detectedAddress } 
               });
