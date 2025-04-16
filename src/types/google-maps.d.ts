@@ -1,4 +1,3 @@
-
 /// <reference types="google.maps" />
 
 declare global {
@@ -15,6 +14,8 @@ declare global {
         LatLng: any;
         LatLngBounds: any;
         Polygon: any;
+        StreetViewPanorama: any;
+        StreetViewService: any;
       }
     };
   }
@@ -56,6 +57,17 @@ declare namespace google {
     
     class LatLngBounds {
       constructor(sw?: LatLng | LatLngLiteral, ne?: LatLng | LatLngLiteral);
+    }
+    
+    class StreetViewPanorama {
+      constructor(container: Element, opts?: StreetViewPanoramaOptions);
+      setPosition(latLng: LatLng | LatLngLiteral): void;
+      setPov(pov: StreetViewPov): void;
+    }
+    
+    class StreetViewService {
+      constructor();
+      getPanorama(request: StreetViewRequest, callback: (data: StreetViewPanoramaData, status: string) => void): void;
     }
 
     // Interface definitions
@@ -114,6 +126,32 @@ declare namespace google {
         location: LatLng;
       };
       formatted_address: string;
+    }
+    
+    interface StreetViewPanoramaOptions {
+      position?: LatLng | LatLngLiteral;
+      pov?: StreetViewPov;
+      zoom?: number;
+      visible?: boolean;
+      [key: string]: any;
+    }
+    
+    interface StreetViewPov {
+      heading: number;
+      pitch: number;
+    }
+    
+    interface StreetViewRequest {
+      location: LatLng | LatLngLiteral;
+      preference?: string;
+      radius?: number;
+      source?: string;
+      [key: string]: any;
+    }
+    
+    interface StreetViewPanoramaData {
+      location: { latLng: LatLng };
+      [key: string]: any;
     }
   }
 }
