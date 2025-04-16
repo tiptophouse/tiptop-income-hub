@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPropertyInsights } from '@/utils/openai';
-import { Building, TrendingUp, Home } from 'lucide-react';
+import { Building, TrendingUp, Home, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface PropertyInsightsProps {
   address: string;
@@ -13,24 +14,33 @@ interface PropertyInsightsProps {
 const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className }) => {
   const [insights, setInsights] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
+
+  const fetchInsights = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getPropertyInsights(address);
+      setInsights(data);
+    } catch (error) {
+      console.error("Error in PropertyInsights component:", error);
+      setError("Failed to fetch property insights. Please try again later.");
+    } finally {
+      setLoading(false);
+      setRetrying(false);
+    }
+  };
 
   useEffect(() => {
     if (!address) return;
-
-    const fetchInsights = async () => {
-      setLoading(true);
-      try {
-        const data = await getPropertyInsights(address);
-        setInsights(data);
-      } catch (error) {
-        console.error("Error in PropertyInsights component:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchInsights();
   }, [address]);
+
+  const handleRetry = () => {
+    setRetrying(true);
+    fetchInsights();
+  };
 
   if (!address) return null;
 
@@ -51,6 +61,23 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
             <Skeleton className="h-4 w-[80%]" />
             <Skeleton className="h-4 w-[70%]" />
             <Skeleton className="h-4 w-full" />
+          </div>
+        ) : error ? (
+          <div className="space-y-4">
+            <Alert variant="destructive" className="bg-red-100 border-red-400">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {error}
+              </AlertDescription>
+            </Alert>
+            <button 
+              onClick={handleRetry}
+              disabled={retrying}
+              className="text-tiptop-accent hover:underline flex items-center gap-1 text-sm"
+            >
+              {retrying ? "Retrying..." : "Try Again"}
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
