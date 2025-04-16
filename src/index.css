@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fahkwang:wght@400;500;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,64 +7,64 @@
 
 @layer base {
   :root {
-    --background: 44 54% 95%;
-    --foreground: 30 6% 25%;
+    --background: 60 100% 97%;
+    --foreground: 273 26% 33%;
 
     --card: 0 0% 100%;
-    --card-foreground: 30 6% 25%;
+    --card-foreground: 273 26% 33%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 30 6% 25%;
+    --popover-foreground: 273 26% 33%;
 
     --primary: 273 59% 73%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 44 54% 95%;
-    --secondary-foreground: 30 6% 25%;
+    --secondary: 60 100% 97%;
+    --secondary-foreground: 273 26% 33%;
 
     --muted: 273 26% 95%;
-    --muted-foreground: 30 6% 40%;
+    --muted-foreground: 273 10% 40%;
 
     --accent: 273 26% 95%;
-    --accent-foreground: 30 6% 25%;
+    --accent-foreground: 273 26% 33%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 30 6% 90%;
-    --input: 30 6% 90%;
+    --border: 273 26% 90%;
+    --input: 273 26% 90%;
     --ring: 273 59% 73%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 30 6% 15%;
+    --background: 273 26% 15%;
     --foreground: 0 0% 98%;
 
-    --card: 30 6% 18%;
+    --card: 273 26% 18%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 30 6% 18%;
+    --popover: 273 26% 18%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 273 59% 73%;
-    --primary-foreground: 30 6% 15%;
+    --primary-foreground: 273 26% 15%;
 
-    --secondary: 30 6% 22%;
+    --secondary: 273 26% 22%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 30 6% 25%;
-    --muted-foreground: 30 6% 80%;
+    --muted: 273 26% 25%;
+    --muted-foreground: 273 10% 80%;
 
-    --accent: 30 6% 25%;
+    --accent: 273 26% 25%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 30 6% 30%;
-    --input: 30 6% 30%;
+    --border: 273 26% 30%;
+    --input: 273 26% 30%;
     --ring: 273 59% 73%;
   }
 }
@@ -75,27 +75,27 @@
   }
 
   body {
-    @apply bg-[#F8F3EA] text-[#3D3935] font-inter;
+    @apply bg-[#FFFDED] text-[#552B1B] font-work-sans;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-poppins text-[#3D3935];
+    @apply font-fahkwang text-tiptop-accent;
   }
 }
 
 /* Custom fonts */
-.font-poppins {
-  font-family: 'Poppins', sans-serif;
+.font-fahkwang {
+  font-family: 'Fahkwang', sans-serif;
 }
 
-.font-inter {
-  font-family: 'Inter', sans-serif;
+.font-work-sans {
+  font-family: 'Work Sans', sans-serif;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -110,73 +110,4 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(170, 148, 226, 0.8);
-}
-
-/* Animation classes */
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-fade-up {
-  animation: fadeUp 0.7s ease-out forwards;
-}
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.7s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Step animation for how it works */
-.step-item {
-  position: relative;
-}
-
-.step-item:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  top: 3rem;
-  right: -50%;
-  height: 2px;
-  width: 100%;
-  background: linear-gradient(90deg, rgba(170, 148, 226, 0.4), rgba(170, 148, 226, 0));
-  z-index: 0;
-}
-
-.step-number {
-  position: relative;
-  z-index: 1;
-  transition: all 0.3s ease;
-}
-
-.step-item:hover .step-number {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(170, 148, 226, 0.3);
 }
