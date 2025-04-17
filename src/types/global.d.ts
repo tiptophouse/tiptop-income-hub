@@ -15,6 +15,12 @@ interface Window {
         ROADMAP: string;
         SATELLITE: string;
       };
+      Rectangle: any;
+      LatLng: any;
+      LatLngBounds: any;
+      Polygon: any;
+      StreetViewPanorama: any;
+      StreetViewService: any;
     }
   }
 }
