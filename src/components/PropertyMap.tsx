@@ -3,9 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Satellite, Map as MapIcon, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-// Fix: Import types directly from the types file in src/types
-import '@/types/google-maps'; // Import the type definitions
 
+// Instead of importing from a separate file, define the necessary types inline
+// or reference the global window.google object directly
 interface PropertyMapProps {
   address: string;
   onZoomComplete?: () => void;
@@ -15,7 +15,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [zoomLevel, setZoomLevel] = useState<'far' | 'medium' | 'close'>('far');
   const [view, setView] = useState<'satellite' | 'map'>('satellite');
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const map = useRef<google.maps.Map | null>(null);
+  const map = useRef<any>(null); // Use any for Google Maps objects
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -30,6 +30,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const initializeMap = () => {
     if (!mapContainerRef.current || !window.google) return;
     
+    // Use the global Google Maps object directly
     const geocoder = new window.google.maps.Geocoder();
     
     geocoder.geocode({ address }, (results, status) => {
