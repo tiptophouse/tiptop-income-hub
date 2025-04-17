@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin } from 'lucide-react';
@@ -9,14 +9,37 @@ import { toast } from '@/components/ui/use-toast';
 const Hero = () => {
   const [address, setAddress] = useState('');
   const [isLocating, setIsLocating] = useState(false);
+  const [showSatellite, setShowSatellite] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const formElement = document.getElementById('asset-form');
-    if (formElement) {
-      formElement.scrollIntoView({ behavior: 'smooth' });
+    // Validate the address
+    if (!address.trim()) {
+      toast({
+        title: "Address Required",
+        description: "Please enter your property address to continue.",
+        variant: "destructive"
+      });
+      return;
     }
+    
+    // Show satellite view first
+    setShowSatellite(true);
+    
+    // Then scroll to asset form
+    setTimeout(() => {
+      const formElement = document.getElementById('asset-form');
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 1500);
+    
+    // Custom event to pass address to other components
+    const addressEvent = new CustomEvent('addressFound', { 
+      detail: { address } 
+    });
+    document.dispatchEvent(addressEvent);
   };
 
   const handleLocationDetection = () => {
@@ -41,15 +64,19 @@ const Hero = () => {
                 description: `Your location: ${detectedAddress}`,
               });
               
-              const formElement = document.getElementById('asset-form');
-              if (formElement) {
-                formElement.scrollIntoView({ behavior: 'smooth' });
-              }
+              setShowSatellite(true);
               
               const addressEvent = new CustomEvent('addressFound', { 
                 detail: { address: detectedAddress } 
               });
               document.dispatchEvent(addressEvent);
+              
+              setTimeout(() => {
+                const formElement = document.getElementById('asset-form');
+                if (formElement) {
+                  formElement.scrollIntoView({ behavior: 'smooth' });
+                }
+              }, 1500);
             } else {
               toast({
                 title: "Location Error",
@@ -102,7 +129,7 @@ const Hero = () => {
       </motion.p>
       
       <motion.form
-        className="w-full max-w-xl mb-12"
+        className="w-full max-w-xl mb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.4 }}
@@ -147,18 +174,61 @@ const Hero = () => {
         </div>
       </motion.form>
       
-      <motion.div 
-        className="mt-8 w-full max-w-4xl bg-white rounded-2xl p-4 shadow-md"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.6 }}
-      >
-        <img 
-          src="/lovable-uploads/0716fc81-957a-490a-b8a1-100fda17e403.png"
-          alt="House Potential and New Paradigms" 
-          className="w-full h-auto rounded-xl" 
-        />
-      </motion.div>
+      <AnimatePresence>
+        {!showSatellite ? (
+          <motion.div 
+            key="house-image"
+            className="mt-4 w-full max-w-4xl bg-white rounded-2xl p-4 shadow-md"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.7, delay: 0.6 }}
+          >
+            <div className="relative">
+              <img 
+                src="/lovable-uploads/0716fc81-957a-490a-b8a1-100fda17e403.png"
+                alt="House with Assets" 
+                className="w-full h-auto rounded-xl" 
+              />
+              
+              {/* Asset Indicators */}
+              <div className="absolute top-[20%] right-[15%] bg-tiptop-accent text-white rounded-full p-2 shadow-lg animate-pulse">
+                <span className="text-xs font-medium">Solar</span>
+              </div>
+              
+              <div className="absolute top-[65%] left-[20%] bg-tiptop-accent text-white rounded-full p-2 shadow-lg animate-pulse">
+                <span className="text-xs font-medium">Internet</span>
+              </div>
+              
+              <div className="absolute bottom-[25%] right-[30%] bg-tiptop-accent text-white rounded-full p-2 shadow-lg animate-pulse">
+                <span className="text-xs font-medium">Parking</span>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="satellite-view"
+            className="mt-4 w-full max-w-4xl bg-white rounded-2xl p-4 shadow-md"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="relative">
+              <img 
+                src="/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png"
+                alt="Satellite View" 
+                className="w-full h-auto rounded-xl" 
+              />
+              
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <div className="h-16 w-16 border-4 border-tiptop-accent rounded-full flex items-center justify-center animate-pulse">
+                  <div className="h-4 w-4 bg-tiptop-accent rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
