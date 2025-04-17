@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Satellite, Map as MapIcon, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import '../types/google-maps'; // Import the type definitions
+// Fix: Import types directly from the types file in src/types
+import '@/types/google-maps'; // Import the type definitions
 
 interface PropertyMapProps {
   address: string;
