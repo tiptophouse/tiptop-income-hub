@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { Satellite, Map as MapIcon, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// Instead of importing from a separate file, define the necessary types inline
+// or reference the global window.google object directly
 interface PropertyMapProps {
   address: string;
   onZoomComplete?: () => void;
@@ -13,46 +15,52 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [zoomLevel, setZoomLevel] = useState<'far' | 'medium' | 'close'>('far');
   const [view, setView] = useState<'satellite' | 'map'>('satellite');
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const map = useRef<google.maps.Map | null>(null);
+  const map = useRef<any>(null); // Use any for Google Maps objects
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!address || !window.google?.maps) return;
+    if (!address) return;
     
-    const initializeMap = () => {
-      if (!mapContainerRef.current || !window.google?.maps) return;
-      
-      const geocoder = new window.google.maps.Geocoder();
-      
-      geocoder.geocode({ address }, (results, status) => {
-        if (status === "OK" && results?.[0]?.geometry?.location) {
-          const location = results[0].geometry.location;
-          
-          const mapInstance = new window.google.maps.Map(mapContainerRef.current!, {
-            center: { lat: location.lat(), lng: location.lng() },
-            zoom: 16,
-            mapTypeId: view === 'satellite' ? 'satellite' : 'roadmap',
-            tilt: 0,
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: false,
-            zoomControl: false,
-          });
-          
-          map.current = mapInstance;
-          setIsLoaded(true);
-          
-          new window.google.maps.Marker({
-            map: mapInstance,
-            position: location,
-            animation: window.google.maps.Animation.DROP,
-          });
-        }
-      });
-    };
+    // Initialize the map if address is provided
+    if (mapContainerRef.current && !map.current && window.google) {
+      initializeMap();
+    }
+  }, [address]);
 
-    initializeMap();
-  }, [address, view]);
+  const initializeMap = () => {
+    if (!mapContainerRef.current || !window.google) return;
+    
+    // Use the global Google Maps object directly
+    const geocoder = new window.google.maps.Geocoder();
+    
+    geocoder.geocode({ address }, (results, status) => {
+      if (status === "OK" && results && results[0] && results[0].geometry) {
+        const location = results[0].geometry.location;
+        
+        // Create the map
+        const mapInstance = new window.google.maps.Map(mapContainerRef.current!, {
+          center: { lat: location.lat(), lng: location.lng() },
+          zoom: 16,
+          mapTypeId: view === 'satellite' ? 'satellite' : 'roadmap',
+          tilt: 0,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          zoomControl: false,
+        });
+        
+        map.current = mapInstance;
+        setIsLoaded(true);
+        
+        // Add a marker for the property
+        new window.google.maps.Marker({
+          map: mapInstance,
+          position: { lat: location.lat(), lng: location.lng() },
+          animation: window.google.maps.Animation.DROP,
+        });
+      }
+    });
+  };
 
   const handleZoomIn = () => {
     if (!map.current) return;
@@ -65,8 +73,11 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       map.current.setTilt(45);
       setZoomLevel('close');
       
+      // Notify parent component that zoom is complete
       if (onZoomComplete) {
-        setTimeout(onZoomComplete, 1000);
+        setTimeout(() => {
+          onZoomComplete();
+        }, 1000);
       }
     }
   };
@@ -89,11 +100,11 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       <div 
         ref={mapContainerRef} 
         className="w-full h-full"
-      />
+      ></div>
       
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-tiptop-accent" />
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-tiptop-accent"></div>
         </div>
       )}
       
