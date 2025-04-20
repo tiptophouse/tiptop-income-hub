@@ -1,7 +1,5 @@
 
 // Global type declarations for the application
-
-// Declare the google namespace on the window object
 interface Window {
   google: {
     maps: {
@@ -24,3 +22,4 @@ interface Window {
     }
   }
 }
+

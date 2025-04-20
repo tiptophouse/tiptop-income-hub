@@ -7,7 +7,7 @@ interface GoogleMapsInitProps {
 }
 
 const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({ 
-  apiKey = "AIzaSyBnSoqI0PTCuN0_1HGWvUgPLgGQnVnYcEY", // Note: In a production app, use environment variables
+  apiKey = "AIzaSyBnSoqI0PTCuN0_1HGWvUgPLgGQnVnYcEY",
   children 
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -15,15 +15,11 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
 
   useEffect(() => {
     // Skip if already loaded or an error occurred
-    if (window.google?.maps || isLoaded || hasError) return;
-    
-    // Skip if script already exists in the DOM
-    const existingScript = document.getElementById('google-maps-script');
-    if (existingScript) {
+    if (window.google?.maps || hasError) {
       setIsLoaded(true);
       return;
     }
-
+    
     // Create script element
     const script = document.createElement('script');
     script.id = 'google-maps-script';
@@ -31,7 +27,6 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
     script.async = true;
     script.defer = true;
     
-    // Set up event handlers
     script.onload = () => {
       console.log('Google Maps API loaded successfully');
       setIsLoaded(true);
@@ -42,14 +37,15 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
       setHasError(true);
     };
     
-    // Append script to document
     document.head.appendChild(script);
-    
-    // Clean up
+
     return () => {
-      // Don't remove the script on component unmount as it might be used by other components
+      const existingScript = document.getElementById('google-maps-script');
+      if (existingScript) {
+        existingScript.remove();
+      }
     };
-  }, [apiKey, isLoaded, hasError]);
+  }, [apiKey, hasError]);
 
   if (hasError) {
     return (
