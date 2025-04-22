@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from '@/components/ui/use-toast';
-import { Building3, Cube, RotateCw, Download } from 'lucide-react';
+import { Building, RotateCw, Download } from 'lucide-react';
 import { checkModelStatus, getModelDownloadUrl } from '@/utils/meshyApi';
 
 interface Property3DModelProps {
@@ -84,7 +83,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
     <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2">
-          <Building3 className="h-5 w-5 text-tiptop-accent" />
+          <Building className="h-5 w-5 text-tiptop-accent" />
           Property 3D Model
         </CardTitle>
         <CardDescription>AI-generated 3D model for {address}</CardDescription>

@@ -2,6 +2,12 @@
 import { useEffect, useState, RefObject } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
 interface UseGoogleMapInstanceProps {
   mapContainerRef: RefObject<HTMLDivElement>;
   address: string;

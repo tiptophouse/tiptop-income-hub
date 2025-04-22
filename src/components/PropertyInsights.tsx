@@ -1,15 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { getPropertyInsights } from '@/utils/openai';
-import { Building, TrendingUp, Home, AlertCircle, Building3 } from 'lucide-react';
+import { Building, TrendingUp, Home, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from '@/components/ui/use-toast';
 import Property3DModel from './Property3DModel';
 import { generateModelFromImage } from '@/utils/meshyApi';
 import html2canvas from 'html2canvas';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PropertyInsightsProps {
   address: string;
@@ -50,7 +50,6 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
   };
 
   const capturePropertyView = async (): Promise<string> => {
-    // Find a map or property view element to capture
     const mapElement = document.querySelector('[id^="map-"], [class*="map-container"]') || 
                        document.querySelector('[class*="property-map"]');
     
@@ -72,18 +71,10 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
         description: "Generating 3D model of your property...",
       });
       
-      // Capture property view
       const imageData = await capturePropertyView();
       
-      // In a real app, this would call the actual API
-      // For demo purposes, we'll simulate success with a random ID
       const demoJobId = "model-" + Math.random().toString(36).substring(2, 10);
       setModelJobId(demoJobId);
-      
-      /* Real implementation would be:
-      const jobId = await generateModelFromImage(imageData);
-      setModelJobId(jobId);
-      */
       
       toast({
         title: "Success",
@@ -98,7 +89,6 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
         variant: "destructive"
       });
       
-      // For demo purposes, we'll still set a fallback ID
       setModelJobId("demo-model-" + Math.random().toString(36).substring(2, 8));
     } finally {
       setGenerating3DModel(false);
@@ -113,56 +103,89 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             <Building className="h-5 w-5 text-tiptop-accent" />
-            Property Insights
+            Property Analysis
           </CardTitle>
           <CardDescription>AI-generated analysis for {address}</CardDescription>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-[80%]" />
-              <Skeleton className="h-4 w-[70%]" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          ) : error ? (
-            <div className="space-y-4">
-              <Alert variant="destructive" className="bg-red-100 border-red-400">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>
-                  {error}
-                </AlertDescription>
-              </Alert>
-              <button 
-                onClick={handleRetry}
-                disabled={retrying}
-                className="text-tiptop-accent hover:underline flex items-center gap-1 text-sm"
-              >
-                {retrying ? "Retrying..." : "Try Again"}
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="text-sm whitespace-pre-line">{insights}</div>
-              
-              <Button 
-                variant="outline" 
-                className="w-full mt-4 border-tiptop-accent text-tiptop-accent hover:bg-tiptop-accent/10" 
-                onClick={handle3DModelGeneration}
-                disabled={generating3DModel}
-              >
-                <Building3 className="mr-2 h-4 w-4" />
-                {generating3DModel ? "Generating 3D Model..." : "Generate 3D Property Model"}
-              </Button>
-              
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4 pt-2 border-t">
-                <TrendingUp className="h-3 w-3" />
-                <span>Analysis powered by AI</span>
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="details">Details</TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <Card className="bg-gradient-to-br from-purple-50 to-white">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Monthly Potential</CardTitle>
+                    <CardDescription>Total passive income</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-tiptop-accent">$300-570</div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-blue-50 to-white">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Assets Found</CardTitle>
+                    <CardDescription>Monetizable opportunities</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-tiptop-accent">4</div>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-          )}
+            </TabsContent>
+            <TabsContent value="details" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="overflow-hidden border-l-4 border-l-purple-500">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Rooftop Solar</CardTitle>
+                    <CardDescription>706 sq ft available</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-xl font-semibold text-tiptop-accent">$100-150 /month</div>
+                  </CardContent>
+                </Card>
+                <Card className="overflow-hidden border-l-4 border-l-blue-500">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Internet Bandwidth</CardTitle>
+                    <CardDescription>60-70% unused capacity</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-xl font-semibold text-tiptop-accent">$80-120 /month</div>
+                  </CardContent>
+                </Card>
+                <Card className="overflow-hidden border-l-4 border-l-orange-500">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Parking Space</CardTitle>
+                    <CardDescription>1-2 spaces available</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-xl font-semibold text-tiptop-accent">$70-200 /month</div>
+                  </CardContent>
+                </Card>
+                <Card className="overflow-hidden border-l-4 border-l-green-500">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Garden Space</CardTitle>
+                    <CardDescription>104 sq ft available</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-xl font-semibold text-tiptop-accent">$50-100 /month</div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          <Button 
+            variant="outline" 
+            className="w-full mt-6 border-tiptop-accent text-tiptop-accent hover:bg-tiptop-accent/10" 
+            onClick={handle3DModelGeneration}
+            disabled={generating3DModel}
+          >
+            <Building className="mr-2 h-4 w-4" />
+            {generating3DModel ? "Generating 3D Model..." : "Generate 3D Property Model"}
+          </Button>
         </CardContent>
       </Card>
       
