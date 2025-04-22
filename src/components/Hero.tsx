@@ -54,7 +54,7 @@ const Hero = () => {
 
   return (
     <GoogleMapsInit>
-      <section className="pt-16 pb-24 px-4 md:px-8 lg:px-12 flex flex-col items-center text-center max-w-6xl mx-auto">
+      <section className="pt-10 md:pt-16 pb-16 md:pb-24 px-4 md:px-8 lg:px-12 flex flex-col items-center text-center max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,7 +68,7 @@ const Hero = () => {
             Turn your property's untapped resources into monthly income
           </p>
           
-          <form onSubmit={handleSubmit} className="w-full">
+          <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
             <AddressAutocomplete
               value={address}
               onChange={setAddress}
@@ -93,13 +93,13 @@ const Hero = () => {
             >
               <Card className="h-full hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="flex justify-center mb-4">
+                  <div className="flex justify-center mb-2">
                     {card.icon}
                   </div>
-                  <CardTitle className="text-lg">{card.title}</CardTitle>
+                  <CardTitle className="text-lg truncate">{card.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription>{card.description}</CardDescription>
+                  <CardDescription className="line-clamp-2">{card.description}</CardDescription>
                 </CardContent>
               </Card>
             </motion.div>
@@ -109,7 +109,7 @@ const Hero = () => {
         {showAnalysis && (
           <PropertyInsights 
             address={address}
-            className="w-full mt-8"
+            className="w-full mt-12"
           />
         )}
       </section>

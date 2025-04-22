@@ -10,10 +10,12 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-hidden">
         <Hero />
-        <AssetForm />
-        <DashboardPreview />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AssetForm />
+          <DashboardPreview />
+        </div>
       </main>
       <Footer />
     </div>

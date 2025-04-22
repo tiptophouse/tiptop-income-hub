@@ -64,13 +64,13 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
   const scores = weatherData ? getMaximizerScores() : null;
 
   return (
-    <Card className={`${className} shadow-md transition-shadow duration-300`}>
+    <Card className={`${className} shadow-lg transition-shadow duration-300 hover:shadow-xl rounded-2xl backdrop-blur-sm bg-white/90 border border-gray-100`}>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5 text-tiptop-accent" />
-          AI Profit Analysis
+        <CardTitle className="flex items-center gap-2 text-xl text-[#8B5CF6]">
+          <DollarSign className="h-5 w-5 text-[#9b87f5]" />
+          <span className="truncate">AI Profit Analysis</span>
         </CardTitle>
-        <CardDescription>Weather-based earning potential</CardDescription>
+        <CardDescription className="text-gray-600">Weather-based earning potential</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading || !earningsData ? (
@@ -83,7 +83,7 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
         ) : (
           <>
             <div className="text-center py-4">
-              <div className="text-3xl font-bold text-tiptop-accent">
+              <div className="text-3xl font-bold text-[#8B5CF6]">
                 ${earningsData.totalPotential}
               </div>
               <div className="text-sm text-gray-500">Estimated Annual Potential</div>
@@ -94,12 +94,12 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1">
                     <Sun className="h-3.5 w-3.5 text-amber-500" />
-                    <span className="text-sm font-medium">Solar Potential</span>
+                    <span className="text-sm font-medium truncate max-w-[120px]">Solar Potential</span>
                   </div>
                   <span className="text-sm font-semibold">${earningsData.solarPotential}/yr</span>
                 </div>
                 <Progress value={scores?.solar} className="h-2" />
-                <div className="text-xs text-right mt-0.5 text-gray-500">
+                <div className="text-xs text-right mt-0.5 text-gray-500 truncate">
                   {weatherData.annualSunshine} sunshine days per year
                 </div>
               </div>
@@ -108,7 +108,7 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1">
                     <Wifi className="h-3.5 w-3.5 text-blue-500" />
-                    <span className="text-sm font-medium">Bandwidth Sharing</span>
+                    <span className="text-sm font-medium truncate max-w-[120px]">Bandwidth Sharing</span>
                   </div>
                   <span className="text-sm font-semibold">${earningsData.bandwidthPotential}/yr</span>
                 </div>
@@ -119,7 +119,7 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1">
                     <Car className="h-3.5 w-3.5 text-green-500" />
-                    <span className="text-sm font-medium">Parking Space</span>
+                    <span className="text-sm font-medium truncate max-w-[120px]">Parking Space</span>
                   </div>
                   <span className="text-sm font-semibold">${earningsData.parkingPotential}/yr</span>
                 </div>
@@ -129,10 +129,10 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
             
             <div className="bg-slate-50 p-3 rounded-lg mt-2 text-sm">
               <div className="font-medium flex items-center gap-1 mb-1">
-                <TrendingUp className="h-3.5 w-3.5 text-tiptop-accent" />
-                AI Weather Analysis
+                <TrendingUp className="h-3.5 w-3.5 text-[#8B5CF6]" />
+                <span className="truncate">AI Weather Analysis</span>
               </div>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-600 line-clamp-3">
                 Based on the {weatherData.annualSunshine} days of annual sunshine and average temperature of {weatherData.temperature}°F, 
                 your property has {scores?.solar === 100 ? "excellent" : scores?.solar! > 70 ? "very good" : "good"} solar earning potential. 
                 The {weatherData.conditions.toLowerCase()} conditions in your area are optimal for maximizing your property's passive income.

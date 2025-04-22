@@ -137,39 +137,39 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
         onValueChange={setActiveAsset}
         className="mb-8"
       >
-        <TabsList className="w-full grid grid-cols-5 h-auto rounded-lg bg-[#F3ECFF] shadow-md">
-          <TabsTrigger value="all" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6]">
+        <TabsList className="w-full grid grid-cols-5 h-auto rounded-xl bg-[#F3ECFF] shadow-md">
+          <TabsTrigger value="all" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6] text-xs sm:text-sm md:text-base">
             All Assets
           </TabsTrigger>
-          <TabsTrigger value="rooftopSolar" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6]">
+          <TabsTrigger value="rooftopSolar" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6] text-xs sm:text-sm md:text-base">
             <span className="hidden sm:inline">Rooftop Solar</span>
             <span className="sm:hidden">☀️</span>
           </TabsTrigger>
-          <TabsTrigger value="internetBandwidth" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6]">
+          <TabsTrigger value="internetBandwidth" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6] text-xs sm:text-sm md:text-base">
             <span className="hidden sm:inline">Internet</span>
             <span className="sm:hidden">🌐</span>
           </TabsTrigger>
-          <TabsTrigger value="parkingSpace" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6]">
+          <TabsTrigger value="parkingSpace" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6] text-xs sm:text-sm md:text-base">
             <span className="hidden sm:inline">Parking</span>
             <span className="sm:hidden">🅿️</span>
           </TabsTrigger>
-          <TabsTrigger value="gardenSpace" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6]">
+          <TabsTrigger value="gardenSpace" className="py-3 font-semibold text-[#6E59A5] hover:text-[#8B5CF6] text-xs sm:text-sm md:text-base">
             <span className="hidden sm:inline">Garden</span>
             <span className="sm:hidden">🌱</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="mt-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-6">
             {Object.entries(assetInfo).map(([key, asset]) => (
               <motion.div
                 key={key}
-                whileHover={{ scale: 1.05 }}
-                className="bg-white rounded-3xl p-6 shadow-xl text-center cursor-pointer border border-transparent hover:border-[#8B5CF6] transition-colors duration-300"
+                whileHover={{ scale: 1.03 }}
+                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg text-center cursor-pointer border border-transparent hover:border-[#8B5CF6] transition-colors duration-300"
                 onClick={() => setActiveAsset(key)}
               >
-                <div className="text-4xl mb-3">{asset.icon}</div>
-                <h3 className="font-semibold text-sm tracking-wide text-[#7E69AB]">{asset.title}</h3>
+                <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">{asset.icon}</div>
+                <h3 className="font-semibold text-xs sm:text-sm tracking-wide text-[#7E69AB] truncate">{asset.title}</h3>
               </motion.div>
             ))}
           </div>
@@ -181,13 +181,13 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
-              className="bg-white rounded-3xl p-8 shadow-xl mb-6 border border-[#B993FE]/60"
+              className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl mb-6 border border-[#B993FE]/60"
             >
-              <div className="flex items-center mb-6 gap-5">
-                <div className="text-5xl">{asset.icon}</div>
+              <div className="flex items-center mb-4 sm:mb-6 gap-3 sm:gap-5">
+                <div className="text-4xl sm:text-5xl">{asset.icon}</div>
                 <div>
-                  <h3 className="text-2xl font-extrabold text-[#8B5CF6]">{asset.title}</h3>
-                  <p className="text-gray-700 text-lg">{asset.description}</p>
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-[#8B5CF6] truncate max-w-[200px] sm:max-w-xs">{asset.title}</h3>
+                  <p className="text-gray-700 text-sm sm:text-base line-clamp-2">{asset.description}</p>
                 </div>
               </div>
             </motion.div>
@@ -241,7 +241,7 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
             </Button>
             <Button 
               type="submit" 
-              className="bg-[#9b87f5] hover:bg-[#8B5CF6] px-6 py-3 h-auto rounded-full text-sm font-semibold shadow-lg transition-all duration-300 hover:shadow-xl text-white"
+              className="bg-[#9b87f5] hover:bg-[#8B5CF6] px-4 sm:px-6 py-3 h-auto rounded-full text-xs sm:text-sm font-semibold shadow-lg transition-all duration-300 hover:shadow-xl text-white whitespace-nowrap"
               aria-label="Analyze address"
             >
               Analyze Now

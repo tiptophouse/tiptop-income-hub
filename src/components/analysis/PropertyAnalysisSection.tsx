@@ -17,14 +17,21 @@ const PropertyAnalysisSection = ({ address, show }: PropertyAnalysisSectionProps
       key="analysis-view"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5 }}
-      className="w-full space-y-6"
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="w-full space-y-10 py-6"
     >
-      <div className="mt-4 w-full max-w-4xl bg-white rounded-2xl p-4 shadow-md">
-        <PropertyMap address={address} />
+      <div className="mx-auto w-full max-w-5xl">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-4 w-full bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/30"
+        >
+          <PropertyMap address={address} />
+        </motion.div>
       </div>
       
-      <div className="w-full max-w-4xl">
+      <div className="mx-auto w-full max-w-5xl">
         <PropertyInsights address={address} />
       </div>
     </motion.div>
