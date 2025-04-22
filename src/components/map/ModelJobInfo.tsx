@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AlertCircle, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface ModelJobInfoProps {
   jobId: string;
@@ -8,9 +8,9 @@ interface ModelJobInfoProps {
 
 const ModelJobInfo: React.FC<ModelJobInfoProps> = ({ jobId }) => {
   return (
-    <div className="absolute top-4 left-4 bg-white p-2 rounded shadow-md flex items-center gap-2">
+    <div className="absolute bottom-20 right-4 bg-black/70 p-2 rounded-lg shadow-md text-white flex items-center gap-2 text-xs">
       <Check className="h-4 w-4 text-green-500" />
-      <p className="text-xs text-gray-600">3D Model Processing: 
+      <p>3D Model Ready: 
         <span className="font-semibold ml-1">#{jobId.substring(0, 6)}</span>
       </p>
     </div>

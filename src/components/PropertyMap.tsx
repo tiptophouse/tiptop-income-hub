@@ -18,6 +18,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [is3DModelGenerating, setIs3DModelGenerating] = useState(false);
   const [modelJobId, setModelJobId] = useState<string | null>(null);
+  const [weatherTemp, setWeatherTemp] = useState<string>("26°");
 
   const { mapInstance, isLoaded } = useGoogleMapInstance({
     mapContainerRef,
@@ -103,12 +104,19 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       )}
       
       {isLoaded && (
-        <MapControls
-          view={view}
-          onToggleView={toggleMapType}
-          onGenerate3DModel={generateHouse3DModel}
-          isGenerating={is3DModelGenerating}
-        />
+        <>
+          <MapControls
+            view={view}
+            onToggleView={toggleMapType}
+            onGenerate3DModel={generateHouse3DModel}
+            isGenerating={is3DModelGenerating}
+          />
+          
+          {/* Weather display similar to the reference image */}
+          <div className="absolute bottom-4 left-4 bg-black/70 text-white rounded-full p-2 flex items-center justify-center">
+            <span className="text-yellow-300 mr-1">☀</span>{weatherTemp}
+          </div>
+        </>
       )}
       
       {modelJobId && <ModelJobInfo jobId={modelJobId} />}
