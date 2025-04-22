@@ -8,7 +8,7 @@ import { Building, TrendingUp, Home, AlertCircle, ChartBar, Info } from 'lucide-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from '@/components/ui/use-toast';
 import Property3DModel from './Property3DModel';
-import { generateModelFromImage } from '@/utils/meshyApi';
+// import { generateModelFromImage } from '@/utils/meshyApi'; // Not used in this file anymore
 import html2canvas from 'html2canvas';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -18,9 +18,9 @@ interface PropertyInsightsProps {
 }
 
 const unicornGradient = "bg-gradient-to-tr from-[#9b87f5] via-[#f5e7ff] to-[#ffe4d8]";
-const glassStyle = "backdrop-blur-2xl bg-white/70 dark:bg-[#18122B]/80 border border-white/50 shadow-[0_18px_40px_0_rgba(135,87,236,0.12),0_1.5px_5px_rgba(126,105,171,0.08)]";
-const accentText = "text-[#8B5CF6] font-bold";
-const cardRing = "ring-2 ring-[#B993FE]/30";
+const glassStyle = "backdrop-blur-3xl bg-white/60 dark:bg-[#18122B]/70 border border-white/30 shadow-[0_20px_60px_0_rgba(135,87,236,0.25),0_3px_12px_rgba(126,105,171,0.12)]";
+const accentText = "text-[#8B5CF6] font-extrabold tracking-tight";
+const cardRing = "ring-4 ring-[#B993FE]/40";
 
 const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className }) => {
   const [insights, setInsights] = useState<any | null>(null);
@@ -101,21 +101,21 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
 
   if (loading) {
     return (
-      <div className={`${glassStyle} animate-fade-in shadow-2xl rounded-3xl px-6 py-10`}>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="bg-[#8B5CF6]/90 rounded-full h-12 w-12 flex items-center justify-center shadow-lg border-4 border-white/80">
-            <ChartBar className="h-7 w-7 text-white" />
+      <div className={`${glassStyle} animate-fade-in shadow-2xl rounded-3xl px-8 py-12 max-w-4xl mx-auto`}>
+        <div className="flex items-center gap-5 mb-8">
+          <div className="bg-[#8B5CF6]/95 rounded-full h-14 w-14 flex items-center justify-center shadow-lg border-4 border-white/70">
+            <ChartBar className="h-8 w-8 text-white" />
           </div>
           <div>
-            <span className="uppercase font-bold tracking-wide text-[#8B5CF6] text-xs">ANALYSIS</span>
-            <div className="font-semibold text-xl text-gray-900 dark:text-[#f3eefd]">Analyzing Property...</div>
-            <div className="text-md text-gray-600 mb-2">{address}</div>
+            <span className="uppercase font-extrabold tracking-wide text-[#8B5CF6] text-sm">ANALYSIS</span>
+            <div className="font-extrabold text-3xl text-gray-900 dark:text-[#f3eefd]">Analyzing Property...</div>
+            <div className="text-lg text-gray-600 mt-1">{address}</div>
           </div>
         </div>
-        <div className="grid sm:grid-cols-3 gap-6">
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
+        <div className="grid sm:grid-cols-3 gap-8">
+          <Skeleton className="h-40 rounded-3xl" />
+          <Skeleton className="h-40 rounded-3xl" />
+          <Skeleton className="h-40 rounded-3xl" />
         </div>
       </div>
     );
@@ -123,13 +123,17 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
 
   if (error) {
     return (
-      <Alert variant="destructive" className={`${className} shadow-xl border-l-4 border-[#B993FE] animate-fade-in`}>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
+      <Alert variant="destructive" className={`${className} shadow-xl border-l-8 border-[#B993FE] animate-fade-in max-w-4xl mx-auto rounded-3xl p-6 flex flex-col gap-4`}>
+        <div className="flex items-center gap-3">
+          <AlertCircle className="h-5 w-5" />
+          <AlertTitle className="text-lg font-extrabold">Error</AlertTitle>
+        </div>
+        <AlertDescription className="text-gray-800 dark:text-white">
+          {error}
+        </AlertDescription>
         <Button 
           variant="outline" 
-          className="mt-2 transition-all hover:scale-105"
+          className="mt-2 self-start rounded-lg px-6 text-[#8B5CF6] font-semibold hover:bg-[#8B5CF6]/20 transition-all duration-200"
           onClick={handleRetry}
           disabled={retrying}
         >
@@ -140,121 +144,132 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
   }
 
   // Asset Card Helpers
-  const assetCard = (type: string, color: string, title: string, main: string, details: string, value: string) => (
-    <div className={`relative overflow-hidden rounded-xl ${glassStyle} shadow-lg group hover:scale-105 transition-transform duration-300 border-l-4 ${color}`}>
-      <div className="absolute top-3 right-3 z-10">
-        <span className={`inline-block px-3 py-1 bg-white/70 text-xs font-bold rounded-full uppercase tracking-wider ${accentText} shadow-sm`}>{title}</span>
+  const assetCard = (color: string, title: string, main: string, details: string, value: string, icon: React.ReactNode) => (
+    <div className={`relative overflow-hidden rounded-3xl ${glassStyle} shadow-lg hover:shadow-2xl group hover:scale-[1.04] transition-transform duration-300 border-l-8 ${color} cursor-pointer`}>
+      <div className="absolute top-4 right-4 z-10">
+        <span className={`inline-block px-4 py-2 bg-white/80 text-xs font-extrabold rounded-full uppercase tracking-wider ${accentText} shadow-sm`}>{title}</span>
       </div>
-      <CardHeader className="pb-0 bg-transparent">
-        <CardTitle className="text-lg">{main}</CardTitle>
-        <CardDescription className="font-medium">{details}</CardDescription>
+      <CardHeader className="pb-1 pr-2 bg-transparent flex items-center gap-3">
+        {icon}
+        <CardTitle className="text-xl font-extrabold text-[#6E59A5]">{main}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-1">
-        <div className="text-2xl md:text-3xl font-bold text-[#8B5CF6] mb-2">{value}</div>
+      <CardDescription className="mt-0 mb-3 font-semibold text-gray-700">{details}</CardDescription>
+      <CardContent className="pt-0 pb-6">
+        <div className="text-3xl font-extrabold text-[#8B5CF6]">{value}</div>
       </CardContent>
     </div>
   );
 
   // Main Section Rendering
   return (
-    <section className={`w-full flex flex-col items-center gap-10 ${className || ""} animate-fade-in`}>
+    <section className={`w-full flex flex-col items-center gap-14 ${className || ""} animate-fade-in`}>
       {/* Header */}
-      <div className={`w-full max-w-3xl mx-auto rounded-3xl p-8 ${unicornGradient} shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center gap-8 mb-6`}>
-        <div className="relative z-20 flex items-center gap-4">
-          <span className="block bg-white/70 rounded-full p-3 shadow-xl border border-white/40">
-            <ChartBar className="h-8 w-8 text-[#8B5CF6]" />
+      <div className={`w-full max-w-5xl mx-auto rounded-3xl p-12 ${unicornGradient} shadow-[0_30px_90px_rgba(155,135,245,0.56)] relative overflow-hidden flex flex-col md:flex-row items-center gap-10 mb-10`}>
+        <div className="relative z-20 flex items-center gap-6">
+          <span className="block bg-white/90 rounded-full p-4 shadow-lg border border-white/60">
+            <ChartBar className="h-9 w-9 text-[#8B5CF6]" />
           </span>
-          <div className="text-left">
-            <div className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-[#f3eefd] tracking-tight mb-1">Property Analysis</div>
-            <div className="font-medium text-gray-700 dark:text-[#DED9F3]">AI-powered insights for <span className={accentText}>{address}</span></div>
+          <div className="text-left max-w-xl">
+            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-[#f3eefd] tracking-tight mb-1 leading-tight">
+              Property Analysis
+            </h1>
+            <p className="font-semibold text-gray-700 dark:text-[#ded9f3] text-lg">
+              AI-powered insights for <span className={accentText}>{address}</span>
+            </p>
             {insights?.propertySize && (
-              <div className="text-sm mt-1 text-[#B993FE] font-bold">Estimated Size: {insights.propertySize}</div>
+              <p className="text-sm mt-2 text-[#B993FE] font-extrabold tracking-widest">
+                Estimated Size: {insights.propertySize}
+              </p>
             )}
           </div>
         </div>
-        <div className="absolute right-0 bottom-0 z-0 w-5/12 h-40 hidden md:block" aria-hidden>
-          <svg width="100%" height="100%" viewBox="0 0 200 60" fill="none"><ellipse cx="100" cy="30" rx="100" ry="30" fill="#ece2fe"/></svg>
+        <div className="absolute right-0 bottom-0 z-0 w-1/3 h-44 hidden md:block" aria-hidden>
+          <svg width="100%" height="100%" viewBox="0 0 200 60" fill="none"><ellipse cx="100" cy="30" rx="100" ry="30" fill="#ece2fe" /></svg>
         </div>
       </div>
       
       {/* Tabs and Insight Summary */}
-      <Card className={`w-full max-w-3xl bg-white/95 dark:bg-[#18122B]/75 glass-morphism rounded-3xl ${glassStyle} ${cardRing} shadow-2xl`}>
-        <CardHeader className="pb-2 pt-8 animate-fade-in">
-          <CardTitle className="flex items-center gap-2 font-extrabold text-[#8B5CF6] text-2xl">
-            <Info className="h-6 w-6 text-[#B993FE]" />
+      <Card className={`w-full max-w-5xl bg-white/95 dark:bg-[#18122B]/75 rounded-3xl shadow-lg ${glassStyle} ${cardRing}`}>
+        <CardHeader className="pb-3 pt-10 px-10 animate-fade-in">
+          <CardTitle className="flex items-center gap-3 font-extrabold text-[#8B5CF6] text-3xl">
+            <Info className="h-7 w-7 text-[#B993FE]" />
             Your Home Earning Potential
           </CardTitle>
-          <CardDescription>
-            <span className="text-gray-600">Discover how you can monetize your property.</span>
+          <CardDescription className="text-gray-700">
+            Discover how you can monetize your property smoothly.
           </CardDescription>
         </CardHeader>
-        <CardContent className="animate-scale-in pb-10">
+        <CardContent className="animate-scale-in pb-12 px-10">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 rounded-xl bg-[#F3ECFF]">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="details">Asset Breakdown</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-8 rounded-3xl bg-[#F3ECFF] shadow-md">
+              <TabsTrigger value="overview" className="text-xl font-extrabold tracking-wider text-[#7E69AB] hover:text-[#8B5CF6] rounded-3xl">Overview</TabsTrigger>
+              <TabsTrigger value="details" className="text-xl font-extrabold tracking-wider text-[#7E69AB] hover:text-[#8B5CF6] rounded-3xl">Asset Breakdown</TabsTrigger>
             </TabsList>
-            <TabsContent value="overview" className="space-y-5 animate-fade-in">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-                <div className={`rounded-2xl bg-gradient-to-br from-[#DBEAFE] via-[#F3ECFF] to-white shadow-xl p-6 flex flex-col items-start`}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <TrendingUp className="h-7 w-7 text-[#B993FE]" />
-                    <span className="font-semibold text-tiptop-accent text-lg">Monthly Potential</span>
+            <TabsContent value="overview" className="space-y-8 animate-fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-8">
+                <div className="rounded-3xl bg-gradient-to-br from-[#D6BCFA] via-[#F3ECFF] to-white shadow-xl p-8 flex flex-col items-start">
+                  <div className="flex items-center gap-4 mb-3">
+                    <TrendingUp className="h-8 w-8 text-[#B993FE]" />
+                    <span className="font-extrabold text-[#8B5CF6] text-xl tracking-wider">Monthly Potential</span>
                   </div>
-                  <div className="text-4xl font-extrabold text-[#8B5CF6] mb-2">{insights?.totalMonthlyPotential || "$300-570"}</div>
-                  <span className="uppercase text-xs font-bold text-[#A78BFA] tracking-widest">estimated range</span>
+                  <div className="text-5xl font-extrabold text-[#6E59A5] mb-3">{insights?.totalMonthlyPotential || "$300-570"}</div>
+                  <span className="uppercase text-sm font-extrabold text-[#B993FE] tracking-widest">estimated range</span>
                 </div>
-                <div className={`rounded-2xl bg-gradient-to-br from-[#F9ECFF] via-[#F3ECFF] to-white shadow-xl p-6 flex flex-col items-start`}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <Home className="h-7 w-7 text-[#A0E884]" />
-                    <span className="font-semibold text-tiptop-accent text-lg">Assets Found</span>
+                <div className="rounded-3xl bg-gradient-to-br from-[#E5DEFF] via-[#F3ECFF] to-white shadow-xl p-8 flex flex-col items-start">
+                  <div className="flex items-center gap-4 mb-3">
+                    <Home className="h-8 w-8 text-[#A0E884]" />
+                    <span className="font-extrabold text-[#7E9C6F] text-xl tracking-wider">Assets Found</span>
                   </div>
-                  <div className="text-4xl font-extrabold text-[#A0E884] mb-2">4</div>
-                  <span className="uppercase text-xs font-bold text-[#C7B9F9] tracking-widest">monetizable</span>
+                  <div className="text-5xl font-extrabold text-[#7E9C6F] mb-3">4</div>
+                  <span className="uppercase text-sm font-extrabold text-[#B9D08F] tracking-widest">monetizable</span>
                 </div>
               </div>
             </TabsContent>
-            <TabsContent value="details" className="space-y-6 animate-fade-in">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            <TabsContent value="details" className="space-y-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 mt-8">
                 {assetCard(
-                  "rooftop", "border-l-purple-500",
+                  "border-l-purple-600",
                   "Rooftop Solar",
+                  insights?.rooftopSolar?.potential || "High",
                   insights?.rooftopSolar?.sqFootage || "706 sq ft",
-                  "Sun-soaked, ready for panels",
-                  insights?.rooftopSolar?.monthlySavings || "$100-150 /mo"
+                  insights?.rooftopSolar?.monthlySavings || "$100-150 /mo",
+                  <TrendingUp className="h-7 w-7 text-[#8B5CF6]" />
                 )}
                 {assetCard(
-                  "internet", "border-l-blue-500",
+                  "border-l-blue-600",
                   "Internet Bandwidth",
+                  insights?.internetBandwidth?.potential || "Medium",
                   insights?.internetBandwidth?.sharingCapacity || "60-70%",
-                  "Unused, monetizable",
-                  insights?.internetBandwidth?.monthlyEarnings || "$80-120 /mo"
+                  insights?.internetBandwidth?.monthlyEarnings || "$80-120 /mo",
+                  <Home className="h-7 w-7 text-[#57A3FF]" />
                 )}
                 {assetCard(
-                  "parking", "border-l-orange-500",
+                  "border-l-orange-600",
                   "Parking Space",
                   insights?.parkingSpace?.available || "1-2 spaces",
-                  "Prime location, high demand",
-                  insights?.parkingSpace?.monthlyValue || "$70-200 /mo"
+                  insights?.parkingSpace?.details || "Prime location, high demand",
+                  insights?.parkingSpace?.monthlyValue || "$70-200 /mo",
+                  <Building className="h-7 w-7 text-[#FF9D5C]" />
                 )}
                 {assetCard(
-                  "garden", "border-l-green-500",
+                  "border-l-green-600",
                   "Garden Space",
+                  insights?.gardenSpace?.communityValue || "Medium-High",
                   insights?.gardenSpace?.sqFootage || "104 sq ft",
-                  "Perfect for community use",
-                  insights?.gardenSpace?.monthlyPotential || "$50-100 /mo"
+                  insights?.gardenSpace?.monthlyPotential || "$50-100 /mo",
+                  <Info className="h-7 w-7 text-[#7EB564]" />
                 )}
               </div>
             </TabsContent>
           </Tabs>
-
           <Button 
             variant="outline" 
-            className="w-full mt-10 rounded-xl border-2 border-[#8B5CF6]/60 text-[#8B5CF6] font-bold hover:bg-[#8B5CF6]/10 hover:scale-105 shadow-lg transition-all duration-200 py-5 text-lg"
+            className="w-full mt-12 rounded-3xl border-2 border-[#8B5CF6]/70 text-[#8B5CF6] font-extrabold hover:bg-[#8B5CF6]/20 hover:scale-105 shadow-lg transition-all duration-300 py-6 text-xl"
             onClick={handle3DModelGeneration}
             disabled={generating3DModel}
+            aria-label="Generate 3D property model"
           >
-            <Building className="mr-2 h-5 w-5" />
+            <Building className="mr-3 h-6 w-6" />
             {generating3DModel ? "Generating 3D Model..." : "Generate 3D Property Model"}
           </Button>
         </CardContent>
@@ -272,3 +287,4 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
 };
 
 export default PropertyInsights;
+
