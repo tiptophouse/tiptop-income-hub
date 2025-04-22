@@ -1,4 +1,3 @@
-
 const OPENAI_API_KEY = "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";
 const ASSISTANT_ID = "asst_qzFnLVnn9KCzmfdFssW1qcTj";
 
@@ -25,6 +24,7 @@ interface PropertyInsight {
     monthlyPotential: string;
   };
   totalMonthlyPotential: string;
+  propertySize?: string;
 }
 
 export const getPropertyInsightsFromAI = async (address: string): Promise<PropertyInsight> => {
@@ -64,8 +64,11 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
           2. Internet Bandwidth - Sharing potential, capacity that could be shared, estimated monthly earnings
           3. Parking Space - Number of spaces available, monthly rental value, and details
           4. Garden Space - Square footage, community garden potential, estimated monthly return
-          
-          Also calculate the total monthly passive income potential from all these combined assets.`
+
+          ALSO: Estimate the total size of the property (total square footage or lot size) and include this as "propertySize" in the JSON results, e.g.: "propertySize": "2700 sq ft" or "0.32 acres".
+
+          Also calculate the total monthly passive income potential from all these combined assets.
+        `
       })
     });
 
@@ -138,7 +141,8 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
                 const parsedResponse = JSON.parse(jsonMatch[0]);
                 return {
                   address,
-                  ...parsedResponse
+                  ...parsedResponse,
+                  propertySize: parsedResponse.propertySize // This will attach the estimate if provided
                 };
               }
               
@@ -166,7 +170,7 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
 };
 
 // Provides default values when the API call fails
-const getDefaultPropertyInsights = (address: string): PropertyInsight => {
+const getDefaultPropertyInsights = (address: string): PropertyInsight & { propertySize?: string } => {
   return {
     address,
     rooftopSolar: {
@@ -189,6 +193,7 @@ const getDefaultPropertyInsights = (address: string): PropertyInsight => {
       communityValue: "Medium-High",
       monthlyPotential: "$50-100"
     },
-    totalMonthlyPotential: "$300-570"
+    totalMonthlyPotential: "$300-570",
+    propertySize: "2,000 sq ft (default estimate)"
   };
 };

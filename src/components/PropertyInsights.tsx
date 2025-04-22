@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -140,7 +139,14 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
             <Building className="h-5 w-5 text-tiptop-accent" />
             Property Analysis
           </CardTitle>
-          <CardDescription>AI-generated analysis for {address}</CardDescription>
+          <CardDescription>
+            AI-generated analysis for {address}
+            {insights?.propertySize && (
+              <div className="text-sm mt-2 text-tiptop-accent font-semibold">
+                Estimated Property Size: {insights.propertySize}
+              </div>
+            )}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="overview" className="w-full">
