@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +12,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { measureInternetSpeed } from '@/utils/speedTest';
+import { Wifi } from 'lucide-react';
 
 const monthlyData = [
   { month: 'Jan', rooftop: 720, internet: 320, parking: 150, storage: 50 },
@@ -30,8 +31,17 @@ const monthlyData = [
 ];
 
 const DashboardPreview = () => {
+  const [speedTest, setSpeedTest] = useState<{ download: number; upload: number; latency: number } | null>(null);
+
+  useEffect(() => {
+    const runSpeedTest = async () => {
+      const result = await measureInternetSpeed();
+      setSpeedTest(result);
+    };
+    runSpeedTest();
+  }, []);
+
   const calculateTodayRevenue = () => {
-    // Example calculation based on last month's data
     const lastMonth = monthlyData[monthlyData.length - 1];
     return (lastMonth.rooftop + lastMonth.internet + lastMonth.parking + lastMonth.storage) / 30;
   };
@@ -72,7 +82,7 @@ const DashboardPreview = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         <div className="bg-tiptop-accent p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="bg-white/10 border-0">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-lg">Today's Revenue</CardTitle>
@@ -81,6 +91,7 @@ const DashboardPreview = () => {
                 <div className="text-3xl font-bold text-white">${calculateTodayRevenue().toFixed(2)}</div>
               </CardContent>
             </Card>
+            
             <Card className="bg-white/10 border-0">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-lg">Monthly Average</CardTitle>
@@ -89,12 +100,34 @@ const DashboardPreview = () => {
                 <div className="text-3xl font-bold text-white">${calculateMonthlyAverage()}</div>
               </CardContent>
             </Card>
+            
             <Card className="bg-white/10 border-0">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-lg">Yearly Total</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-white">${calculateYearlyTotal()}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 border-0">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-white text-lg">
+                  <Wifi className="h-4 w-4" />
+                  Internet Speed
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {speedTest ? (
+                  <div className="text-white space-y-1">
+                    <div className="text-xl font-bold">{speedTest.download} Mbps</div>
+                    <div className="text-sm opacity-80">
+                      ↑ {speedTest.upload} Mbps | {speedTest.latency}ms
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-white text-sm">Testing speed...</div>
+                )}
               </CardContent>
             </Card>
           </div>
