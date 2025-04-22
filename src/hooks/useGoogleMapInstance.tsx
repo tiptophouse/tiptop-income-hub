@@ -2,12 +2,8 @@
 import { useEffect, useState, RefObject } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
-// Use the Window interface extension from the types file
-declare global {
-  interface Window {
-    google: any;
-  }
-}
+// Reference the Google Maps types from the types file
+// We're not re-declaring the global interface since it's already defined in global.d.ts
 
 interface UseGoogleMapInstanceProps {
   mapContainerRef: RefObject<HTMLDivElement>;
@@ -22,8 +18,8 @@ export function useGoogleMapInstance({
   view,
   onZoomComplete
 }: UseGoogleMapInstanceProps) {
-  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
+  const [mapInstance, setMapInstance] = useState<any>(null);
+  const [marker, setMarker] = useState<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
