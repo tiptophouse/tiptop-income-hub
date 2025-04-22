@@ -19,6 +19,12 @@ interface Window {
       Polygon: any;
       StreetViewPanorama: any;
       StreetViewService: any;
+      places: {
+        Autocomplete: any;
+      };
+      event: {
+        clearInstanceListeners: (instance: any) => void;
+      };
     }
   }
 }
