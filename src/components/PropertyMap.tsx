@@ -1,10 +1,12 @@
-import React, { useRef, useState } from 'react';
+
+import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
 import { generateModelFromImage } from '@/utils/meshyApi';
 import MapControls from './map/MapControls';
 import ModelJobInfo from './map/ModelJobInfo';
 import { useGoogleMapInstance } from '@/hooks/useGoogleMapInstance';
+import html2canvas from 'html2canvas';
 
 interface PropertyMapProps {
   address: string;
@@ -31,36 +33,20 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     setView(newView);
   };
 
-  const captureMapImage = (): Promise<string> => {
-    return new Promise((resolve, reject) => {
+  const captureMapImage = async (): Promise<string> => {
+    try {
       if (!mapContainerRef.current) {
-        reject("Map container not found");
-        return;
+        throw new Error("Map container not found");
       }
 
-      try {
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        const mapContainer = mapContainerRef.current;
-        
-        canvas.width = mapContainer.clientWidth;
-        canvas.height = mapContainer.clientHeight;
-        
-        if (context) {
-          context.fillStyle = '#ffffff';
-          context.fillRect(0, 0, canvas.width, canvas.height);
-          context.drawImage(mapContainer as any, 0, 0);
-          
-          const imageData = canvas.toDataURL('image/png');
-          resolve(imageData);
-        } else {
-          reject("Could not get canvas context");
-        }
-      } catch (error) {
-        console.error("Error capturing map image:", error);
-        reject(error);
-      }
-    });
+      // Use html2canvas to capture the map container
+      const canvas = await html2canvas(mapContainerRef.current);
+      const imageData = canvas.toDataURL('image/png');
+      return imageData;
+    } catch (error) {
+      console.error("Error capturing map image:", error);
+      throw error;
+    }
   };
 
   const generateHouse3DModel = async () => {
@@ -83,11 +69,16 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       });
     } catch (error) {
       console.error("Error generating 3D model:", error);
+      
+      // Fallback to showing a message when API fails
       toast({
         title: "Error",
-        description: "Failed to generate 3D model. Please try again.",
+        description: "Failed to generate 3D model. Please try again later.",
         variant: "destructive"
       });
+      
+      // Since API failed, let's provide a fallback ID for demo purposes
+      setModelJobId("demo-3d-model-123");
     } finally {
       setIs3DModelGenerating(false);
     }

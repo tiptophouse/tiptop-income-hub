@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Satellite, Map as MapIcon, ZoomIn } from 'lucide-react';
+import { Satellite, Map as MapIcon, ZoomIn, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MapControlsProps {
