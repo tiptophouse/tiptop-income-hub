@@ -157,24 +157,24 @@ declare namespace google {
 
   namespace places {
     class Autocomplete {
-      constructor(inputField: HTMLInputElement, opts?: AutocompleteOptions);
-      addListener(eventName: string, handler: () => void): void;
+      constructor(input: HTMLInputElement, opts?: {
+        types?: string[];
+        componentRestrictions?: { country: string };
+      });
+      addListener(event: string, callback: () => void): void;
       getPlace(): PlaceResult;
-    }
-
-    interface AutocompleteOptions {
-      types?: string[];
-      componentRestrictions?: {
-        country: string | string[];
-      };
     }
 
     interface PlaceResult {
       formatted_address?: string;
       geometry?: {
-        location: LatLng;
+        location: google.maps.LatLng;
       };
     }
+  }
+
+  namespace event {
+    function clearInstanceListeners(instance: any): void;
   }
 }
 
