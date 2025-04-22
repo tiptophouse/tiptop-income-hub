@@ -31,30 +31,30 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
   try {
     console.log("Fetching AI insights for address:", address);
     
-    // Create a thread
+    // Create a thread - updated to v2
     const threadResponse = await fetch("https://api.openai.com/v1/threads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "OpenAI-Beta": "assistants=v1"
+        "OpenAI-Beta": "assistants=v2" // Updated to v2
       }
     });
 
     if (!threadResponse.ok) {
-      console.error("Failed to create thread");
+      console.error("Failed to create thread", await threadResponse.text());
       return getDefaultPropertyInsights(address);
     }
 
     const thread = await threadResponse.json();
 
-    // Add a message to the thread
+    // Add a message to the thread - updated to v2
     const messageResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "OpenAI-Beta": "assistants=v1"
+        "OpenAI-Beta": "assistants=v2" // Updated to v2
       },
       body: JSON.stringify({
         role: "user",
@@ -70,17 +70,17 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
     });
 
     if (!messageResponse.ok) {
-      console.error("Failed to create message");
+      console.error("Failed to create message", await messageResponse.text());
       return getDefaultPropertyInsights(address);
     }
 
-    // Run the assistant
+    // Run the assistant - updated to v2
     const runResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "OpenAI-Beta": "assistants=v1"
+        "OpenAI-Beta": "assistants=v2" // Updated to v2
       },
       body: JSON.stringify({
         assistant_id: ASSISTANT_ID
@@ -88,7 +88,7 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
     });
 
     if (!runResponse.ok) {
-      console.error("Failed to create run");
+      console.error("Failed to create run", await runResponse.text());
       return getDefaultPropertyInsights(address);
     }
 
@@ -101,22 +101,22 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
       const runStatusResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, {
         headers: {
           "Authorization": `Bearer ${OPENAI_API_KEY}`,
-          "OpenAI-Beta": "assistants=v1"
+          "OpenAI-Beta": "assistants=v2" // Updated to v2
         }
       });
 
       if (!runStatusResponse.ok) {
-        console.error("Failed to check run status");
+        console.error("Failed to check run status", await runStatusResponse.text());
         break;
       }
 
       const runStatus = await runStatusResponse.json();
       if (runStatus.status === "completed") {
-        // Get the messages
+        // Get the messages - updated to v2
         const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
           headers: {
             "Authorization": `Bearer ${OPENAI_API_KEY}`,
-            "OpenAI-Beta": "assistants=v1"
+            "OpenAI-Beta": "assistants=v2" // Updated to v2
           }
         });
 
@@ -126,21 +126,31 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
           
           try {
             // Extract JSON from the assistant's response
-            const jsonMatch = lastMessage.content[0].text.content.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              const parsedResponse = JSON.parse(jsonMatch[0]);
-              return {
-                address,
-                ...parsedResponse
-              };
+            // The response format might be different in v2, so add more logging
+            console.log("Last message content:", lastMessage.content);
+            
+            // In v2, the content is an array of different content types
+            const textContent = lastMessage.content.find(item => item.type === 'text');
+            
+            if (textContent && textContent.text) {
+              const jsonMatch = textContent.text.value.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                const parsedResponse = JSON.parse(jsonMatch[0]);
+                return {
+                  address,
+                  ...parsedResponse
+                };
+              }
+              
+              console.error("No JSON found in response:", textContent.text.value);
             }
           } catch (error) {
             console.error("Error parsing assistant response:", error);
           }
         }
         break;
-      } else if (runStatus.status === "failed") {
-        console.error("Run failed:", runStatus.error);
+      } else if (runStatus.status === "failed" || runStatus.status === "cancelled") {
+        console.error("Run failed or cancelled:", runStatus.error || runStatus.last_error);
         break;
       }
 
