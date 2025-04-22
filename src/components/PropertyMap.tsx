@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Satellite, Map as MapIcon, Maximize } from 'lucide-react';
+import { Satellite, Map as MapIcon, Maximize, ZoomIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import GoogleMapsInit from './GoogleMapsInit';
 
 interface PropertyMapProps {
   address: string;
@@ -13,7 +14,8 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [zoomLevel, setZoomLevel] = useState<'far' | 'medium' | 'close'>('far');
   const [view, setView] = useState<'satellite' | 'map'>('satellite');
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const map = useRef<google.maps.Map | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -39,14 +41,16 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
             zoomControl: false,
           });
           
-          map.current = mapInstance;
-          setIsLoaded(true);
+          mapRef.current = mapInstance;
           
-          new window.google.maps.Marker({
+          const marker = new window.google.maps.Marker({
             map: mapInstance,
             position: location,
             animation: window.google.maps.Animation.DROP,
           });
+          
+          markerRef.current = marker;
+          setIsLoaded(true);
         }
       });
     };
@@ -55,27 +59,36 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   }, [address, view]);
 
   const handleZoomIn = () => {
-    if (!map.current) return;
+    if (!mapRef.current || !markerRef.current) return;
     
-    if (zoomLevel === 'far') {
-      map.current.setZoom(18);
-      setZoomLevel('medium');
-    } else if (zoomLevel === 'medium') {
-      map.current.setZoom(20);
-      map.current.setTilt(45);
-      setZoomLevel('close');
-      
-      if (onZoomComplete) {
-        setTimeout(onZoomComplete, 1000);
-      }
+    const marker = markerRef.current;
+    const map = mapRef.current;
+    
+    // Get current marker position
+    const position = marker.getPosition();
+    if (!position) return;
+    
+    // Set new zoom level for 50m view (typically zoom level 19-20 for this distance)
+    map.setZoom(20);
+    map.setCenter(position);
+    
+    if (view !== 'satellite') {
+      setView('satellite');
+      map.setMapTypeId('satellite');
+    }
+    
+    setZoomLevel('close');
+    
+    if (onZoomComplete) {
+      setTimeout(onZoomComplete, 1000);
     }
   };
 
   const toggleMapType = () => {
-    if (!map.current) return;
+    if (!mapRef.current) return;
     
     const newView = view === 'satellite' ? 'map' : 'satellite';
-    map.current.setMapTypeId(newView === 'satellite' ? 'satellite' : 'roadmap');
+    mapRef.current.setMapTypeId(newView === 'satellite' ? 'satellite' : 'roadmap');
     setView(newView);
   };
 
@@ -115,7 +128,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
             onClick={handleZoomIn}
             disabled={zoomLevel === 'close'}
           >
-            <Maximize className="h-4 w-4" />
+            <ZoomIn className="h-4 w-4" />
           </Button>
         </div>
       )}
