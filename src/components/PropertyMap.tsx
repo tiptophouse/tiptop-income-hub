@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Satellite, Map as MapIcon, ZoomIn, Download3D } from 'lucide-react';
+import { Satellite, Map as MapIcon, ZoomIn, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { generateModelFromImage } from '@/utils/meshyApi';
