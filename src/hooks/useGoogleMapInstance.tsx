@@ -30,9 +30,10 @@ export function useGoogleMapInstance({
         
         const map = new window.google.maps.Map(mapContainerRef.current!, {
           center: { lat: location.lat(), lng: location.lng() },
-          zoom: 18,
+          zoom: 19, // Closer zoom for better 3D effect
           mapTypeId: view === 'satellite' ? 'satellite' : 'roadmap',
-          tilt: 0,
+          tilt: 45, // Add tilt for 3D effect
+          heading: 45, // Rotate the map for better perspective
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: false,
