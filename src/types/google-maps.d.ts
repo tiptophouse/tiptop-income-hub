@@ -154,6 +154,28 @@ declare namespace google {
       [key: string]: any;
     }
   }
+
+  namespace places {
+    class Autocomplete {
+      constructor(inputField: HTMLInputElement, opts?: AutocompleteOptions);
+      addListener(eventName: string, handler: () => void): void;
+      getPlace(): PlaceResult;
+    }
+
+    interface AutocompleteOptions {
+      types?: string[];
+      componentRestrictions?: {
+        country: string | string[];
+      };
+    }
+
+    interface PlaceResult {
+      formatted_address?: string;
+      geometry?: {
+        location: LatLng;
+      };
+    }
+  }
 }
 
 export {};
