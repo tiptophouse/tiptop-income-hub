@@ -1,3 +1,4 @@
+
 /// <reference types="google.maps" />
 
 declare global {
@@ -10,12 +11,22 @@ declare global {
         Animation: {
           DROP: number;
         };
+        MapTypeId: {
+          ROADMAP: string;
+          SATELLITE: string;
+        };
         Rectangle: any;
         LatLng: any;
         LatLngBounds: any;
         Polygon: any;
         StreetViewPanorama: any;
         StreetViewService: any;
+        places: {
+          Autocomplete: any;
+        };
+        event: {
+          clearInstanceListeners: (instance: any) => void;
+        };
       }
     };
   }

@@ -26,7 +26,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
       componentRestrictions: { country: 'us' }
     };
 
-    autocompleteRef.current = new google.maps.places.Autocomplete(
+    autocompleteRef.current = new window.google.maps.places.Autocomplete(
       inputRef.current,
       options
     );
@@ -40,7 +40,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
     return () => {
       if (window.google?.maps?.event) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current!);
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current!);
       }
     };
   }, [onAddressSelect]);
@@ -54,7 +54,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             lng: position.coords.longitude
           };
           if (window.google?.maps) {
-            const geocoder = new google.maps.Geocoder();
+            const geocoder = new window.google.maps.Geocoder();
             geocoder.geocode({ location: latlng }, (results, status) => {
               if (status === "OK" && results && results[0]) {
                 const detectedAddress = results[0].formatted_address;
