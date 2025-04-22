@@ -30,12 +30,19 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
   const [generating3DModel, setGenerating3DModel] = useState(false);
   const [modelJobId, setModelJobId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [requestedAddress, setRequestedAddress] = useState('');
 
   const fetchInsights = async () => {
+    if (!address || address === requestedAddress) return;
+    
     setLoading(true);
     setError(null);
+    setRequestedAddress(address);
+    console.log("Fetching insights for new address:", address);
+    
     try {
       const data = await getPropertyInsightsFromAI(address);
+      console.log("Received property insights:", data);
       setInsights(data);
     } catch (error) {
       console.error("Error in PropertyInsights component:", error);
@@ -53,6 +60,7 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
 
   const handleRetry = () => {
     setRetrying(true);
+    setRequestedAddress(''); // Reset to force a new fetch
     fetchInsights();
   };
 
@@ -160,9 +168,9 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
       <CardHeader className="pb-1 pt-4 pr-2 bg-transparent flex flex-col">
         <div className="flex items-center gap-2 mb-1">
           {icon}
-          <CardTitle className="text-lg font-bold text-[#6E59A5] truncate">{main}</CardTitle>
+          <CardTitle className="text-lg font-bold text-[#6E59A5] truncate max-w-[150px]">{main}</CardTitle>
         </div>
-        <CardDescription className="text-sm font-medium text-gray-700 line-clamp-2 h-10">{details}</CardDescription>
+        <CardDescription className="text-sm font-medium text-gray-700 line-clamp-2 h-10 max-w-full">{details}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0 pb-4">
         <div className="text-2xl font-extrabold text-[#8B5CF6]">{value}</div>
@@ -183,7 +191,7 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
             <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-[#f3eefd] tracking-tight mb-1 leading-tight truncate">
               Property Analysis
             </h1>
-            <p className="font-semibold text-gray-700 dark:text-[#ded9f3] text-base sm:text-lg truncate">
+            <p className="font-semibold text-gray-700 dark:text-[#ded9f3] text-base sm:text-lg truncate max-w-[300px]">
               AI-powered insights for <span className={accentText}>{address.length > 25 ? address.substring(0, 25) + '...' : address}</span>
             </p>
             {insights?.propertySize && (
@@ -203,9 +211,9 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
         <CardHeader className="pb-3 pt-8 px-8 animate-fade-in">
           <CardTitle className="flex items-center gap-3 font-extrabold text-[#8B5CF6] text-2xl sm:text-3xl">
             <Info className="h-6 w-6 text-[#B993FE]" />
-            <span className="truncate">Your Home Earning Potential</span>
+            <span className="truncate max-w-[350px]">Your Home Earning Potential</span>
           </CardTitle>
-          <CardDescription className="text-gray-700 line-clamp-2">
+          <CardDescription className="text-gray-700 line-clamp-2 max-w-full">
             Discover how you can monetize your property smoothly.
           </CardDescription>
         </CardHeader>
@@ -235,9 +243,9 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
                 <div className="rounded-2xl bg-gradient-to-br from-[#D6BCFA] via-[#F3ECFF] to-white shadow-xl p-6 flex flex-col items-start">
                   <div className="flex items-center gap-3 mb-3">
                     <TrendingUp className="h-7 w-7 text-[#B993FE]" />
-                    <span className="font-extrabold text-[#8B5CF6] text-lg tracking-wide truncate">Monthly Potential</span>
+                    <span className="font-extrabold text-[#8B5CF6] text-lg tracking-wide truncate max-w-[180px]">Monthly Potential</span>
                   </div>
-                  <div className="text-4xl sm:text-5xl font-extrabold text-[#6E59A5] mb-3 line-clamp-1">
+                  <div className="text-4xl sm:text-5xl font-extrabold text-[#6E59A5] mb-3 line-clamp-1 max-w-full">
                     {insights?.totalMonthlyPotential || "$300-570"}
                   </div>
                   <span className="uppercase text-sm font-extrabold text-[#B993FE] tracking-widest">estimated range</span>
@@ -245,7 +253,7 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
                 <div className="rounded-2xl bg-gradient-to-br from-[#E5DEFF] via-[#F3ECFF] to-white shadow-xl p-6 flex flex-col items-start">
                   <div className="flex items-center gap-3 mb-3">
                     <Home className="h-7 w-7 text-[#A0E884]" />
-                    <span className="font-extrabold text-[#7E9C6F] text-lg tracking-wide truncate">Assets Found</span>
+                    <span className="font-extrabold text-[#7E9C6F] text-lg tracking-wide truncate max-w-[180px]">Assets Found</span>
                   </div>
                   <div className="text-4xl sm:text-5xl font-extrabold text-[#7E9C6F] mb-3">4</div>
                   <span className="uppercase text-sm font-extrabold text-[#B9D08F] tracking-widest">monetizable</span>
@@ -274,7 +282,7 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
                   "border-l-orange-600",
                   "Parking",
                   insights?.parkingSpace?.available || "1-2 spaces",
-                  insights?.parkingSpace?.details || "Prime location, high demand",
+                  insights?.parkingSpace?.details || "Prime location",
                   insights?.parkingSpace?.monthlyValue || "$70-200 /mo",
                   assetIcons.parkingSpace
                 )}

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressAutocomplete from './AddressAutocomplete';
-import PropertyInsights from './PropertyInsights';
+import PropertyAnalysisSection from './analysis/PropertyAnalysisSection';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wifi, Sun, CarFront, TreeDeciduous } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,22 +33,22 @@ const Hero = () => {
     {
       icon: <Sun className="h-8 w-8 text-yellow-500" />,
       title: "Rooftop Solar",
-      description: "Generate clean energy and earn monthly"
+      description: "Generate clean energy and earn monthly income"
     },
     {
       icon: <Wifi className="h-8 w-8 text-blue-500" />,
       title: "Internet Bandwidth",
-      description: "Share unused bandwidth capacity"
+      description: "Share unused bandwidth capacity for passive income"
     },
     {
       icon: <CarFront className="h-8 w-8 text-purple-500" />,
       title: "Parking Space",
-      description: "Rent out your unused parking space"
+      description: "Rent out your unused parking space when not needed"
     },
     {
       icon: <TreeDeciduous className="h-8 w-8 text-green-500" />,
       title: "Garden Space",
-      description: "Share your garden with the community"
+      description: "Share your garden with the community for extra income"
     }
   ];
 
@@ -99,19 +99,17 @@ const Hero = () => {
                   <CardTitle className="text-lg truncate">{card.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="line-clamp-2">{card.description}</CardDescription>
+                  <CardDescription className="line-clamp-2 h-10">{card.description}</CardDescription>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </motion.div>
 
-        {showAnalysis && (
-          <PropertyInsights 
-            address={address}
-            className="w-full mt-12"
-          />
-        )}
+        <PropertyAnalysisSection 
+          address={address}
+          show={showAnalysis}
+        />
       </section>
     </GoogleMapsInit>
   );
