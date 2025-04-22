@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { getPropertyInsights } from '@/utils/openai';
+import { getPropertyInsightsFromAI } from '@/utils/openaiApi';
 import { Building, TrendingUp, Home, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from '@/components/ui/use-toast';
@@ -17,7 +18,7 @@ interface PropertyInsightsProps {
 }
 
 const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className }) => {
-  const [insights, setInsights] = useState<string | null>(null);
+  const [insights, setInsights] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
@@ -28,7 +29,7 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
     setLoading(true);
     setError(null);
     try {
-      const data = await getPropertyInsights(address);
+      const data = await getPropertyInsightsFromAI(address);
       setInsights(data);
     } catch (error) {
       console.error("Error in PropertyInsights component:", error);
@@ -97,6 +98,40 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
 
   if (!address) return null;
 
+  if (loading) {
+    return (
+      <Card className={`${className} shadow-md animate-pulse`}>
+        <CardHeader>
+          <CardTitle>Property Analysis</CardTitle>
+          <CardDescription>Analyzing {address}...</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive" className={className}>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+        <Button 
+          variant="outline" 
+          className="mt-2" 
+          onClick={handleRetry}
+          disabled={retrying}
+        >
+          {retrying ? "Retrying..." : "Retry"}
+        </Button>
+      </Alert>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
@@ -121,7 +156,9 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
                     <CardDescription>Total passive income</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-tiptop-accent">$300-570</div>
+                    <div className="text-3xl font-bold text-tiptop-accent">
+                      {insights?.totalMonthlyPotential || "$300-570"}
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="bg-gradient-to-br from-blue-50 to-white">
@@ -140,37 +177,45 @@ const PropertyInsights: React.FC<PropertyInsightsProps> = ({ address, className 
                 <Card className="overflow-hidden border-l-4 border-l-purple-500">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">Rooftop Solar</CardTitle>
-                    <CardDescription>706 sq ft available</CardDescription>
+                    <CardDescription>{insights?.rooftopSolar?.sqFootage || "706 sq ft"} available</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-xl font-semibold text-tiptop-accent">$100-150 /month</div>
+                    <div className="text-xl font-semibold text-tiptop-accent">
+                      {insights?.rooftopSolar?.monthlySavings || "$100-150"} /month
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="overflow-hidden border-l-4 border-l-blue-500">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">Internet Bandwidth</CardTitle>
-                    <CardDescription>60-70% unused capacity</CardDescription>
+                    <CardDescription>{insights?.internetBandwidth?.sharingCapacity || "60-70%"} unused capacity</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-xl font-semibold text-tiptop-accent">$80-120 /month</div>
+                    <div className="text-xl font-semibold text-tiptop-accent">
+                      {insights?.internetBandwidth?.monthlyEarnings || "$80-120"} /month
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="overflow-hidden border-l-4 border-l-orange-500">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">Parking Space</CardTitle>
-                    <CardDescription>1-2 spaces available</CardDescription>
+                    <CardDescription>{insights?.parkingSpace?.available || "1-2 spaces"} available</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-xl font-semibold text-tiptop-accent">$70-200 /month</div>
+                    <div className="text-xl font-semibold text-tiptop-accent">
+                      {insights?.parkingSpace?.monthlyValue || "$70-200"} /month
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="overflow-hidden border-l-4 border-l-green-500">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">Garden Space</CardTitle>
-                    <CardDescription>104 sq ft available</CardDescription>
+                    <CardDescription>{insights?.gardenSpace?.sqFootage || "104 sq ft"} available</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-xl font-semibold text-tiptop-accent">$50-100 /month</div>
+                    <div className="text-xl font-semibold text-tiptop-accent">
+                      {insights?.gardenSpace?.monthlyPotential || "$50-100"} /month
+                    </div>
                   </CardContent>
                 </Card>
               </div>
