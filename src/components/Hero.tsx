@@ -6,6 +6,7 @@ import AddressAutocomplete from './AddressAutocomplete';
 import PropertyInsights from './PropertyInsights';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wifi, Sun, CarFront, TreeDeciduous } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Hero = () => {
   const [address, setAddress] = useState('');
@@ -19,6 +20,13 @@ const Hero = () => {
       detail: { address: selectedAddress }
     });
     document.dispatchEvent(addressEvent);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (address.trim()) {
+      handleAddressSelect(address);
+    }
   };
 
   const assetCards = [
@@ -60,11 +68,14 @@ const Hero = () => {
             Turn your property's untapped resources into monthly income
           </p>
           
-          <AddressAutocomplete
-            value={address}
-            onChange={setAddress}
-            onAddressSelect={handleAddressSelect}
-          />
+          <form onSubmit={handleSubmit} className="w-full">
+            <AddressAutocomplete
+              value={address}
+              onChange={setAddress}
+              onAddressSelect={handleAddressSelect}
+            />
+            <Button type="submit" className="hidden">Submit</Button>
+          </form>
         </motion.div>
 
         <motion.div 

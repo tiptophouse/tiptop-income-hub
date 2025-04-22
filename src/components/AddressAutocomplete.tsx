@@ -71,6 +71,15 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (value.trim()) {
+        onAddressSelect(value);
+      }
+    }
+  };
+
   return (
     <div className="relative w-full">
       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -81,6 +90,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="Enter your property address..."
         className="pl-12 pr-28 py-6 w-full rounded-full text-base sm:text-lg shadow-lg border-none bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-tiptop-accent/50 transition-all duration-300"
       />
