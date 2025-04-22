@@ -2,9 +2,10 @@
 import { useEffect, useState, RefObject } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
+// Use the Window interface extension from the types file
 declare global {
   interface Window {
-    google: typeof google;
+    google: any;
   }
 }
 
@@ -30,7 +31,7 @@ export function useGoogleMapInstance({
     
     const geocoder = new window.google.maps.Geocoder();
     
-    geocoder.geocode({ address }, (results, status) => {
+    geocoder.geocode({ address }, (results: any, status: string) => {
       if (status === "OK" && results?.[0]?.geometry?.location) {
         const location = results[0].geometry.location;
         

@@ -19,6 +19,8 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [is3DModelGenerating, setIs3DModelGenerating] = useState(false);
   const [modelJobId, setModelJobId] = useState<string | null>(null);
   const [weatherTemp, setWeatherTemp] = useState<string>("26°");
+  const [tiltAngle, setTiltAngle] = useState(45);
+  const [rotationAngle, setRotationAngle] = useState(45);
 
   const { mapInstance, isLoaded } = useGoogleMapInstance({
     mapContainerRef,
@@ -26,6 +28,38 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     view,
     onZoomComplete
   });
+
+  // Add effect for enhanced 3D tilt and rotation
+  useEffect(() => {
+    if (!mapInstance) return;
+    
+    // Slowly increase tilt for more dynamic 3D effect
+    const tiltInterval = setInterval(() => {
+      setTiltAngle(prev => {
+        const newTilt = (prev + 0.5) % 60;
+        if (mapInstance) {
+          mapInstance.setOptions({ tilt: newTilt > 0 ? newTilt : 1 });
+        }
+        return newTilt;
+      });
+    }, 500);
+    
+    // Slowly rotate heading for dynamic view
+    const rotateInterval = setInterval(() => {
+      setRotationAngle(prev => {
+        const newRotation = (prev + 0.3) % 360;
+        if (mapInstance) {
+          mapInstance.setOptions({ heading: newRotation });
+        }
+        return newRotation;
+      });
+    }, 800);
+    
+    return () => {
+      clearInterval(tiltInterval);
+      clearInterval(rotateInterval);
+    };
+  }, [mapInstance]);
 
   const toggleMapType = () => {
     if (!mapInstance) return;
@@ -115,6 +149,11 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
           {/* Weather display similar to the reference image */}
           <div className="absolute bottom-4 left-4 bg-black/70 text-white rounded-full p-2 flex items-center justify-center">
             <span className="text-yellow-300 mr-1">☀</span>{weatherTemp}
+          </div>
+          
+          {/* 3D Info badge */}
+          <div className="absolute top-4 left-4 bg-tiptop-accent/90 text-white rounded-lg px-3 py-1 text-xs font-bold shadow-lg">
+            3D View Active
           </div>
         </>
       )}

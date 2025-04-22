@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from '@/components/ui/use-toast';
-import { Building, RotateCw, Download } from 'lucide-react';
+import { Building, RotateCw, Download, Cube3d } from 'lucide-react';
 import { checkModelStatus, getModelDownloadUrl } from '@/utils/meshyApi';
 
 interface Property3DModelProps {
@@ -101,7 +102,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
           </div>
         ) : modelStatus === 'failed' ? (
           <div className="text-center py-8">
-            <Cube className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <Cube3d className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">Model Generation Failed</h3>
             <p className="text-sm text-muted-foreground mb-4">
               We couldn't generate a 3D model for this property.
