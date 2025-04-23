@@ -18,8 +18,6 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [is3DModelGenerating, setIs3DModelGenerating] = useState(false);
   const [modelJobId, setModelJobId] = useState<string | null>(null);
   const [weatherTemp, setWeatherTemp] = useState<string>("26°");
-  const [tiltAngle, setTiltAngle] = useState(45);
-  const [rotationAngle, setRotationAngle] = useState(45);
 
   const { mapInstance, isLoaded } = useGoogleMapInstance({
     mapContainerRef,
@@ -27,34 +25,6 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     view,
     onZoomComplete
   });
-
-  useEffect(() => {
-    if (!mapInstance) return;
-    const tiltInterval = setInterval(() => {
-      setTiltAngle(prev => {
-        const newTilt = (prev + 0.5) % 60;
-        if (mapInstance) {
-          mapInstance.setOptions({ tilt: newTilt > 0 ? newTilt : 1 });
-        }
-        return newTilt;
-      });
-    }, 500);
-
-    const rotateInterval = setInterval(() => {
-      setRotationAngle(prev => {
-        const newRotation = (prev + 0.3) % 360;
-        if (mapInstance) {
-          mapInstance.setOptions({ heading: newRotation });
-        }
-        return newRotation;
-      });
-    }, 800);
-
-    return () => {
-      clearInterval(tiltInterval);
-      clearInterval(rotateInterval);
-    };
-  }, [mapInstance]);
 
   const toggleMapType = () => {
     if (!mapInstance) return;
