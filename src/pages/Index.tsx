@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#f7f2fe] to-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#f7f2fe] via-[#fcfcff] to-[#f5f7ff]">
       <Header />
       <main className="flex-1 overflow-x-hidden">
         <Hero />

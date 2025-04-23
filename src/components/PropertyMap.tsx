@@ -98,6 +98,13 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       const jobId = await generateModelFromImage(imageData);
       
       setModelJobId(jobId);
+      
+      // Dispatch event so other components can use the job ID
+      const modelEvent = new CustomEvent('modelJobCreated', {
+        detail: { jobId }
+      });
+      document.dispatchEvent(modelEvent);
+      
       toast({
         title: "Success",
         description: "3D model generation started. This may take a few minutes to complete.",
@@ -105,7 +112,6 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     } catch (error) {
       console.error("Error generating 3D model:", error);
       
-      // Fallback to showing a message when API fails
       toast({
         title: "Error",
         description: "Failed to generate 3D model. Please try again later.",
@@ -113,7 +119,14 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       });
       
       // Since API failed, let's provide a fallback ID for demo purposes
-      setModelJobId("demo-3d-model-123");
+      const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
+      setModelJobId(fallbackId);
+      
+      // Dispatch event with fallback ID
+      const modelEvent = new CustomEvent('modelJobCreated', {
+        detail: { jobId: fallbackId }
+      });
+      document.dispatchEvent(modelEvent);
     } finally {
       setIs3DModelGenerating(false);
     }

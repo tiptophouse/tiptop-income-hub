@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import PropertyMap from '../PropertyMap';
 import PropertyInsights from '../PropertyInsights';
+import Property3DModel from '../Property3DModel';
 
 interface PropertyAnalysisSectionProps {
   address: string;
@@ -27,8 +28,19 @@ const PropertyAnalysisSection = ({ address, show }: PropertyAnalysisSectionProps
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-4 w-full bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/30"
         >
-          <h2 className="text-2xl font-bold text-[#8B5CF6] mb-4 text-center">Property Map View</h2>
-          <PropertyMap address={address} />
+          <h2 className="text-2xl font-bold text-[#8B5CF6] mb-4 text-center">Property 3D Model & Map View</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <PropertyMap address={address} />
+            </div>
+            <div>
+              <Property3DModel 
+                jobId={null} 
+                address={address} 
+                className="h-full"
+              />
+            </div>
+          </div>
         </motion.div>
       </div>
       

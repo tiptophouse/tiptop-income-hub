@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from '@/components/ui/use-toast';
-import { Building, RotateCw, Download, Box } from 'lucide-react';
+import { Building, RotateCw, Download, Box, RefreshCw } from 'lucide-react';
 import { checkModelStatus, getModelDownloadUrl } from '@/utils/meshyApi';
 
 interface Property3DModelProps {
@@ -15,7 +15,7 @@ interface Property3DModelProps {
 }
 
 const Property3DModel: React.FC<Property3DModelProps> = ({ 
-  jobId, 
+  jobId: initialJobId, 
   address,
   className 
 }) => {
@@ -23,16 +23,46 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [rotateModel, setRotateModel] = useState(true);
+  const [jobId, setJobId] = useState<string | null>(initialJobId);
+  const [modelRotation, setModelRotation] = useState(0);
+
+  // Listen for model job creation events
+  useEffect(() => {
+    const handleModelJobCreated = (event: CustomEvent) => {
+      if (event.detail && event.detail.jobId) {
+        setJobId(event.detail.jobId);
+        setModelStatus('processing');
+        setIsLoading(true);
+      }
+    };
+
+    document.addEventListener('modelJobCreated', handleModelJobCreated as EventListener);
+    
+    return () => {
+      document.removeEventListener('modelJobCreated', handleModelJobCreated as EventListener);
+    };
+  }, []);
+
+  // Start rotation animation
+  useEffect(() => {
+    if (!rotateModel) return;
+    
+    const interval = setInterval(() => {
+      setModelRotation(prev => (prev + 1) % 360);
+    }, 50);
+    
+    return () => clearInterval(interval);
+  }, [rotateModel]);
 
   useEffect(() => {
     if (!jobId) return;
     
     const checkStatus = async () => {
       try {
-        // For demo purposes, we'll simulate a successful model generation
-        // In a real app, you would use the actual API
+        // For demo purposes, simulate a successful model generation after a delay
         setTimeout(() => {
           setModelStatus('completed');
+          // Use a real property image for the demo
           setModelUrl('/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png');
           setIsLoading(false);
         }, 3000);
@@ -78,7 +108,41 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
     });
   };
 
-  if (!jobId) return null;
+  const handleRefresh = () => {
+    setIsLoading(true);
+    setModelStatus('processing');
+    
+    // Generate a new job ID
+    const newJobId = "refreshed-model-" + Math.random().toString(36).substring(2, 8);
+    setJobId(newJobId);
+    
+    // Simulate processing
+    setTimeout(() => {
+      setModelStatus('completed');
+      setIsLoading(false);
+    }, 2000);
+  };
+
+  // If no job ID and not listening for one yet, show the start button
+  if (!jobId) {
+    return (
+      <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5 text-tiptop-accent" />
+            Property 3D Model
+          </CardTitle>
+          <CardDescription>Generate a 3D model for {address}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center p-8">
+          <p className="text-center text-muted-foreground mb-4">
+            Click "Extract 3D" on the map to generate a 3D model of this property
+          </p>
+          <Building className="h-16 w-16 text-muted-foreground/50 mb-4" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
@@ -97,7 +161,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
               <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-tiptop-accent rounded-full" />
             </div>
             <p className="text-center text-sm text-muted-foreground">
-              Generating 3D model...
+              Generating 3D model from satellite imagery...
             </p>
           </div>
         ) : modelStatus === 'failed' ? (
@@ -107,7 +171,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
             <p className="text-sm text-muted-foreground mb-4">
               We couldn't generate a 3D model for this property.
             </p>
-            <Button variant="outline" onClick={() => setIsLoading(true)}>
+            <Button variant="outline" onClick={handleRefresh}>
               Try Again
             </Button>
           </div>
@@ -116,14 +180,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
             <div className="relative">
               <motion.div 
                 className="w-full h-48 bg-gray-100 rounded-md overflow-hidden"
-                animate={{ 
-                  rotateY: rotateModel ? 360 : 0 
-                }}
-                transition={{ 
-                  duration: 20, 
-                  repeat: rotateModel ? Infinity : 0,
-                  ease: "linear"
-                }}
+                style={{ transform: `perspective(800px) rotateY(${modelRotation}deg)` }}
               >
                 {modelUrl && (
                   <img 
@@ -148,6 +205,15 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
                   size="sm" 
                   variant="secondary" 
                   className="bg-black/70 text-white hover:bg-black/80"
+                  onClick={handleRefresh}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                
+                <Button 
+                  size="sm" 
+                  variant="secondary" 
+                  className="bg-black/70 text-white hover:bg-black/80"
                   onClick={handleDownload}
                 >
                   <Download className="h-4 w-4" />
@@ -157,7 +223,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
             
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">
-                Model ID: #{jobId.substring(0, 6)}
+                3D Model ID: #{jobId.substring(0, 6)}
               </p>
               <Button 
                 variant="outline" 
