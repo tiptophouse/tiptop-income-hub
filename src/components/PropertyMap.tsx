@@ -49,6 +49,37 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     }
   };
 
+  const sendToWebhook = async (imageData: string) => {
+    try {
+      const response = await fetch('https://hook.eu1.make.com/dcb3jxlcvxsw55vnwiwjme7gu7pcjvq7', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'no-cors', // Required for cross-origin requests
+        body: JSON.stringify({
+          address: address,
+          timestamp: new Date().toISOString(),
+          satelliteImage: imageData,
+          origin: window.location.origin,
+        }),
+      });
+
+      console.log("Data sent to webhook successfully");
+      toast({
+        title: "Success",
+        description: "Property information sent for processing",
+      });
+    } catch (error) {
+      console.error("Error sending data to webhook:", error);
+      toast({
+        title: "Warning",
+        description: "Continuing with 3D generation, but couldn't send property data",
+        variant: "destructive"
+      });
+    }
+  };
+
   const generate3DModel = async () => {
     if (is3DModelGenerating) return;
     try {
@@ -61,55 +92,45 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       
       const imageData = await captureMapImage();
       
+      // Send to webhook before starting 3D generation
+      await sendToWebhook(imageData);
+      
       toast({
         title: "Processing",
         description: "Generating 3D model from satellite imagery...",
       });
 
+      // Try to generate model via API
+      let jobId;
       try {
-        // Actually call the Meshy API
-        const jobId = await generateModelFromImage(imageData);
+        jobId = await generateModelFromImage(imageData);
         console.log("3D model generation job created:", jobId);
-        setModelJobId(jobId);
-        
-        // Dispatch event to notify other components
-        const modelEvent = new CustomEvent('modelJobCreated', {
-          detail: { jobId }
-        });
-        document.dispatchEvent(modelEvent);
-        
-        toast({
-          title: "Success",
-          description: "3D model generation started! It may take a few minutes to complete.",
-        });
       } catch (error) {
-        console.error("Error calling Meshy API:", error);
-        
-        // Fallback to demo model if API fails
-        const demoJobId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
-        setModelJobId(demoJobId);
-        
-        // Dispatch event for demo model
-        const modelEvent = new CustomEvent('modelJobCreated', {
-          detail: { jobId: demoJobId }
-        });
-        document.dispatchEvent(modelEvent);
+        console.error("Error from Meshy API:", error);
+        jobId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
         
         toast({
-          title: "Using Demo Model",
-          description: "We encountered an issue with the 3D model API. Showing a demo model instead.",
+          title: "Using Sample Model",
+          description: "We encountered an issue with the 3D model service. Showing a sample model instead.",
         });
       }
+      
+      setModelJobId(jobId);
+      
+      const modelEvent = new CustomEvent('modelJobCreated', {
+        detail: { jobId }
+      });
+      document.dispatchEvent(modelEvent);
+
     } catch (error) {
       console.error("Error in 3D model generation process:", error);
       
       toast({
         title: "Error",
-        description: "Failed to generate 3D model. Please try again later.",
+        description: "Failed to process the property view. Please try again later.",
         variant: "destructive"
       });
       
-      // Always provide a fallback
       const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
       setModelJobId(fallbackId);
       
@@ -150,7 +171,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
             <span className="text-yellow-300 mr-1">☀</span>{weatherTemp}
           </div>
           <div className="absolute top-4 left-4 bg-tiptop-accent/90 text-white rounded-lg px-3 py-1 text-xs font-bold shadow-lg">
-            {view === 'satellite' ? 'Satellite View' : 'Map View'}
+            3D View Active
           </div>
         </>
       )}

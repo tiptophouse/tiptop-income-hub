@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
+import PropertyAnalysisSection from './analysis/PropertyAnalysisSection';
 import { Wifi, Sun, CarFront, Droplet, Store } from 'lucide-react';
 import PropertyMap from './PropertyMap';
 import AssetOpportunities from './AssetOpportunities';
@@ -67,6 +67,10 @@ const Hero = () => {
               <div className="w-full">
                 <AssetOpportunities address={address} />
               </div>
+              <PropertyAnalysisSection 
+                address={address}
+                show={showAnalysis}
+              />
             </>
           )}
         </div>
