@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sun, Wifi, CarFront, Droplet, Store, Camera, Car, BatteryCharging, Scissors, Home, Garden } from 'lucide-react';
+import { Sun, Wifi, CarFront, Droplet, Store, Camera, Car, BatteryCharging, Scissors, Home, Flower } from 'lucide-react';
 import AssetOpportunityCard from './AssetOpportunityCard';
 
 interface AssetOpportunitiesListProps {
@@ -92,7 +92,7 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
     {
       id: "garden",
       title: "Garden Space",
-      icon: <Garden className="h-8 w-8 text-green-400" />,
+      icon: <Flower className="h-8 w-8 text-green-400" />,
       estimatedIncome: "$50-100/month",
       details: "Rent garden space for community gardening"
     }

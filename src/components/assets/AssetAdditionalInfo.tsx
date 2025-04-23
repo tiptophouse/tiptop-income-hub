@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Wifi, CarFront, Droplet, Store, Camera, Car, BatteryCharging, Scissors, Home, Garden } from 'lucide-react';
+import { Sun, Wifi, CarFront, Droplet, Store, Camera, Car, BatteryCharging, Scissors, Home, Flower } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AssetInfoCard from './AssetInfoCard';
 
@@ -124,7 +124,7 @@ const AssetAdditionalInfo: React.FC<AssetAdditionalInfoProps> = ({
     },
     garden: {
       title: "Garden Space",
-      icon: <Garden className="h-8 w-8 text-green-400" />,
+      icon: <Flower className="h-8 w-8 text-green-400" />,
       description: "Rent garden space to local gardeners or for community gardening projects.",
       detectedInfo: "Your property has approximately 400 sq ft of suitable garden space with good sun exposure.",
       requiredFields: [
