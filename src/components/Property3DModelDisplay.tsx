@@ -157,9 +157,15 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
     setIsLoading(true);
     setModelStatus("processing");
     setCheckCount(0);
-    const newJobId =
-      "refreshed-model-" + Math.random().toString(36).substring(2, 8);
-    setJobId(newJobId);
+    // Instead of directly updating the jobId, dispatch an event to notify parent components
+    const newJobId = "refreshed-model-" + Math.random().toString(36).substring(2, 8);
+    
+    // Dispatch custom event with new jobId
+    const refreshEvent = new CustomEvent('modelJobCreated', {
+      detail: { jobId: newJobId }
+    });
+    document.dispatchEvent(refreshEvent);
+    
     toast({
       title: "Refreshing Model",
       description: "Generating a new 3D model for your property.",
@@ -204,4 +210,3 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
 };
 
 export default Property3DModelDisplay;
-
