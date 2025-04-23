@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Satellite, Map as MapIcon, ZoomIn, RotateCw, Box, Camera3d, Loader2 } from 'lucide-react';
+import { Satellite, Map as MapIcon, ZoomIn, RotateCw, Box, Camera, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MapControlsProps {
@@ -32,7 +31,7 @@ const MapControls: React.FC<MapControlsProps> = ({
           </>
         ) : (
           <>
-            <Camera3d className="h-4 w-4" />
+            <Camera className="h-4 w-4" />
             <span>Generate 3D Model</span>
           </>
         )}
