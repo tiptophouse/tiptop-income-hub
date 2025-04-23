@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { Search, MapPin } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { geocodeAddress, getCurrentLocation, reverseGeocode } from '@/utils/geocodingService';
 
 interface AssetSearchProps {
   onAddressSubmit: (address: string) => void;
@@ -54,65 +54,39 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
   };
 
   const handleDetectLocation = () => {
+    if (isLocating) return;
+    
     setIsLocating(true);
     
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const latlng = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          
-          if (window.google && window.google.maps) {
-            const geocoder = new window.google.maps.Geocoder();
-            geocoder.geocode({ location: latlng }, (results, status) => {
-              if (status === "OK" && results && results[0]) {
-                const detectedAddress = results[0].formatted_address;
-                setAddress(detectedAddress);
-                
-                toast({
-                  title: "Location Detected",
-                  description: `Your location: ${detectedAddress}`
-                });
-                
-                onAddressSubmit(detectedAddress);
-              } else {
-                toast({
-                  title: "Location Error",
-                  description: "Unable to determine your address.",
-                  variant: "destructive"
-                });
-              }
-              setIsLocating(false);
-            });
-          } else {
+    getCurrentLocation(
+      (userLocation) => {
+        reverseGeocode({
+          location: userLocation,
+          onSuccess: (detectedAddress) => {
+            setAddress(detectedAddress);
+            
             toast({
-              title: "Maps API Not Loaded",
-              description: "Please try entering your address manually.",
+              title: "Location Detected",
+              description: `Your location: ${detectedAddress}`
+            });
+            
+            onAddressSubmit(detectedAddress);
+            setIsLocating(false);
+          },
+          onError: () => {
+            toast({
+              title: "Location Error",
+              description: "Unable to determine your address.",
               variant: "destructive"
             });
             setIsLocating(false);
           }
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          toast({
-            title: "Location Error",
-            description: "Unable to get your location. Please check your browser permissions.",
-            variant: "destructive"
-          });
-          setIsLocating(false);
-        }
-      );
-    } else {
-      toast({
-        title: "Geolocation Not Supported",
-        description: "Your browser does not support geolocation.",
-        variant: "destructive"
-      });
-      setIsLocating(false);
-    }
+        });
+      },
+      () => {
+        setIsLocating(false);
+      }
+    );
   };
 
   return (

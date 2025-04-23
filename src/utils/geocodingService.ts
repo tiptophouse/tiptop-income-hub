@@ -13,6 +13,10 @@ interface GeocodeLocationProps {
   onError?: () => void;
 }
 
+// Simple cache to reduce redundant API calls
+const geocodeCache: Record<string, { lat: number; lng: number }> = {};
+const reverseGeocodeCache: Record<string, string> = {};
+
 // Function to geocode an address to coordinates
 export const geocodeAddress = ({ address, onSuccess, onError }: GeocodeAddressProps): void => {
   if (!window.google) {
@@ -20,15 +24,27 @@ export const geocodeAddress = ({ address, onSuccess, onError }: GeocodeAddressPr
     if (onError) onError();
     return;
   }
+  
+  // Check cache first
+  const cacheKey = address.trim().toLowerCase();
+  if (geocodeCache[cacheKey]) {
+    console.log('Using cached geocode result for:', address);
+    onSuccess(geocodeCache[cacheKey]);
+    return;
+  }
 
   const geocoder = new window.google.maps.Geocoder();
   geocoder.geocode({ address }, (results, status) => {
     if (status === "OK" && results && results[0]) {
       const location = results[0].geometry.location;
-      onSuccess({ 
+      const result = { 
         lat: location.lat(), 
         lng: location.lng() 
-      });
+      };
+      
+      // Cache the result
+      geocodeCache[cacheKey] = result;
+      onSuccess(result);
     } else {
       console.error('Geocode was not successful:', status);
       if (onError) onError();
@@ -44,10 +60,21 @@ export const reverseGeocode = ({ location, onSuccess, onError }: GeocodeLocation
     return;
   }
 
+  // Check cache first
+  const cacheKey = `${location.lat},${location.lng}`;
+  if (reverseGeocodeCache[cacheKey]) {
+    console.log('Using cached reverse geocode result for:', cacheKey);
+    onSuccess(reverseGeocodeCache[cacheKey]);
+    return;
+  }
+
   const geocoder = new window.google.maps.Geocoder();
   geocoder.geocode({ location }, (results, status) => {
     if (status === "OK" && results && results[0]) {
       const address = results[0].formatted_address;
+      
+      // Cache the result
+      reverseGeocodeCache[cacheKey] = address;
       onSuccess(address);
     } else {
       console.error('Reverse geocode was not successful:', status);
