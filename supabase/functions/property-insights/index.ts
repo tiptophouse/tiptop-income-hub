@@ -67,7 +67,7 @@ Contains **exactly** these keys:
 3. \`parking_space\`
 4. \`garden_space\`
 5. \ swimming_pool_space\`
-6. \ car_shering \`
+6. \ car_sharing\`
 7. \ full_house_rental\`
 8. \ storage_space\`
 9. \ items\`
