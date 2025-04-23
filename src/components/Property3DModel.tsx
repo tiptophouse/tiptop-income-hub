@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from '@/components/ui/use-toast';
-import { Building, RotateCw, Download, Box, RefreshCw, FileGlobe } from 'lucide-react';
+import { Building, RotateCw, Download, Box, RefreshCw, FileDown } from 'lucide-react';
 import { checkModelStatus, getModelDownloadUrl } from '@/utils/meshyApi';
 
 interface Property3DModelProps {
@@ -100,7 +100,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
             toast({
               title: "3D Model Ready",
               description: "Your property's 3D model has been generated, but there was an issue loading it.",
-              variant: "warning"
+              variant: "destructive"
             });
           }
         } else if (status.state === 'failed' || status.status === 'failed') {
@@ -125,7 +125,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
             toast({
               title: "Using Sample Model",
               description: "Processing is taking longer than expected. Showing a sample model.",
-              variant: "warning"
+              variant: "destructive"
             });
           }
         }
@@ -139,7 +139,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
           toast({
             title: "Using Sample Model",
             description: "Couldn't retrieve model status. Showing a sample model.",
-            variant: "warning"
+            variant: "destructive"
           });
         } else {
           setModelStatus('processing');
@@ -312,7 +312,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
                 onClick={handleDownload}
                 className="w-full"
               >
-                <FileGlobe className="mr-2 h-4 w-4" />
+                <FileDown className="mr-2 h-4 w-4" />
                 Download 3D Model
               </Button>
             </div>
