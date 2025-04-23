@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import GoogleMapsInit from "./components/GoogleMapsInit";
 import InternetSpeedDisplay from "./components/InternetSpeedDisplay";
 import ModelViewerScript from "./components/ModelViewerScript";
+import ModelsGallery from "./pages/ModelsGallery";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/models" element={<ModelsGallery />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <InternetSpeedDisplay />

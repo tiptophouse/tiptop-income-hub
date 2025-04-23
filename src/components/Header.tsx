@@ -51,6 +51,8 @@ const Header = () => {
   const navItems = [
     { label: "How It Works", onClick: () => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }) },
     { label: "Earning Quiz", onClick: () => document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' }) },
+    // Add 3D Models nav item
+    { label: "3D Models", onClick: () => navigate('/models') },
   ];
 
   return (
