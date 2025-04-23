@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import AssetAdditionalInfo from './assets/AssetAdditionalInfo';
 import AssetOpportunitiesList from './assets/AssetOpportunitiesList';
@@ -61,17 +60,31 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
     }, 100);
   };
 
-  const handleAuthWithGoogle = () => {
+  const handleAuthWithGoogle = async () => {
     toast({
       title: "Redirecting to Google login",
       description: "You'll be redirected to sign in with your Google account"
     });
     
-    // In a real app, this would redirect to Google Auth
-    // For demo purposes, redirect to dashboard after a brief delay
-    setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 1500);
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/dashboard'
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error with Google auth:", error);
+      toast({
+        title: "Authentication Error",
+        description: "There was an error signing in with Google. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   useEffect(() => {
@@ -130,6 +143,7 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
         <AssetAdditionalInfo
           selectedAssets={selectedAssets}
           onComplete={handleAuthWithGoogle}
+          insights={insights}
         />
       )}
     </div>

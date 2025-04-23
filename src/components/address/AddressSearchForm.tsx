@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin } from 'lucide-react';
@@ -21,6 +21,32 @@ const AddressSearchForm = ({
   setIsLocating,
   setShowAnalysis
 }: AddressSearchFormProps) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+  // Initialize Google Places Autocomplete
+  useEffect(() => {
+    if (!inputRef.current || !window.google?.maps?.places) return;
+    
+    autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
+      types: ['address'],
+      fields: ['formatted_address', 'geometry'],
+      componentRestrictions: { country: 'us' }
+    });
+    
+    const listener = autocompleteRef.current.addListener('place_changed', () => {
+      const place = autocompleteRef.current?.getPlace();
+      if (place && place.formatted_address) {
+        setAddress(place.formatted_address);
+        setShowAnalysis(true);
+      }
+    });
+    
+    return () => {
+      if (listener) google.maps.event.removeListener(listener);
+    };
+  }, [setAddress, setShowAnalysis]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -69,14 +95,6 @@ const AddressSearchForm = ({
                   }
                 });
                 document.dispatchEvent(addressEvent);
-                setTimeout(() => {
-                  const formElement = document.getElementById('asset-form');
-                  if (formElement) {
-                    formElement.scrollIntoView({
-                      behavior: 'smooth'
-                    });
-                  }
-                }, 1500);
               } else {
                 toast({
                   title: "Location Error",
@@ -128,19 +146,13 @@ const AddressSearchForm = ({
           <Search className="h-5 w-5 text-muted-foreground" />
         </div>
         <Input 
+          ref={inputRef}
           type="text" 
           placeholder="Enter your property address..." 
           className="pl-12 pr-28 py-6 w-full rounded-full text-base sm:text-lg shadow-lg border-none bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-tiptop-accent/50 transition-all duration-300"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          list="address-suggestions"
-          autoComplete="street-address"
         />
-        <datalist id="address-suggestions">
-          <option value="123 Main St, San Francisco, CA 94105" />
-          <option value="456 Market St, San Francisco, CA 94105" />
-          <option value="789 Mission St, San Francisco, CA 94103" />
-        </datalist>
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
           <Button 
             type="button" 

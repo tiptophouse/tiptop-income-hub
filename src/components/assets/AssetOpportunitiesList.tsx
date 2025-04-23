@@ -94,7 +94,8 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
     ];
   };
   
-  const additionalOpportunities = [
+  // All other potential opportunities
+  const allOpportunities = [
     {
       id: "pool",
       title: "Swimming Pool",
@@ -139,38 +140,13 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
     }
   ];
 
-  // Filter the opportunities based on the address
-  const getAssetAvailability = (assetId: string, address: string) => {
-    // In a real app, this would analyze the address data
-    // For demo, we'll use a simple hash of the address to determine availability
-    const addressHash = address.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    
-    // Different assets have different probabilities of being available
-    const probabilities: Record<string, number> = {
-      solar: 0.8,      // 80% chance of solar being viable
-      bandwidth: 0.9,  // 90% chance of bandwidth sharing being viable
-      parking: 0.7,    // 70% chance of parking being viable
-      pool: 0.3,       // 30% chance of having a pool
-      storage: 0.7,    // 70% chance of storage space
-      items: 0.9,      // 90% chance of having items to rent
-      car: 0.6,        // 60% chance of car sharing being viable
-      'ev-charger': 0.4, // 40% chance of EV charger
-      'full-house': 0.5, // 50% chance of full house rental
-      garden: 0.5      // 50% chance of garden space
-    };
-    
-    // Use address hash to create a pseudo-random but consistent result for each address
-    const hashBasedRandom = (addressHash % 100) / 100 + (assetId.charCodeAt(0) % 10) / 100;
-    return hashBasedRandom < (probabilities[assetId] || 0.5);
-  };
-
   // Get immediate opportunities based on insights or fallback data
   const immediateOpportunities = getImmediateOpportunities();
   
-  // Filter additional opportunities based on the address
-  const availableAdditional = additionalOpportunities.filter(
-    asset => getAssetAvailability(asset.id, address)
-  );
+  // Display all other opportunities that are not in immediate opportunities
+  const otherOpportunities = immediateOpportunities?.length > 0 
+    ? allOpportunities.filter(asset => !immediateOpportunities.some(imm => imm.id === asset.id))
+    : allOpportunities;
 
   if (isLoading) {
     return (
@@ -201,7 +177,7 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
       {immediateOpportunities && immediateOpportunities.length > 0 && (
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6 text-[#6E59A5] font-fahkwang">
-            Immediate Asset Opportunities
+            Immediately Available Asset Opportunities
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {immediateOpportunities.map(asset => (
@@ -216,13 +192,13 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
         </div>
       )}
 
-      {availableAdditional.length > 0 && (
+      {otherOpportunities.length > 0 && (
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6 text-[#6E59A5] font-fahkwang">
             Other Monetization Opportunities
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {availableAdditional.map(asset => (
+            {otherOpportunities.map(asset => (
               <AssetOpportunityCard
                 key={asset.id}
                 asset={asset}
@@ -234,7 +210,7 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
         </div>
       )}
 
-      {!immediateOpportunities?.length && !availableAdditional.length && (
+      {!immediateOpportunities?.length && !otherOpportunities.length && (
         <div className="text-center py-12">
           <p className="text-lg text-gray-500">
             No asset opportunities found for this address. Try a different location.
