@@ -1,13 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Wifi, CarFront, Droplet, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import AssetOpportunitiesCard from './assets/AssetOpportunityCard';
 import AssetAdditionalInfo from './assets/AssetAdditionalInfo';
 import AssetOpportunitiesList from './assets/AssetOpportunitiesList';
 import PropertyAnalysisCard from './PropertyAnalysisCard';
+import { getPropertyInsightsFromAI } from '@/utils/openaiApi';
 
 interface AssetOpportunitiesProps {
   address: string;
@@ -16,6 +15,8 @@ interface AssetOpportunitiesProps {
 const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [insights, setInsights] = useState<any | null>(null);
   
   // Calculate a consistent estimated total based on the address
   const calculateEstimatedTotal = (address: string): string => {
@@ -73,27 +74,57 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
     }, 1500);
   };
 
+  useEffect(() => {
+    if (!address) return;
+    
+    setIsLoading(true);
+    console.log("Fetching insights for address:", address);
+    
+    // Get property insights using the AI API
+    getPropertyInsightsFromAI(address)
+      .then(data => {
+        console.log("Received insights data:", data);
+        setInsights(data);
+      })
+      .catch(error => {
+        console.error("Error fetching property insights:", error);
+        toast({
+          title: "Error",
+          description: "Failed to analyze property. Please try again later.",
+          variant: "destructive"
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [address]);
+
   return (
     <div className="w-full">
       <PropertyAnalysisCard 
         address={address}
         estimatedTotal={estimatedTotal}
+        isLoading={isLoading}
       />
 
       <AssetOpportunitiesList
         selectedAssets={selectedAssets}
         onAssetToggle={handleAssetToggle}
         address={address}
+        insights={insights}
+        isLoading={isLoading}
       />
 
-      <div className="flex justify-center mb-12">
-        <button
-          onClick={handleContinue}
-          className="bg-[#AA94E2] hover:bg-[#9b87f5] text-[#FFFDED] px-8 py-6 text-lg rounded-full font-fahkwang"
-        >
-          Continue with Selected Assets
-        </button>
-      </div>
+      {selectedAssets.length > 0 && (
+        <div className="flex justify-center mb-12 mt-8">
+          <button
+            onClick={handleContinue}
+            className="bg-[#AA94E2] hover:bg-[#9b87f5] text-[#FFFDED] px-8 py-4 text-lg rounded-full font-fahkwang transition-all shadow-md hover:shadow-lg"
+          >
+            Continue with Selected Assets
+          </button>
+        </div>
+      )}
 
       {showAdditionalInfo && (
         <AssetAdditionalInfo

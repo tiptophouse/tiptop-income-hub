@@ -31,7 +31,7 @@ serve(async (req) => {
 
     console.log(`Analyzing property at address: ${address} (uniqueId: ${uniqueId || 'none'}, forceRefresh: ${forceRefresh})`);
     
-    // Call OpenAI API for analysis using the new Version 10 prompt
+    // Call OpenAI API for analysis using the Version 10 prompt
     const openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -66,11 +66,7 @@ Contains **exactly** these keys:
 2. \`internet_bandwidth\`
 3. \`parking_space\`
 4. \`garden_space\`
-5. \ swimming_pool_space\`
-6. \ car_sharing\`
-7. \ full_house_rental\`
-8. \ storage_space\`
-9. \ items\`
+
 Each nested object shares the common fields below **and** may add its own extras as listed.
 
 | common field | type | notes |
@@ -172,6 +168,7 @@ Remember to include a unique analysis specific to this request ID: ${uniqueId ||
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (e) {
+      console.error("Error parsing JSON from OpenAI response:", e);
       // If that fails, try to extract JSON with regex
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -193,6 +190,7 @@ Remember to include a unique analysis specific to this request ID: ${uniqueId ||
           throw new Error("Invalid JSON in OpenAI response");
         }
       } else {
+        console.error("No JSON found in OpenAI response");
         throw new Error("No JSON found in OpenAI response");
       }
     }
