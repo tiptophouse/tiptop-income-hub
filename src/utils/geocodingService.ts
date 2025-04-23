@@ -1,4 +1,3 @@
-
 import { toast } from '@/components/ui/use-toast';
 
 interface GeocodeAddressProps {
@@ -17,15 +16,68 @@ interface GeocodeLocationProps {
 const geocodeCache: Record<string, { lat: number; lng: number }> = {};
 const reverseGeocodeCache: Record<string, string> = {};
 
-// Function to geocode an address to coordinates
-export const geocodeAddress = ({ address, onSuccess, onError }: GeocodeAddressProps): void => {
+// Rate limiting setup
+const MAX_REQUESTS_PER_INTERVAL = 4; // 4 requests maximum
+const INTERVAL_MS = 1000; // per second
+let requestCount = 0;
+let lastIntervalStart = Date.now();
+
+// Queue for pending requests
+interface QueuedRequest {
+  type: 'geocode' | 'reverse';
+  params: any;
+  resolve: () => void;
+}
+const requestQueue: QueuedRequest[] = [];
+
+// Function to process the queue
+const processQueue = () => {
+  if (requestQueue.length === 0) return;
+
+  const now = Date.now();
+  if (now - lastIntervalStart >= INTERVAL_MS) {
+    // Reset counter for new interval
+    requestCount = 0;
+    lastIntervalStart = now;
+  }
+
+  while (requestQueue.length > 0 && requestCount < MAX_REQUESTS_PER_INTERVAL) {
+    const request = requestQueue.shift();
+    if (!request) continue;
+
+    requestCount++;
+    if (request.type === 'geocode') {
+      processGeocodeRequest(request.params);
+    } else {
+      processReverseGeocodeRequest(request.params);
+    }
+    request.resolve();
+  }
+
+  // Schedule next queue processing
+  if (requestQueue.length > 0) {
+    setTimeout(processQueue, Math.max(0, INTERVAL_MS - (Date.now() - lastIntervalStart)));
+  }
+};
+
+// Function to add request to queue
+const queueRequest = (type: 'geocode' | 'reverse', params: any): Promise<void> => {
+  return new Promise((resolve) => {
+    requestQueue.push({ type, params, resolve });
+    if (requestQueue.length === 1) { // If this is the first request, start processing
+      processQueue();
+    }
+  });
+};
+
+// Internal function to process geocode request
+const processGeocodeRequest = ({ address, onSuccess, onError }: GeocodeAddressProps) => {
   if (!window.google) {
     console.error('Google Maps API not loaded');
     if (onError) onError();
     return;
   }
   
-  // Check cache first
   const cacheKey = address.trim().toLowerCase();
   if (geocodeCache[cacheKey]) {
     console.log('Using cached geocode result for:', address);
@@ -42,7 +94,6 @@ export const geocodeAddress = ({ address, onSuccess, onError }: GeocodeAddressPr
         lng: location.lng() 
       };
       
-      // Cache the result
       geocodeCache[cacheKey] = result;
       onSuccess(result);
     } else {
@@ -52,15 +103,14 @@ export const geocodeAddress = ({ address, onSuccess, onError }: GeocodeAddressPr
   });
 };
 
-// Function to reverse geocode coordinates to an address
-export const reverseGeocode = ({ location, onSuccess, onError }: GeocodeLocationProps): void => {
+// Internal function to process reverse geocode request
+const processReverseGeocodeRequest = ({ location, onSuccess, onError }: GeocodeLocationProps) => {
   if (!window.google) {
     console.error('Google Maps API not loaded');
     if (onError) onError();
     return;
   }
 
-  // Check cache first
   const cacheKey = `${location.lat},${location.lng}`;
   if (reverseGeocodeCache[cacheKey]) {
     console.log('Using cached reverse geocode result for:', cacheKey);
@@ -72,8 +122,6 @@ export const reverseGeocode = ({ location, onSuccess, onError }: GeocodeLocation
   geocoder.geocode({ location }, (results, status) => {
     if (status === "OK" && results && results[0]) {
       const address = results[0].formatted_address;
-      
-      // Cache the result
       reverseGeocodeCache[cacheKey] = address;
       onSuccess(address);
     } else {
@@ -81,6 +129,16 @@ export const reverseGeocode = ({ location, onSuccess, onError }: GeocodeLocation
       if (onError) onError();
     }
   });
+};
+
+// Public geocode function with rate limiting
+export const geocodeAddress = async (params: GeocodeAddressProps): Promise<void> => {
+  await queueRequest('geocode', params);
+};
+
+// Public reverse geocode function with rate limiting
+export const reverseGeocode = async (params: GeocodeLocationProps): Promise<void> => {
+  await queueRequest('reverse', params);
 };
 
 // Function to get the user's current location
