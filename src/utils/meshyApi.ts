@@ -3,7 +3,7 @@
  * Utility functions for interacting with the Meshy API
  */
 
-const MESHY_API_TOKEN = "msy_DgxWw3aWy765u25h6IRoS4P2KWKpleCcoWT6";
+const MESHY_API_TOKEN = "msy_0qltUPlTWaFsH6P35O2k63BS4olznK8x0Qzm";
 const MESHY_API_URL = "https://api.meshy.ai/v1";
 const SAMPLE_MODEL_URL = "/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png";
 
