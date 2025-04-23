@@ -54,17 +54,17 @@ const Header = () => {
   ];
 
   return (
-    <header className="flex justify-between items-center py-4 px-4 md:px-6 lg:px-12 max-w-7xl mx-auto">
+    <header className="flex justify-between items-center py-4 px-4 md:px-6 lg:px-12 max-w-7xl mx-auto bg-[#FFFDED]">
       <motion.div 
         className="flex items-center gap-2"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="h-10 w-10 rounded-full bg-tiptop-accent flex items-center justify-center">
+        <div className="h-10 w-10 rounded-full bg-[#AA94E2] flex items-center justify-center">
           <span className="text-white font-bold text-xl">T</span>
         </div>
-        <span className="font-bold text-xl">Tiptop</span>
+        <span className="font-bold text-xl font-fahkwang text-[#552B1B]">Tiptop</span>
       </motion.div>
       
       {/* Desktop search bar */}
@@ -79,15 +79,15 @@ const Header = () => {
           <Input
             type="text"
             placeholder="Search property address..."
-            className="pl-10 pr-4 py-2 w-full bg-white/90 backdrop-blur-sm"
+            className="pl-10 pr-4 py-2 w-full bg-white/90 backdrop-blur-sm border-[#E5DEFF]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6E59A5]" />
           <Button 
             type="submit" 
             size="sm"
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-tiptop-accent hover:bg-tiptop-accent/90 h-8"
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-[#AA94E2] hover:bg-[#9b87f5] h-8 text-white"
           >
             Search
           </Button>
@@ -105,7 +105,7 @@ const Header = () => {
           <Button 
             key={index}
             variant="ghost" 
-            className="hidden md:inline-flex"
+            className="hidden md:inline-flex text-[#552B1B] hover:text-[#6E59A5] hover:bg-[#F3ECFF]"
             onClick={item.onClick}
           >
             {item.label}
@@ -113,14 +113,14 @@ const Header = () => {
         ))}
         <Button 
           variant="outline"
-          className="hidden sm:flex"
+          className="hidden sm:flex border-[#AA94E2] text-[#6E59A5]"
           onClick={() => navigate('/login')}
         >
           <LogIn className="mr-2 h-4 w-4" />
           Sign In
         </Button>
         <Button 
-          className="bg-tiptop-accent hover:bg-tiptop-accent/90"
+          className="bg-[#AA94E2] hover:bg-[#9b87f5] text-white"
           onClick={() => navigate('/signup')}
         >
           Sign Up
@@ -131,24 +131,25 @@ const Header = () => {
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5 text-[#552B1B]" />
             <span className="sr-only">Open menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-[80%] max-w-sm">
+        <SheetContent side="right" className="w-[80%] max-w-sm bg-[#FFFDED] border-l border-[#E5DEFF]">
           <div className="flex flex-col h-full pt-6">
             <div className="mb-6">
-              <h2 className="text-lg font-semibold mb-4">Search</h2>
+              <h2 className="text-lg font-semibold mb-4 text-[#6E59A5] font-fahkwang">Search</h2>
               <form onSubmit={handleSearch} className="space-y-2">
                 <Input
                   type="text"
                   placeholder="Search property address..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  className="border-[#E5DEFF]"
                 />
                 <Button 
                   type="submit" 
-                  className="w-full bg-tiptop-accent hover:bg-tiptop-accent/90"
+                  className="w-full bg-[#AA94E2] hover:bg-[#9b87f5] text-white"
                 >
                   Search
                 </Button>
@@ -156,13 +157,13 @@ const Header = () => {
             </div>
             
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Navigation</h2>
+              <h2 className="text-lg font-semibold text-[#6E59A5] font-fahkwang">Navigation</h2>
               <div className="flex flex-col space-y-2">
                 {navItems.map((item, index) => (
                   <Button 
                     key={index}
                     variant="ghost" 
-                    className="justify-start"
+                    className="justify-start text-[#552B1B] hover:text-[#6E59A5] hover:bg-[#F3ECFF]"
                     onClick={() => {
                       item.onClick();
                       setIsMobileMenuOpen(false);
@@ -176,14 +177,14 @@ const Header = () => {
             
             <div className="mt-auto space-y-2 pt-6">
               <Button 
-                className="w-full bg-tiptop-accent hover:bg-tiptop-accent/90"
+                className="w-full bg-[#AA94E2] hover:bg-[#9b87f5] text-white"
                 onClick={() => navigate('/signup')}
               >
                 Sign Up
               </Button>
               <Button 
                 variant="outline" 
-                className="w-full"
+                className="w-full border-[#AA94E2] text-[#6E59A5]"
                 onClick={() => navigate('/login')}
               >
                 <LogIn className="mr-2 h-4 w-4" />

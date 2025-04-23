@@ -12,12 +12,17 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Add Fahkwang and Work Sans to the font families
         'fahkwang': ['Fahkwang', 'sans-serif'],
         'work-sans': ['Work Sans', 'sans-serif'],
       },
       colors: {
-        // Extend existing colors with your specific colors
+        'tiptop-accent': '#AA94E2',
+        'tiptop-dark': '#552B1B',
+        'tiptop-light': '#FFFDED',
+        'tiptop-secondary': '#6E59A5',
+        'tiptop-tertiary': '#E5DEFF',
+        'tiptop-hover': '#9b87f5',
+        'tiptop-background': '#FFFDED',
         custom: {
           background: '#FFFDED',
           text: '#552B1B',

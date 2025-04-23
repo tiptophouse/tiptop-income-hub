@@ -2,32 +2,15 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import GoogleMapsInit from './GoogleMapsInit';
-import AddressAutocomplete from './AddressAutocomplete';
+import AddressSearchForm from './address/AddressSearchForm';
 import PropertyAnalysisSection from './analysis/PropertyAnalysisSection';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wifi, Sun, CarFront, TreeDeciduous } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const Hero = () => {
   const [address, setAddress] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
-
-  const handleAddressSelect = (selectedAddress: string) => {
-    setAddress(selectedAddress);
-    setShowAnalysis(true);
-    
-    const addressEvent = new CustomEvent('addressFound', {
-      detail: { address: selectedAddress }
-    });
-    document.dispatchEvent(addressEvent);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (address.trim()) {
-      handleAddressSelect(address);
-    }
-  };
 
   const assetCards = [
     {
@@ -54,28 +37,27 @@ const Hero = () => {
 
   return (
     <GoogleMapsInit>
-      <section className="pt-10 md:pt-16 pb-16 md:pb-24 px-4 md:px-8 lg:px-12 flex flex-col items-center text-center max-w-6xl mx-auto">
+      <section className="pt-10 md:pt-16 pb-16 md:pb-24 px-4 md:px-8 lg:px-12 flex flex-col items-center max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-8 text-center w-full"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-tiptop-accent font-poppins">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-[#AA94E2] font-fahkwang">
             Monetize Your Home Assets
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+          <p className="text-lg text-[#552B1B] max-w-2xl mx-auto mb-8 font-work-sans">
             Turn your property's untapped resources into monthly income
           </p>
           
-          <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
-            <AddressAutocomplete
-              value={address}
-              onChange={setAddress}
-              onAddressSelect={handleAddressSelect}
-            />
-            <Button type="submit" className="hidden">Submit</Button>
-          </form>
+          <AddressSearchForm
+            address={address}
+            setAddress={setAddress}
+            isLocating={isLocating}
+            setIsLocating={setIsLocating}
+            setShowAnalysis={setShowAnalysis}
+          />
         </motion.div>
 
         <motion.div 
@@ -91,15 +73,15 @@ const Hero = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+              <Card className="h-full hover:shadow-lg transition-shadow duration-300 bg-white border border-[#E5DEFF]">
                 <CardHeader>
                   <div className="flex justify-center mb-2">
                     {card.icon}
                   </div>
-                  <CardTitle className="text-lg truncate">{card.title}</CardTitle>
+                  <CardTitle className="text-lg truncate text-[#6E59A5]">{card.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="line-clamp-2 h-10">{card.description}</CardDescription>
+                  <CardDescription className="line-clamp-2 h-10 text-[#552B1B]">{card.description}</CardDescription>
                 </CardContent>
               </Card>
             </motion.div>

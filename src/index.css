@@ -20,3 +20,13 @@
     @apply font-fahkwang text-[#AA94E2];
   }
 }
+
+/* Improve form input appearance */
+input, textarea, select {
+  @apply font-work-sans;
+}
+
+/* Add smooth transitions for all interactive elements */
+button, a {
+  @apply transition-all duration-300;
+}
