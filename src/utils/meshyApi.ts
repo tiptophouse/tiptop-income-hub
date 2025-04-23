@@ -5,10 +5,15 @@
 
 const MESHY_API_TOKEN = "msy_0qltUPlTWaFsH6P35O2k63BS4olznK8x0Qzm";
 const MESHY_API_URL = "https://api.meshy.ai/v1";
-const SAMPLE_MODEL_URL = "/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png";
+const SAMPLE_MODEL_URL = "https://storage.googleapis.com/realestate-3d-models/demo-property.glb";
 
 /**
  * Generates a 3D model from an image using Meshy API
+ * 
+ * Note: For solar potential data, Google's Project Sunroof API could be integrated
+ * to measure sun exposure on rooftops. This would require additional API keys and
+ * implementation. The Project Sunroof Data Explorer provides solar potential data
+ * based on address: https://sunroof.withgoogle.com/data-explorer/
  */
 export const generateModelFromImage = async (imageData: string): Promise<string> => {
   try {
@@ -127,3 +132,27 @@ export const getModelDownloadUrl = async (jobId: string): Promise<string> => {
     return SAMPLE_MODEL_URL;
   }
 };
+
+/**
+ * To integrate with Google Project Sunroof API for solar potential data:
+ * 
+ * Google's Project Sunroof API could provide detailed information about:
+ * 1. Solar potential for the roof (kWh/year)
+ * 2. Percentage of roof that's solar-viable
+ * 3. Estimated savings
+ * 4. Carbon offset potential
+ * 
+ * However, the Project Sunroof API is not publicly available for general use.
+ * Alternative approaches:
+ * 
+ * 1. Use the public Project Sunroof Data Explorer for manual lookups:
+ *    https://sunroof.withgoogle.com/data-explorer/
+ * 
+ * 2. Use alternative solar APIs like:
+ *    - NREL's PVWatts Calculator API (https://developer.nrel.gov/docs/solar/pvwatts/v6/)
+ *    - NREL's Solar Resource Data API
+ * 
+ * 3. If enterprise-level access is needed, contact Google directly about
+ *    potential partnership or enterprise access to Project Sunroof data.
+ */
+
