@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sun, Wifi, CarFront, SwimmingPool, Storage } from 'lucide-react';
+import { Sun, Wifi, CarFront, Pool, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 
@@ -43,14 +42,14 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
     {
       id: "pool",
       title: "Swimming Pool",
-      icon: <SwimmingPool className="h-8 w-8 text-blue-500" />,
+      icon: <Pool className="h-8 w-8 text-blue-500" />,
       estimatedIncome: "$200-300/month",
       details: "Rent your pool hourly during summer months"
     },
     {
       id: "storage",
       title: "Storage Space",
-      icon: <Storage className="h-8 w-8 text-green-500" />,
+      icon: <Store className="h-8 w-8 text-green-500" />,
       estimatedIncome: "$60-90/month",
       details: "Unused garage or basement space can be rented"
     }

@@ -5,7 +5,7 @@ import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
 import PropertyAnalysisSection from './analysis/PropertyAnalysisSection';
 import { Card } from "@/components/ui/card";
-import { Wifi, Sun, CarFront, SwimmingPool, Storage } from 'lucide-react';
+import { Wifi, Sun, CarFront, Pool, Store } from 'lucide-react';
 import PropertyMap from './PropertyMap';
 import AssetOpportunities from './AssetOpportunities';
 
@@ -66,7 +66,7 @@ const Hero = () => {
                   <Sun className="h-8 w-8 text-yellow-500" />
                   <Wifi className="h-8 w-8 text-blue-500" />
                   <CarFront className="h-8 w-8 text-purple-500" />
-                  <Storage className="h-8 w-8 text-green-500" />
+                  <Store className="h-8 w-8 text-green-500" />
                 </div>
               </div>
             </div>
