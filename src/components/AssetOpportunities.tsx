@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sun, Wifi, CarFront, Water, Store } from 'lucide-react';
+import { Sun, Wifi, CarFront, Droplet, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 
@@ -42,7 +42,7 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
     {
       id: "pool",
       title: "Swimming Pool",
-      icon: <Water className="h-8 w-8 text-blue-500" />,
+      icon: <Droplet className="h-8 w-8 text-blue-500" />,
       estimatedIncome: "$200-300/month",
       details: "Rent your pool hourly during summer months"
     },

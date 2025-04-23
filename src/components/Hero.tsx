@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
 import PropertyAnalysisSection from './analysis/PropertyAnalysisSection';
 import { Card } from "@/components/ui/card";
-import { Wifi, Sun, CarFront, Water, Store } from 'lucide-react';
+import { Wifi, Sun, CarFront, Droplet, Store } from 'lucide-react';
 import PropertyMap from './PropertyMap';
 import AssetOpportunities from './AssetOpportunities';
 
