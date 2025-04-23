@@ -66,11 +66,7 @@ Contains **exactly** these keys:
 2. \`internet_bandwidth\`
 3. \`parking_space\`
 4. \`garden_space\`
-5. \ swimming_pool_space\`
-6. \ car_sharing\`
-7. \ full_house_rental\`
-8. \ storage_space\`
-9. \ items\`
+
 Each nested object shares the common fields below **and** may add its own extras as listed.
 
 | common field | type | notes |
