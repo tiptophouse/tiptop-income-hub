@@ -25,7 +25,7 @@ const Hero = () => {
 
         <div className="w-full max-w-3xl">
           {!showAnalysis ? <div className="w-full relative flex flex-col items-center">
-              <div className="w-full h-80 rounded-xl overflow-hidden bg-gradient-to-b from-[#F3ECFF] to-[#E5DEFF] shadow-md flex items-center justify-center relative mb-3">
+              <div className="w-full h-80 overflow-hidden bg-gradient-to-b from-[#F3ECFF] to-[#E5DEFF] shadow-md flex items-center justify-center relative mb-3 rounded-3xl bg-[#000a00]/0">
                 <img alt="3D House Visualization" className="w-auto h-64 object-contain" style={{
               zIndex: 1
             }} src="/lovable-uploads/b2b09e18-36b8-4e94-b1a1-042c72b8cee0.jpg" />
