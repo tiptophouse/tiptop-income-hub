@@ -6,18 +6,36 @@ interface GoogleMapsInitProps {
   children: React.ReactNode;
 }
 
+// Track if the API is already loaded globally
+let isGoogleMapsLoaded = false;
+
 const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({ 
   apiKey = "AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE",
   children 
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(isGoogleMapsLoaded);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    // Skip if already loaded or an error occurred
-    if (window.google?.maps || hasError) {
+    // Skip if already loaded globally or an error occurred
+    if (isGoogleMapsLoaded || window.google?.maps || hasError) {
       setIsLoaded(true);
       return;
+    }
+    
+    // Check if the script is already being loaded by another instance
+    const existingScript = document.getElementById('google-maps-script');
+    if (existingScript) {
+      // Just wait for the existing script to load
+      const checkExisting = setInterval(() => {
+        if (window.google?.maps) {
+          clearInterval(checkExisting);
+          isGoogleMapsLoaded = true;
+          setIsLoaded(true);
+        }
+      }, 100);
+      
+      return () => clearInterval(checkExisting);
     }
     
     // Create script element
@@ -29,6 +47,7 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
     
     script.onload = () => {
       console.log('Google Maps API loaded successfully');
+      isGoogleMapsLoaded = true;
       setIsLoaded(true);
     };
     
@@ -40,10 +59,8 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
     document.head.appendChild(script);
 
     return () => {
-      const existingScript = document.getElementById('google-maps-script');
-      if (existingScript) {
-        existingScript.remove();
-      }
+      // Don't remove the script on unmount, as other components might be using it
+      // This prevents reloading the API when components using it unmount and remount
     };
   }, [apiKey, hasError]);
 
