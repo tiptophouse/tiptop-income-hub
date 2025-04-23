@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Satellite, Map as MapIcon, ZoomIn, RotateCw, Cube } from 'lucide-react';
+import { Satellite, Map as MapIcon, ZoomIn, RotateCw, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MapControlsProps {
@@ -39,7 +39,7 @@ const MapControls: React.FC<MapControlsProps> = ({
             <div className="animate-spin h-4 w-4 border-t-2 border-tiptop-accent rounded-full" />
           ) : (
             <span className="flex items-center gap-1">
-              <Cube className="h-4 w-4" />
+              <Box className="h-4 w-4" />
               <span className="text-xs">Generate 3D Model</span>
             </span>
           )}
