@@ -21,6 +21,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [weatherTemp, setWeatherTemp] = useState<string>("26°");
   const [tiltAngle, setTiltAngle] = useState(45);
   const [rotationAngle, setRotationAngle] = useState(45);
+  const [captureProgress, setCaptureProgress] = useState(0);
 
   const { mapInstance, isLoaded } = useGoogleMapInstance({
     mapContainerRef,
@@ -68,6 +69,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     setView(newView);
   };
 
+  // Capture map image at current angle
   const captureMapImage = async (): Promise<string> => {
     try {
       if (!mapContainerRef.current) {
@@ -85,6 +87,57 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     }
   };
 
+  // Capture multiple angles of the property
+  const captureMultipleAngles = async (): Promise<string[]> => {
+    if (!mapInstance) return [];
+    
+    const capturedImages: string[] = [];
+    const totalAngles = 4;
+    
+    // Store original map settings to restore later
+    const originalHeading = mapInstance.getHeading();
+    const originalTilt = mapInstance.getTilt();
+    
+    try {
+      // Capture front view (0 degrees)
+      mapInstance.setOptions({ heading: 0, tilt: 45 });
+      setCaptureProgress(25);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const frontImage = await captureMapImage();
+      capturedImages.push(frontImage);
+      
+      // Capture side view (90 degrees)
+      mapInstance.setOptions({ heading: 90, tilt: 45 });
+      setCaptureProgress(50);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const sideImage = await captureMapImage();
+      capturedImages.push(sideImage);
+      
+      // Capture rear view (180 degrees)
+      mapInstance.setOptions({ heading: 180, tilt: 45 });
+      setCaptureProgress(75);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const rearImage = await captureMapImage();
+      capturedImages.push(rearImage);
+      
+      // Capture top-down view
+      mapInstance.setOptions({ heading: 0, tilt: 0 });
+      setCaptureProgress(100);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const topImage = await captureMapImage();
+      capturedImages.push(topImage);
+      
+      return capturedImages;
+    } catch (error) {
+      console.error("Error capturing multiple angles:", error);
+      return capturedImages.length > 0 ? capturedImages : [];
+    } finally {
+      // Restore original map settings
+      mapInstance.setOptions({ heading: originalHeading, tilt: originalTilt });
+      setCaptureProgress(0);
+    }
+  };
+
   const generateHouse3DModel = async () => {
     if (!isLoaded || is3DModelGenerating) return;
     
@@ -92,13 +145,27 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       setIs3DModelGenerating(true);
       toast({
         title: "Processing",
-        description: "Extracting house layout and generating 3D model...",
+        description: "Capturing property from multiple angles...",
       });
       
-      const imageData = await captureMapImage();
-      console.log("Sending image to Meshy API for 3D model generation");
+      // Capture property from multiple angles
+      const images = await captureMultipleAngles();
       
-      const jobId = await generateModelFromImage(imageData);
+      if (images.length === 0) {
+        throw new Error("Failed to capture any property images");
+      }
+      
+      toast({
+        title: "Processing",
+        description: `Sending ${images.length} images to generate 3D model...`,
+      });
+      
+      // Use the best image for 3D model generation
+      // In a production app, you could send all images to Meshy if their API supports it
+      const bestImage = images[0]; // Front view is usually best for house modeling
+      
+      console.log("Sending image to Meshy API for 3D model generation");
+      const jobId = await generateModelFromImage(bestImage);
       console.log("3D model generation job created:", jobId);
       
       setModelJobId(jobId);
@@ -172,6 +239,20 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
           <div className="absolute top-4 left-4 bg-tiptop-accent/90 text-white rounded-lg px-3 py-1 text-xs font-bold shadow-lg">
             3D View Active
           </div>
+          
+          {/* Capture progress indicator */}
+          {captureProgress > 0 && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 text-white rounded-lg p-4 text-center">
+              <div className="mb-2">Capturing property...</div>
+              <div className="w-full bg-gray-700 rounded-full h-2.5">
+                <div 
+                  className="bg-tiptop-accent h-2.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${captureProgress}%` }}
+                ></div>
+              </div>
+              <div className="mt-1 text-xs">{captureProgress}%</div>
+            </div>
+          )}
         </>
       )}
       

@@ -28,13 +28,13 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
       },
       body: JSON.stringify({
         image: base64Image,
-        mode: "geometry",
-        background_removal: true,
-        generate_material: true,
-        prompt: "Realistic house architecture, detailed building structure",
-        reference_model_id: "house", // Use house as reference model
+        mode: "geometry",         // Focus on accurate geometry
+        background_removal: true, // Remove background for cleaner model
+        generate_material: true,  // Generate realistic materials
+        prompt: "Realistic residential house architecture, detailed building structure with accurate proportions", // Improved prompt for better results
+        reference_model_id: "house", // Use house as reference model 
         preserve_topology: true,     // Better for architectural models
-        mesh_quality: "high"        // Higher quality for detailed structures
+        mesh_quality: "high"         // Higher quality for detailed structures
       })
     });
 
@@ -51,6 +51,41 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
     return data.id;
   } catch (error) {
     console.error("Error generating 3D model:", error);
+    throw error;
+  }
+};
+
+/**
+ * Generates a 3D model from multiple images using Meshy API
+ * Note: This is a placeholder for future API capabilities
+ * Current Meshy API only supports single image input
+ */
+export const generateModelFromMultipleImages = async (imageDataArray: string[]): Promise<string> => {
+  try {
+    console.log(`Generating 3D model from ${imageDataArray.length} images`);
+    
+    // For now, we'll use the first (front) image as the best representation
+    // When Meshy API supports multiple images, this function can be updated
+    return await generateModelFromImage(imageDataArray[0]);
+    
+    // Future implementation when API supports multiple images:
+    /*
+    const response = await fetch(`${MESHY_API_URL}/multi-view-to-3d`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${MESHY_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        images: imageDataArray.map(img => img.includes('base64,') ? img.split('base64,')[1] : img),
+        mode: "geometry",
+        generate_material: true,
+        prompt: "Realistic house architecture"
+      })
+    });
+    */
+  } catch (error) {
+    console.error("Error generating 3D model from multiple images:", error);
     throw error;
   }
 };

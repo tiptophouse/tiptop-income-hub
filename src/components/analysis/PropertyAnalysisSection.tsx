@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import PropertyMap from '../PropertyMap';
 import PropertyInsights from '../PropertyInsights';
@@ -14,7 +14,7 @@ const PropertyAnalysisSection = ({ address, show }: PropertyAnalysisSectionProps
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   
   // Listen for model job creation events
-  React.useEffect(() => {
+  useEffect(() => {
     const handleModelJobCreated = (event: CustomEvent) => {
       if (event.detail && event.detail.jobId) {
         setCurrentJobId(event.detail.jobId);
