@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import PropertyMap from '../PropertyMap';
 import PropertyInsights from '../PropertyInsights';
@@ -11,6 +11,23 @@ interface PropertyAnalysisSectionProps {
 }
 
 const PropertyAnalysisSection = ({ address, show }: PropertyAnalysisSectionProps) => {
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  
+  // Listen for model job creation events
+  React.useEffect(() => {
+    const handleModelJobCreated = (event: CustomEvent) => {
+      if (event.detail && event.detail.jobId) {
+        setCurrentJobId(event.detail.jobId);
+      }
+    };
+
+    document.addEventListener('modelJobCreated', handleModelJobCreated as EventListener);
+    
+    return () => {
+      document.removeEventListener('modelJobCreated', handleModelJobCreated as EventListener);
+    };
+  }, []);
+  
   if (!show) return null;
 
   return (
@@ -35,7 +52,7 @@ const PropertyAnalysisSection = ({ address, show }: PropertyAnalysisSectionProps
             </div>
             <div>
               <Property3DModel 
-                jobId={null} 
+                jobId={currentJobId} 
                 address={address} 
                 className="h-full"
               />

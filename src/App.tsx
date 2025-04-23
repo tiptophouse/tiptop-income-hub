@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import GoogleMapsInit from "./components/GoogleMapsInit";
 import InternetSpeedDisplay from "./components/InternetSpeedDisplay";
+import ModelViewerScript from "./components/ModelViewerScript";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
     <BrowserRouter>
       <TooltipProvider>
         <GoogleMapsInit>
+          <ModelViewerScript />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<SignUp />} />

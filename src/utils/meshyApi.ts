@@ -18,7 +18,6 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
       ? imageData.split('base64,')[1] 
       : imageData;
     
-    // Actually call the Meshy API now instead of returning a fake job ID
     console.log("Calling Meshy API with token:", MESHY_API_TOKEN.substring(0, 5) + "...");
     
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
@@ -49,14 +48,10 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
     console.log("Meshy API response:", data);
     
     // Return the job ID for later retrieval
-    return data.id || data.model_url || data.task_id;
+    return data.id;
   } catch (error) {
     console.error("Error generating 3D model:", error);
-    
-    // For demo/fallback purposes, still generate a fake ID if the API fails
-    const fallbackId = "property-model-" + Math.random().toString(36).substring(2, 8);
-    console.log("Using fallback ID:", fallbackId);
-    return fallbackId;
+    throw error;
   }
 };
 
@@ -67,7 +62,6 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
   try {
     console.log("Checking status for job:", jobId);
     
-    // Actually check the job status from Meshy API
     const response = await fetch(`${MESHY_API_URL}/tasks/${jobId}`, {
       method: 'GET',
       headers: {
@@ -82,18 +76,9 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
     const data = await response.json();
     console.log("Job status response:", data);
     return data;
-    
   } catch (error) {
     console.error("Error checking model status:", error);
-    
-    // Fallback for demo or if API fails
-    console.log("Returning fake completed status");
-    return { 
-      state: 'completed',
-      output: {
-        model_url: '/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png'
-      }
-    };
+    throw error;
   }
 };
 
@@ -104,11 +89,11 @@ export const getModelDownloadUrl = async (jobId: string): Promise<string> => {
   try {
     const status = await checkModelStatus(jobId);
     
-    if (status.state === 'completed') {
-      return status.output.model_url || '';
+    if (status.state === 'completed' && status.output?.model_url) {
+      return status.output.model_url;
     }
     
-    throw new Error('Model not ready yet');
+    throw new Error('Model not ready yet or no model URL available');
   } catch (error) {
     console.error("Error getting model URL:", error);
     throw error;

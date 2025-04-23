@@ -77,6 +77,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       // Use html2canvas to capture the map container
       const canvas = await html2canvas(mapContainerRef.current);
       const imageData = canvas.toDataURL('image/png');
+      console.log("Map image captured successfully");
       return imageData;
     } catch (error) {
       console.error("Error capturing map image:", error);
@@ -95,7 +96,10 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       });
       
       const imageData = await captureMapImage();
+      console.log("Sending image to Meshy API for 3D model generation");
+      
       const jobId = await generateModelFromImage(imageData);
+      console.log("3D model generation job created:", jobId);
       
       setModelJobId(jobId);
       

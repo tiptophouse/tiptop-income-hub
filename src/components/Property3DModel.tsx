@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from '@/components/ui/use-toast';
-import { Building, RotateCw, Download, Box, RefreshCw } from 'lucide-react';
+import { Building, RotateCw, Download, Box, RefreshCw, FileGlobe } from 'lucide-react';
 import { checkModelStatus, getModelDownloadUrl } from '@/utils/meshyApi';
 
 interface Property3DModelProps {
@@ -26,6 +26,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
   const [jobId, setJobId] = useState<string | null>(initialJobId);
   const [modelRotation, setModelRotation] = useState(0);
   const [checkCount, setCheckCount] = useState(0);
+  const [isModelViewerLoaded, setIsModelViewerLoaded] = useState(false);
 
   // Listen for model job creation events
   useEffect(() => {
@@ -34,6 +35,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
         setJobId(event.detail.jobId);
         setModelStatus('processing');
         setIsLoading(true);
+        setCheckCount(0); // Reset check count for new job
       }
     };
 
@@ -42,6 +44,19 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
     return () => {
       document.removeEventListener('modelJobCreated', handleModelJobCreated as EventListener);
     };
+  }, []);
+
+  // Load model-viewer script
+  useEffect(() => {
+    if (!document.querySelector('script[src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
+      script.type = 'module';
+      script.onload = () => setIsModelViewerLoaded(true);
+      document.head.appendChild(script);
+    } else {
+      setIsModelViewerLoaded(true);
+    }
   }, []);
 
   // Start rotation animation
@@ -63,18 +78,31 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
         console.log("Checking model status for job:", jobId);
         setIsLoading(true);
         
-        // Actually check status from the Meshy API
         const status = await checkModelStatus(jobId);
         
         if (status.state === 'completed' || status.status === 'completed') {
           console.log("Model generation completed!");
-          const url = await getModelDownloadUrl(jobId);
-          setModelUrl(url);
-          setModelStatus('completed');
-          toast({
-            title: "3D Model Ready",
-            description: "Your property's 3D model has been generated successfully."
-          });
+          try {
+            const url = await getModelDownloadUrl(jobId);
+            setModelUrl(url);
+            setModelStatus('completed');
+            toast({
+              title: "3D Model Ready",
+              description: "Your property's 3D model has been generated successfully."
+            });
+          } catch (modelUrlError) {
+            console.error("Error getting model URL:", modelUrlError);
+            // If we can't get the model URL but the status is complete,
+            // still mark it as complete but with a warning
+            setModelStatus('completed');
+            // Use fallback image as a last resort
+            setModelUrl('/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png');
+            toast({
+              title: "3D Model Ready",
+              description: "Your property's 3D model has been generated, but there was an issue loading it.",
+              variant: "warning"
+            });
+          }
         } else if (status.state === 'failed' || status.status === 'failed') {
           console.error("Model generation failed");
           setModelStatus('failed');
@@ -94,6 +122,11 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
             console.log("Too many checks, using fallback image");
             setModelUrl('/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png');
             setModelStatus('completed');
+            toast({
+              title: "Using Sample Model",
+              description: "Processing is taking longer than expected. Showing a sample model.",
+              variant: "warning"
+            });
           }
         }
       } catch (error) {
@@ -103,6 +136,11 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
           console.log("Using fallback after failed checks");
           setModelStatus('completed');
           setModelUrl('/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png');
+          toast({
+            title: "Using Sample Model",
+            description: "Couldn't retrieve model status. Showing a sample model.",
+            variant: "warning"
+          });
         } else {
           setModelStatus('processing');
         }
@@ -121,7 +159,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
     }, 10000);
     
     return () => clearInterval(interval);
-  }, [jobId, checkCount]);
+  }, [jobId, checkCount, modelStatus]);
 
   const toggleRotate = () => {
     setRotateModel(!rotateModel);
@@ -130,7 +168,6 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
   const handleDownload = () => {
     if (!modelUrl) return;
     
-    // In a real implementation, this would download the actual 3D model file
     window.open(modelUrl, '_blank');
     
     toast({
@@ -209,18 +246,31 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
         ) : (
           <div className="space-y-4">
             <div className="relative">
-              <motion.div 
-                className="w-full h-48 bg-gray-100 rounded-md overflow-hidden"
-                style={{ transform: `perspective(800px) rotateY(${modelRotation}deg)` }}
-              >
-                {modelUrl && (
-                  <img 
-                    src={modelUrl} 
-                    alt="Property 3D Model" 
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </motion.div>
+              {modelUrl?.endsWith('.glb') && isModelViewerLoaded ? (
+                // @ts-ignore - model-viewer is a custom element loaded at runtime
+                <model-viewer
+                  src={modelUrl}
+                  alt="3D model of property"
+                  auto-rotate={rotateModel}
+                  camera-controls
+                  shadow-intensity="1"
+                  style={{width: '100%', height: '200px', background: '#f5f5f5', borderRadius: '0.375rem'}}
+                  poster="/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png"
+                />
+              ) : (
+                <motion.div 
+                  className="w-full h-48 bg-gray-100 rounded-md overflow-hidden"
+                  style={{ transform: `perspective(800px) rotateY(${modelRotation}deg)` }}
+                >
+                  {modelUrl && (
+                    <img 
+                      src={modelUrl} 
+                      alt="Property 3D Model" 
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </motion.div>
+              )}
               
               <div className="absolute bottom-2 right-2 flex gap-2">
                 <Button 
@@ -262,6 +312,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
                 onClick={handleDownload}
                 className="w-full"
               >
+                <FileGlobe className="mr-2 h-4 w-4" />
                 Download 3D Model
               </Button>
             </div>
