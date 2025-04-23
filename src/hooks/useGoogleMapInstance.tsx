@@ -2,9 +2,6 @@
 import { useEffect, useState, RefObject } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
-// Reference the Google Maps types from the types file
-// We're not re-declaring the global interface since it's already defined in global.d.ts
-
 interface UseGoogleMapInstanceProps {
   mapContainerRef: RefObject<HTMLDivElement>;
   address: string;
@@ -33,7 +30,7 @@ export function useGoogleMapInstance({
         
         const map = new window.google.maps.Map(mapContainerRef.current!, {
           center: { lat: location.lat(), lng: location.lng() },
-          zoom: 19, // Closer zoom for better property view
+          zoom: 18, // Set to zoom level 18 for clearer property view
           mapTypeId: view === 'satellite' ? 'satellite' : 'roadmap',
           tilt: 0, // No tilt for clearer top-down view
           mapTypeControl: false,

@@ -4,36 +4,15 @@ import { motion } from 'framer-motion';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
 import PropertyAnalysisSection from './analysis/PropertyAnalysisSection';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wifi, Sun, CarFront, TreeDeciduous } from 'lucide-react';
+import { Card } from "@/components/ui/card";
+import { Wifi, Sun, CarFront, SwimmingPool, Storage } from 'lucide-react';
+import PropertyMap from './PropertyMap';
+import AssetOpportunities from './AssetOpportunities';
 
 const Hero = () => {
   const [address, setAddress] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
-
-  const assetCards = [
-    {
-      icon: <Sun className="h-8 w-8 text-yellow-500" />,
-      title: "Rooftop Solar",
-      description: "Generate clean energy and earn monthly income"
-    },
-    {
-      icon: <Wifi className="h-8 w-8 text-blue-500" />,
-      title: "Internet Bandwidth",
-      description: "Share unused bandwidth capacity for passive income"
-    },
-    {
-      icon: <CarFront className="h-8 w-8 text-purple-500" />,
-      title: "Parking Space",
-      description: "Rent out your unused parking space when not needed"
-    },
-    {
-      icon: <TreeDeciduous className="h-8 w-8 text-green-500" />,
-      title: "Garden Space",
-      description: "Share your garden with the community for extra income"
-    }
-  ];
 
   return (
     <GoogleMapsInit>
@@ -60,38 +39,60 @@ const Hero = () => {
           />
         </motion.div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mt-8"
-        >
-          {assetCards.map((card, index) => (
+        {!showAnalysis ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-3xl mx-auto"
+          >
+            <div className="relative w-full h-80 bg-gradient-to-b from-[#F3ECFF] to-[#E5DEFF] rounded-xl overflow-hidden shadow-md mb-8">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <img 
+                  src="/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png" 
+                  alt="3D House Visualization" 
+                  className="w-auto h-64 object-contain"
+                />
+              </div>
+              
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#E5DEFF] to-transparent" />
+              
+              <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-full text-xs font-semibold text-[#6E59A5]">
+                Enter your address to analyze
+              </div>
+              
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="grid grid-cols-4 gap-16 mt-40">
+                  <Sun className="h-8 w-8 text-yellow-500" />
+                  <Wifi className="h-8 w-8 text-blue-500" />
+                  <CarFront className="h-8 w-8 text-purple-500" />
+                  <Storage className="h-8 w-8 text-green-500" />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <>
             <motion.div
-              key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
+              transition={{ duration: 0.5 }}
+              className="w-full mb-8"
             >
-              <Card className="h-full hover:shadow-lg transition-shadow duration-300 bg-white border border-[#E5DEFF]">
-                <CardHeader>
-                  <div className="flex justify-center mb-2">
-                    {card.icon}
-                  </div>
-                  <CardTitle className="text-lg truncate text-[#6E59A5]">{card.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="line-clamp-2 h-10 text-[#552B1B]">{card.description}</CardDescription>
-                </CardContent>
-              </Card>
+              <PropertyMap 
+                address={address} 
+                onZoomComplete={() => console.log("Map zoom completed")} 
+              />
             </motion.div>
-          ))}
-        </motion.div>
-
-        <PropertyAnalysisSection 
-          address={address}
-          show={showAnalysis}
-        />
+            
+            <AssetOpportunities address={address} />
+            
+            <PropertyAnalysisSection 
+              address={address}
+              show={showAnalysis}
+            />
+          </>
+        )}
       </section>
     </GoogleMapsInit>
   );
