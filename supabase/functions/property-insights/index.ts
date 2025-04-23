@@ -57,7 +57,7 @@ The JSON **must** match exactly the schema described below—no extra keys, no m
 | \`property_size_acres\` | \`float \\| null\` | Lot size in acres (2 decimals). |
 | \`monetization_opportunities\` | \`object\` | Contains exactly **four** nested objects (see below). |
 | \`summary_metrics\` | \`object\` | Portfolio-level roll-up (see below). |
-| \`overall_assumptions\` | \`array<string>\` | ≤ 5 short bullet points on data sources or calculation logic. |
+| \`overall_assumptions\` | \`array<string>\` | ≤ 9 short bullet points on data sources or calculation logic. |
 
 #### \`monetization_opportunities\`
 Contains **exactly** these keys:
