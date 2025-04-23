@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
@@ -53,43 +54,56 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
 
     try {
       setIs3DModelGenerating(true);
+      
       toast({
         title: "Processing",
-        description: "Capturing property from the front view...",
+        description: "Capturing property view...",
       });
-      const frontImage = await captureMapImage();
-
+      
+      const image = await captureMapImage();
+      
       toast({
         title: "Processing",
-        description: `Sending photo to generate 3D model...`,
+        description: "Generating 3D model from satellite imagery...",
       });
 
-      console.log("Sending image to Meshy API for 3D model generation");
-      const jobId = await generateModelFromImage(frontImage);
-      console.log("3D model generation job created:", jobId);
-
+      // Try to generate model via API
+      let jobId;
+      try {
+        jobId = await generateModelFromImage(image);
+        console.log("3D model generation job created:", jobId);
+      } catch (error) {
+        console.error("Error from Meshy API:", error);
+        // Generate a random demo ID for fallback
+        jobId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
+        
+        toast({
+          title: "Using Sample Model",
+          description: "We encountered an issue with the 3D model service. Showing a sample model instead.",
+        });
+      }
+      
       setModelJobId(jobId);
-
+      
+      // Dispatch event to notify other components about the job creation
       const modelEvent = new CustomEvent('modelJobCreated', {
         detail: { jobId }
       });
       document.dispatchEvent(modelEvent);
 
-      toast({
-        title: "Success",
-        description: "3D model generation started. This may take a few minutes to complete.",
-      });
     } catch (error) {
-      console.error("Error generating 3D model:", error);
-
+      console.error("Error in 3D model generation process:", error);
+      
       toast({
         title: "Error",
-        description: "Failed to generate 3D model. Please try again later.",
+        description: "Failed to process the property view. Please try again later.",
         variant: "destructive"
       });
-
+      
+      // Always provide a fallback model ID
       const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
       setModelJobId(fallbackId);
+      
       const modelEvent = new CustomEvent('modelJobCreated', {
         detail: { jobId: fallbackId }
       });
