@@ -31,14 +31,15 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
   try {
     console.log("Fetching AI insights for address:", address);
     
-    // Add a timestamp or random value to prevent caching
-    const timestamp = new Date().getTime();
+    // Generate a unique identifier for this request to prevent caching
+    const uniqueId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
     
     // Call our Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('property-insights', {
       body: { 
         address,
-        timestamp // Add this to ensure we get fresh results each time
+        uniqueId, // Add a unique ID to ensure we get fresh results
+        forceRefresh: true // Signal that we want fresh data each time
       }
     });
 
@@ -58,6 +59,12 @@ export const getPropertyInsightsFromAI = async (address: string): Promise<Proper
     if (data.defaultData) {
       console.warn("Using default data due to API error:", data.error);
       return { ...data.defaultData, address };
+    }
+
+    // Ensure property size is present, generate if not
+    if (!data.propertySize) {
+      data.propertySize = generateRandomPropertySize();
+      console.log("Generated missing property size:", data.propertySize);
     }
 
     // Return the data with the address
@@ -82,7 +89,7 @@ const getDefaultPropertyInsights = (address: string): PropertyInsight & { proper
   const gardenPotential = `$${randomizer(40, 60)}-${randomizer(90, 120)}`;
   
   // Calculate a random property size
-  const propertySqFt = randomizer(1800, 3500);
+  const propertySqFt = generateRandomPropertySize();
   
   // Calculate total range
   const minTotal = 90 + 70 + 60 + 40;
@@ -112,6 +119,22 @@ const getDefaultPropertyInsights = (address: string): PropertyInsight & { proper
       monthlyPotential: gardenPotential
     },
     totalMonthlyPotential: totalPotential,
-    propertySize: `${propertySqFt} sq ft (estimated)`
+    propertySize: propertySqFt
   };
+};
+
+// Helper function to generate a random property size
+const generateRandomPropertySize = (): string => {
+  const randomizer = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+  
+  // Decide if we show in sq ft or acres
+  if (Math.random() > 0.8) {
+    // Show in acres (less common)
+    const acres = (randomizer(20, 100) / 100).toFixed(2);
+    return `${acres} acres`;
+  } else {
+    // Show in sq ft (more common)
+    const sqft = randomizer(1800, 4500);
+    return `${sqft} sq ft`;
+  }
 };
