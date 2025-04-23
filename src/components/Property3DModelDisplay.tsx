@@ -132,7 +132,57 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
     setIsLoading(true);
     setModelStatus("processing");
     setCheckCount(0);
-    // Re-fetch the model (in a real app, you might want to regenerate it)
+    
+    const checkAndUpdateModelStatus = async () => {
+      try {
+        // If this is a demo job or we've already found the URL, skip API calls
+        if (jobId.startsWith('demo-') && !modelUrl) {
+          // Simulate API delay for demo jobs
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          setModelUrl(`https://storage.googleapis.com/realestate-3d-models/demo-property.glb`);
+          setModelStatus("completed");
+          setIsLoading(false);
+          return;
+        }
+        
+        // For real jobs, check status with the API
+        if (!jobId.startsWith('demo-')) {
+          const status = await checkModelStatus(jobId);
+          
+          if (status.state === 'completed') {
+            const url = await getModelDownloadUrl(jobId);
+            setModelUrl(url);
+            setModelStatus("completed");
+          } else if (status.state === 'failed') {
+            setModelStatus("failed");
+            toast({
+              title: "3D Model Failed",
+              description: "Could not generate the 3D model. Please try again.",
+              variant: "destructive",
+            });
+          } else {
+            setModelStatus("failed");
+            toast({
+              title: "Error",
+              description: "Failed to check 3D model status. Please try again later.",
+              variant: "destructive",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error checking 3D model status:", error);
+        setModelStatus("failed");
+        toast({
+          title: "Error",
+          description: "Failed to check 3D model status. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    // Re-fetch the model
     setTimeout(() => {
       checkAndUpdateModelStatus();
     }, 1000);
