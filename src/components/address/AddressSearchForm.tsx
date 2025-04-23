@@ -133,7 +133,14 @@ const AddressSearchForm = ({
           className="pl-12 pr-28 py-6 w-full rounded-full text-base sm:text-lg shadow-lg border-none bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-tiptop-accent/50 transition-all duration-300"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
+          list="address-suggestions"
+          autoComplete="street-address"
         />
+        <datalist id="address-suggestions">
+          <option value="123 Main St, San Francisco, CA 94105" />
+          <option value="456 Market St, San Francisco, CA 94105" />
+          <option value="789 Mission St, San Francisco, CA 94103" />
+        </datalist>
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
           <Button 
             type="button" 
@@ -152,7 +159,7 @@ const AddressSearchForm = ({
               <MapPin className="h-4 w-4 text-tiptop-accent" />
             )}
           </Button>
-          <Button type="submit" className="bg-tiptop-accent hover:bg-tiptop-accent/90 px-6 py-3 h-auto rounded-full text-sm font-medium shadow-lg transition-all duration-300 hover:shadow-xl text-gray-900">
+          <Button type="submit" className="bg-tiptop-accent hover:bg-tiptop-accent/90 px-6 py-3 h-auto rounded-full text-sm font-medium shadow-lg transition-all duration-300 hover:shadow-xl text-[#FFFDED] font-fahkwang">
             Analyze Now
           </Button>
         </div>
