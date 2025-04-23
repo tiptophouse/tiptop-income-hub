@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Card,
@@ -9,7 +8,6 @@ import {
 } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { Building } from "lucide-react";
-import { checkModelStatus, getModelDownloadUrl } from "@/utils/meshyApi";
 import Property3DModelFailed from "./3d/Property3DModelFailed";
 import Property3DModelViewer from "./3d/Property3DModelViewer";
 import Property3DModelLoading from "./Property3DModelLoading";
@@ -32,18 +30,52 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [rotateModel, setRotateModel] = useState(true);
   const [modelRotation, setModelRotation] = useState(0);
-  const [checkCount, setCheckCount] = useState(0);
   const [isModelViewerLoaded, setIsModelViewerLoaded] = useState(false);
 
   useEffect(() => {
-    if (
-      !document.querySelector(
-        'script[src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"]',
-      )
-    ) {
+    if (!jobId) return;
+
+    const fetchModel = async () => {
+      try {
+        setIsLoading(true);
+        // Here you would make the API call to your 3D model service
+        // For now, using a sample GLB file
+        const modelUrl = `https://storage.googleapis.com/realestate-3d-models/${jobId}.glb`;
+        
+        // Verify the model exists
+        const response = await fetch(modelUrl, { method: 'HEAD' });
+        if (response.ok) {
+          setModelUrl(modelUrl);
+          setModelStatus("completed");
+        } else {
+          setModelStatus("failed");
+          toast({
+            title: "3D Model Failed",
+            description: "Could not load the 3D model. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error loading 3D model:", error);
+        setModelStatus("failed");
+        toast({
+          title: "Error",
+          description: "Failed to load the 3D model. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchModel();
+  }, [jobId]);
+
+  useEffect(() => {
+    // Load model-viewer script
+    if (!document.querySelector('script[src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"]')) {
       const script = document.createElement("script");
-      script.src =
-        "https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js";
+      script.src = "https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js";
       script.type = "module";
       script.onload = () => setIsModelViewerLoaded(true);
       document.head.appendChild(script);
@@ -60,88 +92,6 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
     return () => clearInterval(interval);
   }, [rotateModel]);
 
-  useEffect(() => {
-    if (!jobId) return;
-
-    const checkStatus = async () => {
-      try {
-        setIsLoading(true);
-        const status = await checkModelStatus(jobId);
-        if (status.state === "completed" || status.status === "completed") {
-          try {
-            const url = await getModelDownloadUrl(jobId);
-            setModelUrl(url);
-            setModelStatus("completed");
-            toast({
-              title: "3D Model Ready",
-              description:
-                "Your property's 3D model has been generated successfully.",
-            });
-          } catch (modelUrlError) {
-            setModelStatus("completed");
-            setModelUrl(
-              "/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png",
-            );
-            toast({
-              title: "3D Model Ready",
-              description:
-                "Your property's 3D model has been generated, but there was an issue loading it.",
-              variant: "destructive",
-            });
-          }
-        } else if (
-          status.state === "failed" ||
-          status.status === "failed"
-        ) {
-          setModelStatus("failed");
-          toast({
-            title: "Model Generation Failed",
-            description: "We couldn't generate a 3D model for this property.",
-            variant: "destructive",
-          });
-        } else {
-          setCheckCount((prev) => prev + 1);
-          if (checkCount > 10) {
-            setModelUrl(
-              "/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png",
-            );
-            setModelStatus("completed");
-            toast({
-              title: "Using Sample Model",
-              description:
-                "Processing is taking longer than expected. Showing a sample model.",
-              variant: "destructive",
-            });
-          }
-        }
-      } catch (error) {
-        if (checkCount > 5) {
-          setModelStatus("completed");
-          setModelUrl(
-            "/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png",
-          );
-          toast({
-            title: "Using Sample Model",
-            description: "Couldn't retrieve model status. Showing a sample model.",
-            variant: "destructive",
-          });
-        } else {
-          setModelStatus("processing");
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkStatus();
-    const interval = setInterval(() => {
-      if (modelStatus === "processing") {
-        checkStatus();
-      }
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [jobId, checkCount, modelStatus]);
-
   const toggleRotate = () => {
     setRotateModel(!rotateModel);
   };
@@ -154,22 +104,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
     });
   };
   const handleRefresh = () => {
-    setIsLoading(true);
-    setModelStatus("processing");
-    setCheckCount(0);
-    // Instead of directly updating the jobId, dispatch an event to notify parent components
-    const newJobId = "refreshed-model-" + Math.random().toString(36).substring(2, 8);
-    
-    // Dispatch custom event with new jobId
-    const refreshEvent = new CustomEvent('modelJobCreated', {
-      detail: { jobId: newJobId }
-    });
-    document.dispatchEvent(refreshEvent);
-    
-    toast({
-      title: "Refreshing Model",
-      description: "Generating a new 3D model for your property.",
-    });
+    window.location.reload();
   };
 
   if (isLoading) {
@@ -177,20 +112,18 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   }
 
   if (modelStatus === "failed") {
-    return <Property3DModelFailed onRetry={handleRefresh} />;
+    return <Property3DModelFailed onRetry={() => window.location.reload()} />;
   }
 
   return (
-    <Card
-      className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}
-    >
+    <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2">
           <Building className="h-5 w-5 text-tiptop-accent" />
           Property 3D Model
         </CardTitle>
         <CardDescription>
-          AI-generated 3D model for {address}
+          3D model for {address}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -199,9 +132,9 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           isModelViewerLoaded={isModelViewerLoaded}
           rotateModel={rotateModel}
           modelRotation={modelRotation}
-          toggleRotate={toggleRotate}
-          handleRefresh={handleRefresh}
-          handleDownload={handleDownload}
+          toggleRotate={() => setRotateModel(!rotateModel)}
+          handleRefresh={() => window.location.reload()}
+          handleDownload={() => window.open(modelUrl || '', '_blank')}
           jobId={jobId}
         />
       </CardContent>
