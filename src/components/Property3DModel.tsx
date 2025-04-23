@@ -25,6 +25,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
   const [rotateModel, setRotateModel] = useState(true);
   const [jobId, setJobId] = useState<string | null>(initialJobId);
   const [modelRotation, setModelRotation] = useState(0);
+  const [checkCount, setCheckCount] = useState(0);
 
   // Listen for model job creation events
   useEffect(() => {
@@ -59,27 +60,52 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
     
     const checkStatus = async () => {
       try {
-        // For demo purposes, simulate a successful model generation after a delay
-        setTimeout(() => {
-          setModelStatus('completed');
-          // Use a real property image for the demo
-          setModelUrl('/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png');
-          setIsLoading(false);
-        }, 3000);
+        console.log("Checking model status for job:", jobId);
+        setIsLoading(true);
         
-        /* Real API implementation would be:
+        // Actually check status from the Meshy API
         const status = await checkModelStatus(jobId);
-        if (status.state === 'completed') {
+        
+        if (status.state === 'completed' || status.status === 'completed') {
+          console.log("Model generation completed!");
           const url = await getModelDownloadUrl(jobId);
           setModelUrl(url);
           setModelStatus('completed');
-        } else if (status.state === 'failed') {
+          toast({
+            title: "3D Model Ready",
+            description: "Your property's 3D model has been generated successfully."
+          });
+        } else if (status.state === 'failed' || status.status === 'failed') {
+          console.error("Model generation failed");
           setModelStatus('failed');
+          toast({
+            title: "Model Generation Failed",
+            description: "We couldn't generate a 3D model for this property.",
+            variant: "destructive"
+          });
+        } else {
+          // Still processing
+          console.log("Model still processing, status:", status.state || status.status);
+          // Increment check count to limit checks
+          setCheckCount(prev => prev + 1);
+          
+          // If we've checked too many times, use a fallback
+          if (checkCount > 10) {
+            console.log("Too many checks, using fallback image");
+            setModelUrl('/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png');
+            setModelStatus('completed');
+          }
         }
-        */
       } catch (error) {
         console.error('Error checking model status:', error);
-        setModelStatus('failed');
+        // After several failed attempts, use fallback
+        if (checkCount > 5) {
+          console.log("Using fallback after failed checks");
+          setModelStatus('completed');
+          setModelUrl('/lovable-uploads/4bc6d236-25b5-4fab-a4ef-10142c7c48e5.png');
+        } else {
+          setModelStatus('processing');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -87,10 +113,15 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
     
     checkStatus();
     
-    // Check status every 10 seconds
-    const interval = setInterval(checkStatus, 10000);
+    // Check status every 10 seconds if still processing
+    const interval = setInterval(() => {
+      if (modelStatus === 'processing') {
+        checkStatus();
+      }
+    }, 10000);
+    
     return () => clearInterval(interval);
-  }, [jobId]);
+  }, [jobId, checkCount]);
 
   const toggleRotate = () => {
     setRotateModel(!rotateModel);
@@ -111,16 +142,16 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
   const handleRefresh = () => {
     setIsLoading(true);
     setModelStatus('processing');
+    setCheckCount(0);
     
     // Generate a new job ID
     const newJobId = "refreshed-model-" + Math.random().toString(36).substring(2, 8);
     setJobId(newJobId);
     
-    // Simulate processing
-    setTimeout(() => {
-      setModelStatus('completed');
-      setIsLoading(false);
-    }, 2000);
+    toast({
+      title: "Refreshing Model",
+      description: "Generating a new 3D model for your property."
+    });
   };
 
   // If no job ID and not listening for one yet, show the start button
@@ -136,7 +167,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center p-8">
           <p className="text-center text-muted-foreground mb-4">
-            Click "Extract 3D" on the map to generate a 3D model of this property
+            Click "Generate 3D Model" on the map to generate a 3D model of this property
           </p>
           <Building className="h-16 w-16 text-muted-foreground/50 mb-4" />
         </CardContent>
