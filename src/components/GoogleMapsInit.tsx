@@ -7,7 +7,7 @@ interface GoogleMapsInitProps {
 }
 
 const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({ 
-  apiKey = "AIzaSyBnSoqI0PTCuN0_1HGWvUgPLgGQnVnYcEY",
+  apiKey = "AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE",
   children 
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
