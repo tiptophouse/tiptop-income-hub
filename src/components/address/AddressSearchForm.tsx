@@ -14,6 +14,22 @@ interface AddressSearchFormProps {
   setShowAnalysis: (show: boolean) => void;
 }
 
+declare global {
+  interface Window {
+    google: {
+      maps: {
+        places: {
+          Autocomplete: new (
+            input: HTMLInputElement,
+            opts?: google.maps.places.AutocompleteOptions
+          ) => google.maps.places.Autocomplete;
+        };
+        Geocoder: new () => google.maps.Geocoder;
+      };
+    };
+  }
+}
+
 const AddressSearchForm = ({
   address,
   setAddress,
