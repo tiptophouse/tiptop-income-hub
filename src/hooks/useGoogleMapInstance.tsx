@@ -21,6 +21,7 @@ export function useGoogleMapInstance({
   const [marker, setMarker] = useState<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [isZooming, setIsZooming] = useState(false);
   const [hasCompletedZoom, setHasCompletedZoom] = useState(false);
 
   useEffect(() => {
@@ -54,10 +55,19 @@ export function useGoogleMapInstance({
           setMarker(newMarker);
           setIsLoaded(true);
           setHasInitialized(true);
+          console.log(`Map initialized with zoom level: ${initialZoom}`);
           
-          // Only trigger onZoomComplete once when tiles are loaded
+          // Listen for zoom changes
+          map.addListener('zoom_changed', () => {
+            console.log(`Map zoom changed to: ${map.getZoom()}`);
+          });
+          
+          // Only trigger onZoomComplete when tiles are loaded
           const tileListener = map.addListener('tilesloaded', () => {
-            if (!hasCompletedZoom && onZoomComplete) {
+            console.log("Map tiles loaded");
+            
+            if (!hasCompletedZoom && onZoomComplete && !isZooming) {
+              console.log("Executing onZoomComplete callback");
               setHasCompletedZoom(true);
               onZoomComplete();
               
@@ -79,7 +89,7 @@ export function useGoogleMapInstance({
     } catch (error) {
       console.error("Map initialization error:", error);
     }
-  }, [address, view, initialZoom, onZoomComplete, hasInitialized, hasCompletedZoom]);
+  }, [address, view, initialZoom, onZoomComplete, hasInitialized, hasCompletedZoom, isZooming]);
 
   // Update map type if view changes
   useEffect(() => {
@@ -88,5 +98,23 @@ export function useGoogleMapInstance({
     }
   }, [view, mapInstance]);
 
-  return { mapInstance, marker, isLoaded };
+  // Function to handle zooming the map to a specific level
+  const zoomMap = (zoomLevel: number) => {
+    if (!mapInstance) return false;
+    
+    console.log(`Zooming map to level: ${zoomLevel}`);
+    setIsZooming(true);
+    
+    mapInstance.setZoom(zoomLevel);
+    
+    // Use a timeout to make sure the zoom animation has time to complete
+    setTimeout(() => {
+      setIsZooming(false);
+      console.log(`Zoom animation completed to level: ${zoomLevel}`);
+    }, 1000);
+    
+    return true;
+  };
+
+  return { mapInstance, marker, isLoaded, zoomMap };
 }

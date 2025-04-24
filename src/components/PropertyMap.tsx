@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
@@ -19,46 +20,84 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [modelJobId, setModelJobId] = useState<string | null>(null);
   const [weatherTemp, setWeatherTemp] = useState<string>("26°");
   const [isAnalyzing, setIsAnalyzing] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(12); // Track the current zoom level
+  const [currentZoomLevel, setCurrentZoomLevel] = useState(12); // Track the current zoom level
+  const analysisTimerRef = useRef<NodeJS.Timeout | null>(null);
   const zoomTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { mapInstance, isLoaded } = useGoogleMapInstance({
+  const { mapInstance, isLoaded, zoomMap } = useGoogleMapInstance({
     mapContainerRef,
     address,
     view,
-    initialZoom: zoomLevel,
+    initialZoom: 12, // Initial zoom level during analysis
     onZoomComplete: () => {
-      if (!mapInstance || !isAnalyzing) return;
+      // Initial map loading is complete
+      console.log("Map initial loading complete");
+    }
+  });
+
+  // Handle analysis completion and zooming
+  useEffect(() => {
+    if (!isLoaded || !mapInstance || !isAnalyzing) return;
+    
+    console.log("Starting property analysis timer");
+    
+    // Clear any existing timers
+    if (analysisTimerRef.current) {
+      clearTimeout(analysisTimerRef.current);
+    }
+    
+    if (zoomTimerRef.current) {
+      clearTimeout(zoomTimerRef.current);
+    }
+    
+    // Set a timer to complete "analysis" and trigger zoom
+    analysisTimerRef.current = setTimeout(() => {
+      console.log("Analysis complete, preparing to zoom");
+      setIsAnalyzing(false);
       
-      // Clear any existing timeout to prevent multiple zoom operations
-      if (zoomTimerRef.current) {
-        clearTimeout(zoomTimerRef.current);
-      }
-      
-      // After initial load and analysis, zoom in to detailed view
+      // Wait a moment before zooming to make the transition apparent to the user
       zoomTimerRef.current = setTimeout(() => {
-        if (mapInstance) {
-          console.log("Zooming in to level 18");
-          mapInstance.setZoom(18);
-          setZoomLevel(18);
-          setIsAnalyzing(false);
+        console.log("Executing zoom to level 18");
+        const success = zoomMap(18);
+        
+        if (success) {
+          setCurrentZoomLevel(18);
+          console.log("Zoom level updated to 18");
           
           if (onZoomComplete) {
             onZoomComplete();
           }
         }
-      }, 1500); // Wait a bit before zooming in to ensure map is fully loaded
-    }
-  });
-
-  // Cleanup timer on unmount
-  useEffect(() => {
+      }, 500);
+    }, 3000); // 3 seconds analysis time
+    
+    // Cleanup
     return () => {
+      if (analysisTimerRef.current) {
+        clearTimeout(analysisTimerRef.current);
+      }
       if (zoomTimerRef.current) {
         clearTimeout(zoomTimerRef.current);
       }
     };
-  }, []);
+  }, [isLoaded, mapInstance, isAnalyzing, onZoomComplete, zoomMap]);
+
+  // Monitor map zoom level changes
+  useEffect(() => {
+    if (!mapInstance) return;
+    
+    const zoomListener = mapInstance.addListener('zoom_changed', () => {
+      const newZoom = mapInstance.getZoom();
+      console.log(`Map zoom changed to: ${newZoom}`);
+      setCurrentZoomLevel(newZoom);
+    });
+    
+    return () => {
+      if (window.google && window.google.maps && zoomListener) {
+        window.google.maps.event.removeListener(zoomListener);
+      }
+    };
+  }, [mapInstance]);
 
   const toggleMapType = () => {
     if (!mapInstance) return;
