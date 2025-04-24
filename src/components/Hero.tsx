@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
@@ -48,16 +47,14 @@ const Hero = () => {
                   <div className="absolute top-4 left-4">
                     <p className="text-lg font-semibold text-[#552B1B] text-center mb-2">Rent your</p>
                   </div>
-                  <div className="absolute top-0 left-0 w-full h-32 flex flex-wrap gap-2 justify-center pt-8 px-4">
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Parking Space</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Car</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Items</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Unused Bandwidth</span>
-                  </div>
+                  <span className="absolute top-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
+                  <span className="absolute top-1/4 right-10 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
+                  <span className="absolute bottom-1/4 right-12 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
+                  <span className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
+                  <span className="absolute top-1/4 left-10 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Parking Space</span>
+                  <span className="absolute top-1/2 right-4 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Car</span>
+                  <span className="absolute top-1/2 left-4 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Items</span>
+                  <span className="absolute bottom-1/4 left-12 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Unused Bandwidth</span>
                 </div>
               </div>
             </div>
