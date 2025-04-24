@@ -13,7 +13,7 @@ const Hero = () => {
 
   return (
     <GoogleMapsInit>
-      <section className="pt-8 md:pt-14 pb-14 px-2 sm:px-4 lg:px-8">
+      <section className="pt-8 md:pt-14 pb-14 px-2 sm:px-4 lg:px-8 w-full">
         <div className="w-full text-center mb-0">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 text-[#AA94E2] font-fahkwang">
             Monetize Your Home Assets
@@ -24,7 +24,7 @@ const Hero = () => {
         </div>
 
         <div className="w-full flex justify-center items-center mb-6">
-          <div className="w-full max-w-3xl">
+          <div className="w-full max-w-full px-4">
             <AddressSearchForm 
               address={address} 
               setAddress={setAddress} 
@@ -37,7 +37,7 @@ const Hero = () => {
 
         <div className="w-full">
           {!showAnalysis ? (
-            <div className="w-full max-w-3xl mx-auto relative flex flex-col items-center">
+            <div className="w-full relative flex flex-col items-center">
               <div className="w-full h-80 overflow-hidden bg-gradient-to-b from-[#F3ECFF] to-[#E5DEFF] shadow-md flex items-center justify-center relative mb-3 rounded-3xl bg-[#000a00]/0">
                 <img 
                   alt="3D House Visualization" 
@@ -59,7 +59,7 @@ const Hero = () => {
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-8">
+            <div className="w-full mx-auto">
               <div className="w-full mb-8">
                 <PropertyMap 
                   address={address} 
