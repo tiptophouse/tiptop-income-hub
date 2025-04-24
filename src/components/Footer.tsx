@@ -31,41 +31,41 @@ const Footer = () => {
             <div>
               <h3 className="font-semibold mb-4 text-tiptop-accent">Learn</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-[#552B1B]/70 hover:text-[#552B1B] transition-colors">How It Works</a></li>
-                <li><a href="#" className="text-[#552B1B]/70 hover:text-[#552B1B] transition-colors">Case Studies</a></li>
-                <li><a href="#" className="text-[#552B1B]/70 hover:text-[#552B1B] transition-colors">FAQ</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">How It Works</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Case Studies</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">FAQ</a></li>
               </ul>
             </div>
             
             <div>
               <h3 className="font-semibold mb-4 text-tiptop-accent">Company</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-[#552B1B]/70 hover:text-[#552B1B] transition-colors">About</a></li>
-                <li><a href="#" className="text-[#552B1B]/70 hover:text-[#552B1B] transition-colors">Careers</a></li>
-                <li><a href="#" className="text-[#552B1B]/70 hover:text-[#552B1B] transition-colors">Contact</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">About</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Contact</a></li>
               </ul>
             </div>
             
             <div className="col-span-2 md:col-span-1">
               <h3 className="font-semibold mb-4 text-tiptop-accent">Legal</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-[#552B1B]/70 hover:text-[#552B1B] transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="text-[#552B1B]/70 hover:text-[#552B1B] transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="text-[#552B1B]/70 hover:text-[#552B1B] transition-colors">Cookie Policy</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Cookie Policy</a></li>
               </ul>
             </div>
           </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="border-t border-[#552B1B]/10 mt-10 pt-6 text-center text-[#552B1B]/60 text-sm"
-          >
-            &copy; 2025 Tiptop by Kolonia. All rights reserved.
-          </motion.div>
         </div>
+        
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="border-t border-[#552B1B]/10 mt-10 pt-6 text-center text-[#552B1B]/60 text-sm"
+        >
+          &copy; 2025 Tiptop by Kolonia. All rights reserved.
+        </motion.div>
       </div>
     </footer>
   );

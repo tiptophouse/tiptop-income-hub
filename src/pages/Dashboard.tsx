@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard,
@@ -19,8 +20,7 @@ import {
   Settings,
   Bell,
   Plus,
-  CarFront,
-  LogOut
+  EvCharging
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,6 +63,7 @@ import {
   SidebarInset
 } from "@/components/ui/sidebar";
 
+// Mock data for assets
 const assetTypes = ['rooftop', 'internet', 'parking', 'storage', 'garden'];
 const assetStatuses = ['active', 'pending', 'inactive'];
 
@@ -74,6 +75,7 @@ const mockAssets = [
   { id: 5, type: 'garden', status: 'inactive', revenue: 0, partner: 'None', action: 'Complete registration', description: 'Backyard garden space' },
 ];
 
+// Mock data for distribution chart
 const distributionData = [
   { name: 'Solar', value: 150, color: '#AA94E2' },
   { name: 'Internet', value: 120, color: '#4A3F68' },
@@ -81,6 +83,7 @@ const distributionData = [
   { name: 'Other', value: 40, color: '#FFD7BA' },
 ];
 
+// Mock data for earnings over time
 const earningsData = [
   { month: 'Jan', solar: 120, internet: 100, parking: 80, storage: 0 },
   { month: 'Feb', solar: 130, internet: 110, parking: 85, storage: 0 },
@@ -90,6 +93,7 @@ const earningsData = [
   { month: 'Jun', solar: 155, internet: 130, parking: 100, storage: 20 },
 ];
 
+// Mock connected accounts
 const connectedAccounts = [
   { name: 'SolarCity', status: 'Connected', lastSync: '2023-04-22' },
   { name: 'FastNet', status: 'Connected', lastSync: '2023-04-20' },
@@ -97,6 +101,7 @@ const connectedAccounts = [
   { name: 'StoreBox', status: 'Pending', lastSync: 'N/A' },
 ];
 
+// Asset detail components
 const SolarAssetDetail = () => (
   <div className="p-6">
     <div className="flex justify-between items-center mb-6">
@@ -352,6 +357,7 @@ const EVAssetDetail = () => (
   </div>
 );
 
+// The main dashboard content
 const DashboardOverview = () => {
   const [userName, setUserName] = useState('John');
   const [earnings, setEarnings] = useState({ daily: 0, monthly: 0, yearly: 0 });
@@ -360,6 +366,7 @@ const DashboardOverview = () => {
   const [pendingActions, setPendingActions] = useState(0);
   
   useEffect(() => {
+    // Calculate active assets and pending actions
     const active = mockAssets.filter(asset => asset.status === 'active').length;
     const pending = mockAssets.filter(asset => asset.action !== 'None').length;
     
@@ -367,6 +374,7 @@ const DashboardOverview = () => {
     setTotalPotentialAssets(mockAssets.length);
     setPendingActions(pending);
     
+    // Calculate earnings
     const dailyTotal = mockAssets.reduce((sum, asset) => sum + (asset.status === 'active' ? asset.revenue / 30 : 0), 0);
     const monthlyTotal = mockAssets.reduce((sum, asset) => sum + (asset.status === 'active' ? asset.revenue : 0), 0);
     
@@ -391,11 +399,13 @@ const DashboardOverview = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl">Dashboard</h1>
         <p className="text-muted-foreground mt-1">Hello, {userName}! Here's your property summary.</p>
       </div>
       
+      {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
@@ -446,7 +456,9 @@ const DashboardOverview = () => {
         </Card>
       </div>
       
+      {/* Data visualization cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Asset Distribution */}
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle className="text-lg font-medium">Asset Distribution</CardTitle>
@@ -476,6 +488,7 @@ const DashboardOverview = () => {
           </CardContent>
         </Card>
         
+        {/* Today's Revenue */}
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle className="text-lg font-medium">Today's Revenue</CardTitle>
@@ -492,6 +505,7 @@ const DashboardOverview = () => {
           </CardContent>
         </Card>
         
+        {/* Revenue Over Time */}
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle className="text-lg font-medium">Revenue Over Time</CardTitle>
@@ -516,6 +530,7 @@ const DashboardOverview = () => {
         </Card>
       </div>
       
+      {/* Your Assets Section */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-medium">Your Assets</h2>
@@ -546,7 +561,7 @@ const DashboardOverview = () => {
                           <div className="mr-2 h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                             {asset.type === 'rooftop' && <Sun className="h-4 w-4 text-primary" />}
                             {asset.type === 'internet' && <Wifi className="h-4 w-4 text-primary" />}
-                            {asset.type === 'parking' && <CarFront className="h-4 w-4 text-primary" />}
+                            {asset.type === 'parking' && <EvCharging className="h-4 w-4 text-primary" />}
                             {asset.type === 'storage' && <FileText className="h-4 w-4 text-primary" />}
                             {asset.type === 'garden' && <Check className="h-4 w-4 text-primary" />}
                           </div>
@@ -597,6 +612,7 @@ const DashboardOverview = () => {
         </Card>
       </div>
       
+      {/* Earnings Section */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-medium">Earnings</h2>
@@ -673,6 +689,7 @@ const DashboardOverview = () => {
         </div>
       </div>
       
+      {/* Profile Section */}
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-medium">Your Profile</h2>
@@ -799,7 +816,7 @@ const AddAssetPage = () => (
       <Card className="hover:border-primary hover:shadow-md cursor-pointer transition-all">
         <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
           <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <CarFront className="h-8 w-8 text-primary" />
+            <EvCharging className="h-8 w-8 text-primary" />
           </div>
           <h3 className="text-lg font-medium text-center">EV Charging</h3>
           <p className="text-sm text-center text-muted-foreground">Install EV charging stations</p>
@@ -826,8 +843,8 @@ const AddAssetPage = () => (
           <h3 className="text-lg font-medium text-center">Garden Space</h3>
           <p className="text-sm text-center text-muted-foreground">Rent your garden for urban farming</p>
           <p className="text-primary font-medium">$40-$120/month</p>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   </div>
 );
@@ -844,17 +861,13 @@ const Dashboard = () => {
         if (error) {
           console.error('Session check error:', error);
           navigate('/login');
-          return;
-        }
-        
-        if (!data.session) {
-          console.info('No active session found, redirecting to login');
+        } else if (!data.session) {
+          console.log('No active session found, redirecting to login');
           navigate('/login');
-          return;
+        } else {
+          console.log('Active session found:', data.session);
+          setUser(data.session.user);
         }
-        
-        console.info('Active session found:', data.session);
-        setUser(data.session.user);
       } catch (error) {
         console.error('Session check exception:', error);
         navigate('/login');
@@ -865,7 +878,7 @@ const Dashboard = () => {
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.info('Auth state changed:', event);
+        console.log('Auth state changed:', event);
         if (event === 'SIGNED_OUT') {
           navigate('/login');
         } else if (session) {
@@ -938,7 +951,7 @@ const Dashboard = () => {
                   isActive={selectedView === 'ev'} 
                   onClick={() => setSelectedView('ev')}
                 >
-                  <CarFront className="h-4 w-4 mr-2" />
+                  <EvCharging className="h-4 w-4 mr-2" />
                   <span>EV Charging</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -962,7 +975,7 @@ const Dashboard = () => {
                 className="w-full justify-start" 
                 onClick={handleSignOut}
               >
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogIn className="mr-2 h-4 w-4 rotate-180" />
                 Sign Out
               </Button>
             </div>
