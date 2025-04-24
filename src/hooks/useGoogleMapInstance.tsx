@@ -1,5 +1,5 @@
 
-import { useEffect, useState, RefObject } from 'react';
+import { useEffect, useState, RefObject, useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
 interface UseGoogleMapInstanceProps {
@@ -99,22 +99,32 @@ export function useGoogleMapInstance({
   }, [view, mapInstance]);
 
   // Function to handle zooming the map to a specific level
-  const zoomMap = (zoomLevel: number) => {
+  const zoomMap = useCallback((zoomLevel: number) => {
     if (!mapInstance) return false;
     
     console.log(`Zooming map to level: ${zoomLevel}`);
     setIsZooming(true);
     
-    mapInstance.setZoom(zoomLevel);
-    
-    // Use a timeout to make sure the zoom animation has time to complete
-    setTimeout(() => {
+    try {
+      // Force a smooth animated zoom transition
+      mapInstance.animateCamera = true;
+      mapInstance.setZoom(zoomLevel);
+      
+      console.log(`Zoom command sent to level: ${zoomLevel}, current zoom: ${mapInstance.getZoom()}`);
+      
+      // Use a timeout to make sure the zoom animation has time to complete
+      setTimeout(() => {
+        setIsZooming(false);
+        console.log(`Zoom animation completed to level: ${mapInstance.getZoom()}`);
+      }, 1500);
+      
+      return true;
+    } catch (e) {
+      console.error("Error during zoom operation:", e);
       setIsZooming(false);
-      console.log(`Zoom animation completed to level: ${zoomLevel}`);
-    }, 1000);
-    
-    return true;
-  };
+      return false;
+    }
+  }, [mapInstance]);
 
   return { mapInstance, marker, isLoaded, zoomMap };
 }

@@ -23,6 +23,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [currentZoomLevel, setCurrentZoomLevel] = useState(12); // Track the current zoom level
   const analysisTimerRef = useRef<NodeJS.Timeout | null>(null);
   const zoomTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const hasExecutedZoom = useRef(false);
 
   const { mapInstance, isLoaded, zoomMap } = useGoogleMapInstance({
     mapContainerRef,
@@ -37,7 +38,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
 
   // Handle analysis completion and zooming
   useEffect(() => {
-    if (!isLoaded || !mapInstance || !isAnalyzing) return;
+    if (!isLoaded || !mapInstance || !isAnalyzing || hasExecutedZoom.current) return;
     
     console.log("Starting property analysis timer");
     
@@ -58,14 +59,35 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       // Wait a moment before zooming to make the transition apparent to the user
       zoomTimerRef.current = setTimeout(() => {
         console.log("Executing zoom to level 18");
+        
+        // Mark that we've already executed the zoom to prevent duplicate calls
+        hasExecutedZoom.current = true;
+        
+        // Execute the zoom operation
         const success = zoomMap(18);
         
         if (success) {
           setCurrentZoomLevel(18);
-          console.log("Zoom level updated to 18");
+          console.log("Zoom operation initiated to level 18");
           
-          if (onZoomComplete) {
-            onZoomComplete();
+          // Allow time for zoom animation to complete before calling onZoomComplete
+          setTimeout(() => {
+            if (onZoomComplete) {
+              console.log("Executing zoom completion callback");
+              onZoomComplete();
+            }
+          }, 1500);
+        } else {
+          console.error("Zoom operation failed");
+          // Try a direct approach if the zoomMap function fails
+          if (mapInstance) {
+            try {
+              console.log("Attempting direct zoom to level 18");
+              mapInstance.setZoom(18);
+              setCurrentZoomLevel(18);
+            } catch (e) {
+              console.error("Direct zoom failed:", e);
+            }
           }
         }
       }, 500);
@@ -98,6 +120,22 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       }
     };
   }, [mapInstance]);
+
+  // Add an effect to ensure the zoom is applied correctly if initial zooming failed
+  useEffect(() => {
+    if (mapInstance && !isAnalyzing && currentZoomLevel < 18 && !hasExecutedZoom.current) {
+      console.log("Backup zoom mechanism triggered, current zoom:", currentZoomLevel);
+      hasExecutedZoom.current = true;
+      
+      try {
+        console.log("Forcing zoom to level 18");
+        mapInstance.setZoom(18);
+        setCurrentZoomLevel(18);
+      } catch (e) {
+        console.error("Backup zoom failed:", e);
+      }
+    }
+  }, [mapInstance, isAnalyzing, currentZoomLevel]);
 
   const toggleMapType = () => {
     if (!mapInstance) return;
