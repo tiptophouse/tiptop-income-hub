@@ -45,7 +45,7 @@ const Hero = () => {
                   src="/lovable-uploads/b2b09e18-36b8-4e94-b1a1-042c72b8cee0.jpg" 
                 />
                 <div className="absolute top-0 left-0 w-full h-full z-10">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <div className="absolute top-4 left-4">
                     <p className="text-lg font-semibold text-[#552B1B] text-center mb-2">Rent your:</p>
                   </div>
                   <span className="absolute top-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
