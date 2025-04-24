@@ -22,7 +22,7 @@ const AddressSearchForm = ({
   setShowAnalysis
 }: AddressSearchFormProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const autocompleteRef = useRef<any>(null);
 
   // Initialize Google Places Autocomplete
   useEffect(() => {
@@ -43,7 +43,9 @@ const AddressSearchForm = ({
     });
     
     return () => {
-      if (listener) window.google.maps.event.removeListener(listener);
+      if (listener && window.google?.maps?.event) {
+        window.google.maps.event.removeListener(listener);
+      }
     };
   }, [setAddress, setShowAnalysis]);
 
