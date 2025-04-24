@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -74,71 +73,47 @@ const Login = () => {
       });
       
       if (error) {
-        console.error('Login error:', error);
         toast({
-          title: "Login Failed",
+          title: "Sign In Failed",
           description: error.message,
           variant: "destructive",
         });
       } else if (authData.session) {
-        console.log('Login successful:', authData);
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!",
-        });
         navigate('/dashboard');
       }
     } catch (error) {
-      console.error('Login error:', error);
       toast({
-        title: "Login Failed",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Sign In Failed",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const handleGoogleLogin = async () => {
     try {
-      console.log("Starting Google login flow...");
-      
-      // For debugging
-      const baseUrl = window.location.origin;
-      console.log("Current base URL:", baseUrl);
-      console.log("Redirect URL will be:", `${baseUrl}/dashboard`);
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
+          redirectTo: `${window.location.origin}/dashboard`
         }
       });
       
       if (error) {
-        console.error('Google login error details:', error);
+        console.error('Google login error:', error);
         toast({
-          title: "Google Login Failed",
-          description: `Error: ${error.message}. Please try again.`,
+          title: "Sign In Failed",
+          description: error.message,
           variant: "destructive",
-        });
-      } else {
-        console.log('Google sign in initiated successfully:', data);
-        toast({
-          title: "Redirecting to Google",
-          description: "Please complete the authentication in the Google popup.",
         });
       }
     } catch (error) {
-      console.error('Exception during Google login:', error);
+      console.error('Exception during sign in:', error);
       toast({
-        title: "Google Login Failed",
-        description: `Unexpected error: ${error instanceof Error ? error.message : String(error)}. Please try again.`,
+        title: "Sign In Failed",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
     }
