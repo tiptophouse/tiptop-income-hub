@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 
@@ -56,17 +55,17 @@ const Footer = () => {
               </ul>
             </div>
           </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="border-t border-[#552B1B]/10 mt-10 pt-6 text-center text-[#552B1B]/60 text-sm"
+          >
+            &copy; 2025 Tiptop by Kolonia. All rights reserved.
+          </motion.div>
         </div>
-        
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="border-t border-[#552B1B]/10 mt-10 pt-6 text-center text-[#552B1B]/60 text-sm"
-        >
-          &copy; 2025 Tiptop by Kolonia. All rights reserved.
-        </motion.div>
       </div>
     </footer>
   );
