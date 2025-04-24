@@ -44,15 +44,15 @@ const Hero = () => {
                   style={{ zIndex: 1 }} 
                   src="/lovable-uploads/b2b09e18-36b8-4e94-b1a1-042c72b8cee0.jpg" 
                 />
-                <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center z-10 p-4">
-                  <p className="text-lg font-semibold text-[#552B1B] mb-2">Rent your:</p>
-                  <div className="flex flex-wrap justify-center gap-3">
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Parking Space</span>
+                <div className="absolute top-0 left-0 w-full h-full z-10">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <p className="text-lg font-semibold text-[#552B1B] text-center mb-2">Rent your:</p>
                   </div>
+                  <span className="absolute top-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
+                  <span className="absolute top-1/4 right-10 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
+                  <span className="absolute bottom-1/4 right-12 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
+                  <span className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
+                  <span className="absolute top-1/4 left-10 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Parking Space</span>
                 </div>
               </div>
             </div>
