@@ -151,7 +151,7 @@ const AddressSearchForm = ({
           ref={inputRef}
           type="text" 
           placeholder="Enter your property address..." 
-          className="pl-12 pr-28 py-6 w-full rounded-full text-base sm:text-lg shadow-lg border-none bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-tiptop-accent/50 transition-all duration-300"
+          className="pl-12 pr-36 py-6 w-full rounded-full text-base sm:text-lg shadow-lg border-none bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-tiptop-accent/50 transition-all duration-300"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
         />
@@ -173,7 +173,10 @@ const AddressSearchForm = ({
               <MapPin className="h-4 w-4 text-tiptop-accent" />
             )}
           </Button>
-          <Button type="submit" className="bg-tiptop-accent hover:bg-tiptop-accent/90 px-6 py-3 h-auto rounded-full text-sm font-medium shadow-lg transition-all duration-300 hover:shadow-xl text-[#FFFDED] font-fahkwang">
+          <Button 
+            type="submit" 
+            className="bg-tiptop-accent hover:bg-tiptop-accent/90 px-4 sm:px-6 py-3 h-auto rounded-full text-xs sm:text-sm font-medium shadow-lg transition-all duration-300 hover:shadow-xl text-[#FFFDED] font-fahkwang whitespace-nowrap"
+          >
             Analyze Now
           </Button>
         </div>
