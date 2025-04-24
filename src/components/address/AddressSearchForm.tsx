@@ -14,22 +14,6 @@ interface AddressSearchFormProps {
   setShowAnalysis: (show: boolean) => void;
 }
 
-declare global {
-  interface Window {
-    google: {
-      maps: {
-        places: {
-          Autocomplete: new (
-            input: HTMLInputElement,
-            opts?: google.maps.places.AutocompleteOptions
-          ) => google.maps.places.Autocomplete;
-        };
-        Geocoder: new () => google.maps.Geocoder;
-      };
-    };
-  }
-}
-
 const AddressSearchForm = ({
   address,
   setAddress,
@@ -44,7 +28,7 @@ const AddressSearchForm = ({
   useEffect(() => {
     if (!inputRef.current || !window.google?.maps?.places) return;
     
-    autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
+    autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
       types: ['address'],
       fields: ['formatted_address', 'geometry'],
       componentRestrictions: { country: 'us' }

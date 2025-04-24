@@ -22,10 +22,14 @@ declare global {
         StreetViewPanorama: any;
         StreetViewService: any;
         places: {
-          Autocomplete: any;
+          Autocomplete: new (
+            input: HTMLInputElement,
+            opts?: google.maps.places.AutocompleteOptions
+          ) => google.maps.places.Autocomplete;
         };
         event: {
           clearInstanceListeners: (instance: any) => void;
+          removeListener: (listener: any) => void;
         };
       }
     };
@@ -38,6 +42,8 @@ declare namespace google {
     class Map {
       constructor(mapDiv: Element, opts?: MapOptions);
       setCenter(latLng: LatLng | LatLngLiteral): void;
+      setMapTypeId(mapTypeId: string): void;
+      addListener(event: string, callback: () => void): any;
     }
     
     class Marker {
@@ -85,6 +91,12 @@ declare namespace google {
     interface MapOptions {
       center?: LatLng | LatLngLiteral;
       zoom?: number;
+      mapTypeId?: string;
+      tilt?: number;
+      mapTypeControl?: boolean;
+      streetViewControl?: boolean;
+      fullscreenControl?: boolean;
+      zoomControl?: boolean;
       [key: string]: any;
     }
     
@@ -167,12 +179,15 @@ declare namespace google {
   }
 
   namespace places {
+    interface AutocompleteOptions {
+      types?: string[];
+      componentRestrictions?: { country: string };
+      fields?: string[];
+    }
+    
     class Autocomplete {
-      constructor(input: HTMLInputElement, opts?: {
-        types?: string[];
-        componentRestrictions?: { country: string };
-      });
-      addListener(event: string, callback: () => void): void;
+      constructor(input: HTMLInputElement, opts?: AutocompleteOptions);
+      addListener(event: string, callback: () => void): any;
       getPlace(): PlaceResult;
     }
 
@@ -181,11 +196,13 @@ declare namespace google {
       geometry?: {
         location: google.maps.LatLng;
       };
+      [key: string]: any;
     }
   }
 
   namespace event {
     function clearInstanceListeners(instance: any): void;
+    function removeListener(listener: any): void;
   }
 }
 
