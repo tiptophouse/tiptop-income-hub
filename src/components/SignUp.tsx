@@ -33,9 +33,15 @@ const SignUp = () => {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate('/dashboard');
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Session check error:', error);
+        } else if (data.session) {
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error('Session check exception:', error);
       }
     };
     
@@ -57,6 +63,7 @@ const SignUp = () => {
     setIsLoading(true);
     
     try {
+      console.log('Attempting signup with email:', values.email);
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -76,6 +83,7 @@ const SignUp = () => {
           variant: "destructive",
         });
       } else if (data.user) {
+        console.log('Signup successful:', data);
         toast({
           title: "Account created successfully!",
           description: "Please check your email to verify your account.",
@@ -98,6 +106,10 @@ const SignUp = () => {
   const handleGoogleSignUp = async () => {
     try {
       console.log("Starting Google signup flow...");
+      
+      const baseUrl = window.location.origin;
+      console.log("Current base URL:", baseUrl);
+      console.log("Redirect URL will be:", `${baseUrl}/dashboard`);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -128,7 +140,7 @@ const SignUp = () => {
       console.error('Exception during Google signup:', error);
       toast({
         title: "Sign up failed",
-        description: `Unexpected error: ${error.message}. Please try again.`,
+        description: `Unexpected error: ${error instanceof Error ? error.message : String(error)}. Please try again.`,
         variant: "destructive",
       });
     }

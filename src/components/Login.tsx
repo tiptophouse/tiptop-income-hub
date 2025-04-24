@@ -49,9 +49,15 @@ const Login = () => {
   // Check session on component load
   useEffect(() => {
     const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate('/dashboard');
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Session check error:', error);
+        } else if (data.session) {
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error('Session check exception:', error);
       }
     };
     
@@ -75,6 +81,7 @@ const Login = () => {
           variant: "destructive",
         });
       } else if (authData.session) {
+        console.log('Login successful:', authData);
         toast({
           title: "Login Successful",
           description: "Welcome back!",
@@ -96,6 +103,11 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     try {
       console.log("Starting Google login flow...");
+      
+      // For debugging
+      const baseUrl = window.location.origin;
+      console.log("Current base URL:", baseUrl);
+      console.log("Redirect URL will be:", `${baseUrl}/dashboard`);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -126,7 +138,7 @@ const Login = () => {
       console.error('Exception during Google login:', error);
       toast({
         title: "Google Login Failed",
-        description: `Unexpected error: ${error.message}. Please try again.`,
+        description: `Unexpected error: ${error instanceof Error ? error.message : String(error)}. Please try again.`,
         variant: "destructive",
       });
     }
