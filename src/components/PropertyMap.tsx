@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
@@ -21,6 +20,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [weatherTemp, setWeatherTemp] = useState<string>("26°");
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(12); // Track the current zoom level
+  const zoomTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { mapInstance, isLoaded } = useGoogleMapInstance({
     mapContainerRef,
@@ -28,40 +28,37 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     view,
     initialZoom: zoomLevel,
     onZoomComplete: () => {
-      console.log("Map zoom completed");
+      if (!mapInstance || !isAnalyzing) return;
       
-      if (mapInstance && isAnalyzing) {
-        // After initial load and analysis, zoom in to detailed view
-        setTimeout(() => {
-          if (mapInstance) {
-            console.log("Zooming in to level 18");
-            mapInstance.setZoom(18);
-            setZoomLevel(18);
-            setIsAnalyzing(false);
-            
-            if (onZoomComplete) {
-              onZoomComplete();
-            }
-          }
-        }, 1500); // Wait a bit before zooming in to ensure map is fully loaded
+      // Clear any existing timeout to prevent multiple zoom operations
+      if (zoomTimerRef.current) {
+        clearTimeout(zoomTimerRef.current);
       }
+      
+      // After initial load and analysis, zoom in to detailed view
+      zoomTimerRef.current = setTimeout(() => {
+        if (mapInstance) {
+          console.log("Zooming in to level 18");
+          mapInstance.setZoom(18);
+          setZoomLevel(18);
+          setIsAnalyzing(false);
+          
+          if (onZoomComplete) {
+            onZoomComplete();
+          }
+        }
+      }, 1500); // Wait a bit before zooming in to ensure map is fully loaded
     }
   });
 
-  // Add effect to monitor zoom changes for debugging
+  // Cleanup timer on unmount
   useEffect(() => {
-    if (mapInstance) {
-      const listener = mapInstance.addListener('zoom_changed', () => {
-        console.log("Zoom level changed to:", mapInstance.getZoom());
-      });
-      
-      return () => {
-        if (window.google && window.google.maps) {
-          window.google.maps.event.removeListener(listener);
-        }
-      };
-    }
-  }, [mapInstance]);
+    return () => {
+      if (zoomTimerRef.current) {
+        clearTimeout(zoomTimerRef.current);
+      }
+    };
+  }, []);
 
   const toggleMapType = () => {
     if (!mapInstance) return;
