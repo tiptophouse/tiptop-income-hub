@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
@@ -19,12 +18,23 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [is3DModelGenerating, setIs3DModelGenerating] = useState(false);
   const [modelJobId, setModelJobId] = useState<string | null>(null);
   const [weatherTemp, setWeatherTemp] = useState<string>("26°");
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
 
   const { mapInstance, isLoaded } = useGoogleMapInstance({
     mapContainerRef,
     address,
     view,
-    onZoomComplete
+    initialZoom: 12,
+    onZoomComplete: () => {
+      if (mapInstance && isAnalyzing) {
+        // After initial load, zoom in to detailed view
+        mapInstance.setZoom(18);
+        setIsAnalyzing(false);
+        if (onZoomComplete) {
+          onZoomComplete();
+        }
+      }
+    }
   });
 
   const toggleMapType = () => {
@@ -150,7 +160,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
             <span className="text-yellow-300 mr-1">☀</span>{weatherTemp}
           </div>
           <div className="absolute top-4 left-4 bg-tiptop-accent/90 text-white rounded-lg px-3 py-1 text-xs font-bold shadow-lg">
-            {view === 'satellite' ? 'Satellite View' : 'Map View'}
+            {isAnalyzing ? 'Analyzing Property...' : view === 'satellite' ? 'Satellite View' : 'Map View'}
           </div>
         </>
       )}
