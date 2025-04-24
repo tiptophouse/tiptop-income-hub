@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard,
@@ -832,6 +833,7 @@ const AddAssetPage = () => (
           <p className="text-sm text-center text-muted-foreground">Rent out unused storage space</p>
           <p className="text-primary font-medium">$50-$200/month</p>
         </CardContent>
+      </Card>
       
       <Card className="hover:border-primary hover:shadow-md cursor-pointer transition-all">
         <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
@@ -841,8 +843,8 @@ const AddAssetPage = () => (
           <h3 className="text-lg font-medium text-center">Garden Space</h3>
           <p className="text-sm text-center text-muted-foreground">Rent your garden for urban farming</p>
           <p className="text-primary font-medium">$40-$120/month</p>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   </div>
 );
