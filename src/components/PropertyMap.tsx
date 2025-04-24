@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
@@ -19,23 +20,48 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [modelJobId, setModelJobId] = useState<string | null>(null);
   const [weatherTemp, setWeatherTemp] = useState<string>("26°");
   const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [zoomLevel, setZoomLevel] = useState(12); // Track the current zoom level
 
   const { mapInstance, isLoaded } = useGoogleMapInstance({
     mapContainerRef,
     address,
     view,
-    initialZoom: 12,
+    initialZoom: zoomLevel,
     onZoomComplete: () => {
+      console.log("Map zoom completed");
+      
       if (mapInstance && isAnalyzing) {
-        // After initial load, zoom in to detailed view
-        mapInstance.setZoom(18);
-        setIsAnalyzing(false);
-        if (onZoomComplete) {
-          onZoomComplete();
-        }
+        // After initial load and analysis, zoom in to detailed view
+        setTimeout(() => {
+          if (mapInstance) {
+            console.log("Zooming in to level 18");
+            mapInstance.setZoom(18);
+            setZoomLevel(18);
+            setIsAnalyzing(false);
+            
+            if (onZoomComplete) {
+              onZoomComplete();
+            }
+          }
+        }, 1500); // Wait a bit before zooming in to ensure map is fully loaded
       }
     }
   });
+
+  // Add effect to monitor zoom changes for debugging
+  useEffect(() => {
+    if (mapInstance) {
+      const listener = mapInstance.addListener('zoom_changed', () => {
+        console.log("Zoom level changed to:", mapInstance.getZoom());
+      });
+      
+      return () => {
+        if (window.google && window.google.maps) {
+          window.google.maps.event.removeListener(listener);
+        }
+      };
+    }
+  }, [mapInstance]);
 
   const toggleMapType = () => {
     if (!mapInstance) return;

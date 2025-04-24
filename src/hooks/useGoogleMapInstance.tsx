@@ -51,6 +51,7 @@ export function useGoogleMapInstance({
         setMarker(newMarker);
         setIsLoaded(true);
         
+        // Trigger onZoomComplete when tiles are loaded
         map.addListener('tilesloaded', () => {
           if (onZoomComplete) {
             onZoomComplete();
