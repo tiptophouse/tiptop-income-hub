@@ -95,28 +95,38 @@ const Login = () => {
   
   const handleGoogleLogin = async () => {
     try {
+      console.log("Starting Google login flow...");
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
       
       if (error) {
-        console.error('Google login error:', error);
+        console.error('Google login error details:', error);
         toast({
           title: "Google Login Failed",
-          description: error.message,
+          description: `Error: ${error.message}. Please try again.`,
           variant: "destructive",
         });
       } else {
-        console.log('Google sign in initiated:', data);
+        console.log('Google sign in initiated successfully:', data);
+        toast({
+          title: "Redirecting to Google",
+          description: "Please complete the authentication in the Google popup.",
+        });
       }
     } catch (error) {
-      console.error('Google login error:', error);
+      console.error('Exception during Google login:', error);
       toast({
         title: "Google Login Failed",
-        description: "An unexpected error occurred. Please try again.",
+        description: `Unexpected error: ${error.message}. Please try again.`,
         variant: "destructive",
       });
     }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +31,6 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Check session on component load
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -83,7 +81,6 @@ const SignUp = () => {
           description: "Please check your email to verify your account.",
         });
         
-        // Redirect to login page
         navigate('/login');
       }
     } catch (error) {
@@ -100,28 +97,38 @@ const SignUp = () => {
 
   const handleGoogleSignUp = async () => {
     try {
+      console.log("Starting Google signup flow...");
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
       
       if (error) {
-        console.error('Google signup error:', error);
+        console.error('Google signup error details:', error);
         toast({
           title: "Sign up failed",
-          description: error.message,
+          description: `Error: ${error.message}. Please try again.`,
           variant: "destructive",
         });
       } else {
-        console.log('Google sign up initiated:', data);
+        console.log('Google sign up initiated successfully:', data);
+        toast({
+          title: "Redirecting to Google",
+          description: "Please complete the authentication in the Google popup.",
+        });
       }
     } catch (error) {
-      console.error('Error during Google signup:', error);
+      console.error('Exception during Google signup:', error);
       toast({
         title: "Sign up failed",
-        description: "There was an error signing up with Google. Please try again.",
+        description: `Unexpected error: ${error.message}. Please try again.`,
         variant: "destructive",
       });
     }
@@ -129,7 +136,6 @@ const SignUp = () => {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left side - Form */}
       <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -364,7 +370,6 @@ const SignUp = () => {
         </motion.div>
       </div>
 
-      {/* Right side - Image */}
       <div className="hidden md:block md:w-1/2 bg-tiptop-accent/10">
         <div className="h-full w-full flex items-center justify-center p-12">
           <div className="max-w-md">

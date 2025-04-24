@@ -3,3 +3,6 @@ project_id = "eihzjfanyqdzeiitslyd"
 
 [functions.property-insights]
 verify_jwt = false
+
+[auth.external.google]
+enabled = true
