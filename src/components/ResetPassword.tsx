@@ -27,19 +27,27 @@ const ResetPassword = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [resetComplete, setResetComplete] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   
-  // Check if user is in password reset flow
+  // Check if user has a valid recovery session
   useEffect(() => {
-    const hash = window.location.hash;
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      
+      // If no valid session and no hash in URL, redirect to login
+      if (!data.session && !window.location.hash.includes('type=recovery')) {
+        toast({
+          title: "Invalid Reset Link",
+          description: "This page is only accessible from a password reset email.",
+          variant: "destructive",
+        });
+        navigate('/login');
+      }
+      
+      setAuthChecked(true);
+    };
     
-    if (!hash || !hash.includes('type=recovery')) {
-      toast({
-        title: "Invalid Reset Link",
-        description: "This page is only accessible from a password reset email.",
-        variant: "destructive",
-      });
-      navigate('/login');
-    }
+    checkSession();
   }, [navigate]);
   
   const form = useForm<ResetPasswordFormValues>({
@@ -59,6 +67,7 @@ const ResetPassword = () => {
       });
       
       if (error) {
+        console.error('Password reset error:', error);
         toast({
           title: "Password Reset Failed",
           description: error.message,
@@ -86,6 +95,18 @@ const ResetPassword = () => {
   const handleReturnToLogin = () => {
     navigate('/login');
   };
+
+  // Show loading state until auth check completes
+  if (!authChecked) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-tiptop-light p-4 md:p-6">
+        <div className="flex flex-col items-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-tiptop-accent"></div>
+          <p className="mt-4 text-gray-600">Verifying your reset link...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (resetComplete) {
     return (

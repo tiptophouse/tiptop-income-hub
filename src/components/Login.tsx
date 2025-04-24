@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -45,23 +45,36 @@ const Login = () => {
       email: "",
     },
   });
+
+  // Check session on component load
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate('/dashboard');
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
   
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
       
       if (error) {
+        console.error('Login error:', error);
         toast({
           title: "Login Failed",
           description: error.message,
           variant: "destructive",
         });
-      } else {
+      } else if (authData.session) {
         toast({
           title: "Login Successful",
           description: "Welcome back!",
@@ -82,7 +95,7 @@ const Login = () => {
   
   const handleGoogleLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/dashboard`
@@ -92,15 +105,17 @@ const Login = () => {
       if (error) {
         console.error('Google login error:', error);
         toast({
-          title: "Login Failed",
+          title: "Google Login Failed",
           description: error.message,
           variant: "destructive",
         });
+      } else {
+        console.log('Google sign in initiated:', data);
       }
     } catch (error) {
       console.error('Google login error:', error);
       toast({
-        title: "Login Failed",
+        title: "Google Login Failed",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });

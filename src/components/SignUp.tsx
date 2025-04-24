@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -32,6 +32,18 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Check session on component load
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate('/dashboard');
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,7 +59,7 @@ const SignUp = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -59,12 +71,13 @@ const SignUp = () => {
       });
       
       if (error) {
+        console.error('Signup error:', error);
         toast({
           title: "Sign up failed",
           description: error.message,
           variant: "destructive",
         });
-      } else {
+      } else if (data.user) {
         toast({
           title: "Account created successfully!",
           description: "Please check your email to verify your account.",
@@ -87,7 +100,7 @@ const SignUp = () => {
 
   const handleGoogleSignUp = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/dashboard`
@@ -95,11 +108,14 @@ const SignUp = () => {
       });
       
       if (error) {
+        console.error('Google signup error:', error);
         toast({
           title: "Sign up failed",
           description: error.message,
           variant: "destructive",
         });
+      } else {
+        console.log('Google sign up initiated:', data);
       }
     } catch (error) {
       console.error('Error during Google signup:', error);
