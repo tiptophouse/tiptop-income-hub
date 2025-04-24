@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard,
@@ -20,7 +19,8 @@ import {
   Settings,
   Bell,
   Plus,
-  EvCharging
+  CarFront,
+  LogIn
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -357,7 +357,6 @@ const EVAssetDetail = () => (
   </div>
 );
 
-// The main dashboard content
 const DashboardOverview = () => {
   const [userName, setUserName] = useState('John');
   const [earnings, setEarnings] = useState({ daily: 0, monthly: 0, yearly: 0 });
@@ -561,7 +560,7 @@ const DashboardOverview = () => {
                           <div className="mr-2 h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                             {asset.type === 'rooftop' && <Sun className="h-4 w-4 text-primary" />}
                             {asset.type === 'internet' && <Wifi className="h-4 w-4 text-primary" />}
-                            {asset.type === 'parking' && <EvCharging className="h-4 w-4 text-primary" />}
+                            {asset.type === 'parking' && <CarFront className="h-4 w-4 text-primary" />}
                             {asset.type === 'storage' && <FileText className="h-4 w-4 text-primary" />}
                             {asset.type === 'garden' && <Check className="h-4 w-4 text-primary" />}
                           </div>
@@ -816,7 +815,7 @@ const AddAssetPage = () => (
       <Card className="hover:border-primary hover:shadow-md cursor-pointer transition-all">
         <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
           <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <EvCharging className="h-8 w-8 text-primary" />
+            <CarFront className="h-8 w-8 text-primary" />
           </div>
           <h3 className="text-lg font-medium text-center">EV Charging</h3>
           <p className="text-sm text-center text-muted-foreground">Install EV charging stations</p>
@@ -833,7 +832,6 @@ const AddAssetPage = () => (
           <p className="text-sm text-center text-muted-foreground">Rent out unused storage space</p>
           <p className="text-primary font-medium">$50-$200/month</p>
         </CardContent>
-      </Card>
       
       <Card className="hover:border-primary hover:shadow-md cursor-pointer transition-all">
         <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
@@ -843,8 +841,8 @@ const AddAssetPage = () => (
           <h3 className="text-lg font-medium text-center">Garden Space</h3>
           <p className="text-sm text-center text-muted-foreground">Rent your garden for urban farming</p>
           <p className="text-primary font-medium">$40-$120/month</p>
-        </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   </div>
 );
@@ -951,7 +949,7 @@ const Dashboard = () => {
                   isActive={selectedView === 'ev'} 
                   onClick={() => setSelectedView('ev')}
                 >
-                  <EvCharging className="h-4 w-4 mr-2" />
+                  <CarFront className="h-4 w-4 mr-2" />
                   <span>EV Charging</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
