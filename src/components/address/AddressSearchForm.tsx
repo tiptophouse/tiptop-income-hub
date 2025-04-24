@@ -43,7 +43,7 @@ const AddressSearchForm = ({
     });
     
     return () => {
-      if (listener) google.maps.event.removeListener(listener);
+      if (listener) window.google.maps.event.removeListener(listener);
     };
   }, [setAddress, setShowAnalysis]);
 

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,18 +17,32 @@ const loginSchema = z.object({
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address" })
+});
+
 type LoginFormValues = z.infer<typeof loginSchema>;
+type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
+    },
+  });
+  
+  const forgotPasswordForm = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
     },
   });
   
@@ -76,6 +90,7 @@ const Login = () => {
       });
       
       if (error) {
+        console.error('Google login error:', error);
         toast({
           title: "Login Failed",
           description: error.message,
@@ -89,6 +104,39 @@ const Login = () => {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleForgotPassword = async (data: ForgotPasswordFormValues) => {
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) {
+        toast({
+          title: "Password Reset Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        setResetEmailSent(true);
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Check your email for a link to reset your password.",
+        });
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast({
+        title: "Password Reset Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -245,7 +293,7 @@ const Login = () => {
             href="#" 
             onClick={(e) => {
               e.preventDefault();
-              // Password reset functionality would go here
+              setShowForgotPassword(true);
             }}
             className="text-xs text-tiptop-accent hover:underline mt-2 block"
           >
@@ -253,6 +301,85 @@ const Login = () => {
           </a>
         </div>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              {resetEmailSent 
+                ? "Check your email for a password reset link."
+                : "Enter your email address and we'll send you a link to reset your password."
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!resetEmailSent ? (
+            <Form {...forgotPasswordForm}>
+              <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="space-y-4">
+                <FormField
+                  control={forgotPasswordForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                          <Input 
+                            placeholder="you@example.com" 
+                            className="pl-10" 
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowForgotPassword(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="bg-tiptop-accent hover:bg-tiptop-accent/90"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </>
+                    ) : (
+                      "Send Reset Link"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          ) : (
+            <Button 
+              onClick={() => {
+                setShowForgotPassword(false);
+                setResetEmailSent(false);
+              }}
+              className="w-full bg-tiptop-accent hover:bg-tiptop-accent/90"
+            >
+              Close
+            </Button>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

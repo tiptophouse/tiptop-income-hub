@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import GoogleMapsInit from "./components/GoogleMapsInit";
 import InternetSpeedDisplay from "./components/InternetSpeedDisplay";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/models" element={<ModelsGallery />} />
             <Route path="*" element={<NotFound />} />
