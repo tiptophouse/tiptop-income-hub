@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 
 const Footer = () => {
   return (
-    <footer className="py-12 px-6 md:px-12 bg-tiptop-dark text-white">
+    <footer className="py-12 px-6 md:px-12 bg-[#FFFDED] text-[#552B1B]">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
           <motion.div
@@ -15,12 +14,9 @@ const Footer = () => {
             className="text-center md:text-left"
           >
             <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
-              <div className="h-8 w-8 rounded-full bg-tiptop-accent flex items-center justify-center">
-                <span className="text-white font-bold text-sm">T</span>
-              </div>
               <span className="font-bold text-lg">Tiptop</span>
             </div>
-            <p className="text-white/70 max-w-xs text-sm">
+            <p className="text-[#552B1B]/70 max-w-xs text-sm">
               Unlock your property's earning potential with Tiptop. The easiest way to monetize your underutilized assets.
             </p>
           </motion.div>
@@ -66,7 +62,7 @@ const Footer = () => {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="border-t border-white/10 mt-10 pt-6 text-center text-white/60 text-sm"
+          className="border-t border-[#552B1B]/10 mt-10 pt-6 text-center text-[#552B1B]/60 text-sm"
         >
           &copy; 2025 Tiptop by Kolonia. All rights reserved.
         </motion.div>
