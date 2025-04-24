@@ -24,7 +24,7 @@ const Hero = () => {
         </div>
 
         <div className="w-full flex justify-center items-center mb-6">
-          <div className="w-full max-w-full px-4">
+          <div className="w-full max-w-xl">
             <AddressSearchForm 
               address={address} 
               setAddress={setAddress} 
@@ -38,7 +38,7 @@ const Hero = () => {
         <div className="w-full">
           {!showAnalysis ? (
             <div className="w-full relative flex flex-col items-center">
-              <div className="w-full h-80 overflow-hidden bg-gradient-to-b from-[#F3ECFF] to-[#E5DEFF] shadow-md flex items-center justify-center relative mb-3 rounded-3xl bg-[#000a00]/0">
+              <div className="w-full h-80 overflow-hidden bg-white flex items-center justify-center relative mb-3 rounded-3xl">
                 <img 
                   alt="3D House Visualization" 
                   className="w-auto h-64 object-contain" 
@@ -52,10 +52,6 @@ const Hero = () => {
                   <Droplet className="h-9 w-9 text-blue-400 bg-white rounded-full shadow p-1" />
                   <Store className="h-9 w-9 text-green-500 bg-white rounded-full shadow p-1" />
                 </div>
-              </div>
-              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#E5DEFF] to-transparent pointer-events-none" />
-              <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-full text-xs font-semibold text-[#6E59A5] shadow">
-                Enter your address to analyze
               </div>
             </div>
           ) : (
