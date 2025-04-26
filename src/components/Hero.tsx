@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
 import PropertyMap from './PropertyMap';
 import AssetOpportunities from './AssetOpportunities';
+import WebhookConfig from './WebhookConfig';
 
 const Hero = () => {
   const [address, setAddress] = useState('');
@@ -57,9 +59,15 @@ const Hero = () => {
                   <span className="absolute bottom-1/4 left-12 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Unused Bandwidth</span>
                 </div>
               </div>
+              <div className="w-full max-w-xl mt-4">
+                <WebhookConfig />
+              </div>
             </div>
           ) : (
             <div className="w-full mx-auto">
+              <div className="w-full max-w-xl mx-auto mb-4">
+                <WebhookConfig />
+              </div>
               <div className="w-full mb-8">
                 <PropertyMap 
                   address={address} 

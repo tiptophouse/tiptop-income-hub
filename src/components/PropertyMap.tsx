@@ -7,6 +7,7 @@ import MapControls from './map/MapControls';
 import ModelJobInfo from './map/ModelJobInfo';
 import { useGoogleMapInstance } from '@/hooks/useGoogleMapInstance';
 import html2canvas from 'html2canvas';
+import { getWebhookUrl } from '@/utils/webhookConfig';
 
 interface PropertyMapProps {
   address: string;
@@ -24,6 +25,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const analysisTimerRef = useRef<NodeJS.Timeout | null>(null);
   const zoomTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasExecutedZoom = useRef(false);
+  const screenshotCaptured = useRef(false);
 
   const { mapInstance, isLoaded, zoomMap } = useGoogleMapInstance({
     mapContainerRef,
@@ -76,6 +78,11 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
               console.log("Executing zoom completion callback");
               onZoomComplete();
             }
+            
+            // After zoom is complete and only if we haven't captured a screenshot yet
+            if (!screenshotCaptured.current) {
+              captureAndSendPropertyScreenshot();
+            }
           }, 1500);
         } else {
           console.error("Zoom operation failed");
@@ -85,6 +92,13 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
               console.log("Attempting direct zoom to level 18");
               mapInstance.setZoom(18);
               setCurrentZoomLevel(18);
+              
+              // Even if direct zoom was needed, try to capture screenshot
+              setTimeout(() => {
+                if (!screenshotCaptured.current) {
+                  captureAndSendPropertyScreenshot();
+                }
+              }, 1500);
             } catch (e) {
               console.error("Direct zoom failed:", e);
             }
@@ -156,6 +170,52 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     } catch (error) {
       console.error("Error capturing map image:", error);
       throw error;
+    }
+  };
+
+  const captureAndSendPropertyScreenshot = async () => {
+    try {
+      console.log("Capturing property screenshot...");
+      screenshotCaptured.current = true;
+      
+      const webhookUrl = getWebhookUrl();
+      if (!webhookUrl) {
+        console.log("No webhook URL configured, skipping screenshot sending");
+        return;
+      }
+      
+      const imageData = await captureMapImage();
+      
+      // Send to webhook
+      console.log("Sending property screenshot to webhook:", webhookUrl);
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          address: address,
+          image: imageData,
+          timestamp: new Date().toISOString(),
+          source: "TipTop Property Analysis"
+        }),
+        mode: "no-cors" // Use no-cors to prevent CORS issues with external webhooks
+      });
+      
+      console.log("Property screenshot sent to webhook successfully");
+      
+      toast({
+        title: "Property Captured",
+        description: "Property screenshot has been sent for 3D model generation",
+      });
+    } catch (error) {
+      console.error("Error sending property screenshot to webhook:", error);
+      
+      toast({
+        title: "Screenshot Error",
+        description: "Failed to capture or send property screenshot",
+        variant: "destructive"
+      });
     }
   };
 
