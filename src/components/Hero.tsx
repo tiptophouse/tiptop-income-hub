@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
 import PropertyMap from './PropertyMap';
 import AssetOpportunities from './AssetOpportunities';
-import WebhookConfig from './WebhookConfig';
 
 const Hero = () => {
   const [address, setAddress] = useState('');
@@ -37,50 +35,44 @@ const Hero = () => {
 
         <div className="w-full">
           {!showAnalysis ? (
-            <div className="w-full relative flex flex-col items-center">
-              <div className="w-full h-80 overflow-hidden bg-[#FFFDED] flex flex-col items-center justify-center relative mb-3 rounded-3xl">
-                <img 
-                  alt="3D House Visualization" 
-                  className="w-auto h-64 object-contain" 
-                  style={{ zIndex: 1 }} 
-                  src="/lovable-uploads/10603114-d9a7-40ea-afe1-229cb7a86511.png" 
-                />
-                <div className="absolute top-0 left-0 w-full h-full z-10">
-                  <div className="absolute top-4 left-4">
-                    <p className="text-lg font-semibold text-[#552B1B] text-center mb-2">Rent your</p>
-                  </div>
-                  <span className="absolute top-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
-                  <span className="absolute top-1/4 right-10 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
-                  <span className="absolute bottom-1/4 right-12 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
-                  <span className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
-                  <span className="absolute top-1/4 left-10 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Parking Space</span>
-                  <span className="absolute top-1/2 right-4 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Car</span>
-                  <span className="absolute top-1/2 left-4 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Items</span>
-                  <span className="absolute bottom-1/4 left-12 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Unused Bandwidth</span>
+          <div className="w-full relative flex flex-col items-center">
+            <div className="w-full h-80 overflow-hidden bg-[#FFFDED] flex flex-col items-center justify-center relative mb-3 rounded-3xl">
+              <img 
+                alt="3D House Visualization" 
+                className="w-auto h-64 object-contain" 
+                style={{ zIndex: 1 }} 
+                src="/lovable-uploads/10603114-d9a7-40ea-afe1-229cb7a86511.png" 
+              />
+              <div className="absolute top-0 left-0 w-full h-full z-10">
+                <div className="absolute top-4 left-4">
+                  <p className="text-lg font-semibold text-[#552B1B] text-center mb-2">Rent your</p>
                 </div>
-              </div>
-              <div className="w-full max-w-xl mt-4">
-                <WebhookConfig />
-              </div>
-            </div>
-          ) : (
-            <div className="w-full mx-auto">
-              <div className="w-full max-w-xl mx-auto mb-4">
-                <WebhookConfig />
-              </div>
-              <div className="w-full mb-8">
-                <PropertyMap 
-                  address={address} 
-                  onZoomComplete={() => console.log("Map zoom completed")} 
-                />
-              </div>
-              <div className="w-full">
-                <AssetOpportunities address={address} />
+                <span className="absolute top-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
+                <span className="absolute top-1/4 right-10 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
+                <span className="absolute bottom-1/4 right-12 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
+                <span className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
+                <span className="absolute top-1/4 left-10 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Parking Space</span>
+                <span className="absolute top-1/2 right-4 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Car</span>
+                <span className="absolute top-1/2 left-4 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Items</span>
+                <span className="absolute bottom-1/4 left-12 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Unused Bandwidth</span>
               </div>
             </div>
-          )}
-        </div>
-      </section>
+          </div>
+        ) : (
+          <div className="w-full mx-auto">
+            <div className="w-full mb-8">
+              <PropertyMap 
+                address={address} 
+                onZoomComplete={() => console.log("Map zoom completed")} 
+              />
+            </div>
+            <div className="w-full">
+              <AssetOpportunities address={address} />
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
     </GoogleMapsInit>
   );
 };

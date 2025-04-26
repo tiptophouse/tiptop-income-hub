@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Eye, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -70,8 +71,17 @@ const SolarAssetDetail = () => (
         <CardTitle className="text-lg font-medium">System Design</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="bg-gray-100 h-64 rounded-md flex items-center justify-center">
-          <p className="text-gray-500">Solar panel layout design</p>
+        <div className="relative bg-white rounded-lg overflow-hidden h-64">
+          <img 
+            src="/lovable-uploads/913daccf-062e-43c1-a1ea-61722735d206.jpg"
+            alt="Solar Panel Layout"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          <div className="absolute bottom-4 left-4 text-white">
+            <p className="font-medium">Optimized Panel Layout</p>
+            <p className="text-sm opacity-90">15 panels · 5.8 kW total capacity</p>
+          </div>
         </div>
       </CardContent>
     </Card>

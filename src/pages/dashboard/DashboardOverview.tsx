@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { DollarSign, Check, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { AssetTable } from './components/AssetTable';
 import { EarningsSection } from './components/EarningsSection';
 import { DashboardCharts } from './components/DashboardCharts';
+import Property3DModel from '@/components/Property3DModel';
 
 interface DashboardOverviewProps {
   userName: string;
@@ -24,6 +24,31 @@ const DashboardOverview = ({ userName, earnings, activeAssets, totalPotentialAss
     <div className="mb-8">
       <h1 className="text-2xl">Dashboard</h1>
       <p className="text-muted-foreground mt-1">Hello, {userName}! Here's your property summary.</p>
+    </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <Property3DModel jobId="demo-3d-model-1" address="123 Main St" />
+      <Card>
+        <CardHeader>
+          <CardTitle>Property Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            This beautiful property features a spacious rooftop perfect for solar panel installation. 
+            The building's orientation and roof angle provide optimal conditions for solar energy generation. 
+            Current estimates suggest potential for significant energy production and cost savings.
+          </p>
+          <div className="mt-4">
+            <h4 className="font-medium">Key Features:</h4>
+            <ul className="list-disc list-inside text-muted-foreground mt-2">
+              <li>1,200 sq ft rooftop area</li>
+              <li>Southern exposure</li>
+              <li>30° roof pitch - optimal for solar panels</li>
+              <li>No surrounding tall buildings causing shade</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
     </div>
     
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
