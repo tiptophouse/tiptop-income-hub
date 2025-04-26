@@ -1,10 +1,20 @@
+
 import React from 'react';
 import { DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { distributionData, earningsData } from '../dashboardData';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart as ReChartPieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 
-export const DashboardCharts = ({ earnings, aiRevenueDescription }) => (
+interface DashboardChartsProps {
+  earnings: {
+    daily: number;
+    monthly: number;
+    yearly: number;
+  };
+  aiRevenueDescription: string;
+}
+
+export const DashboardCharts = ({ earnings, aiRevenueDescription }: DashboardChartsProps) => (
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
     <Card className="col-span-1">
       <CardHeader>

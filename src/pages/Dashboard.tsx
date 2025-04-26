@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { LayoutDashboard, Plus, Car, FileText, Check, LogOut, Home, Sun, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import DashboardPropertyView from '@/components/DashboardPropertyView';
 import {
   SidebarProvider,
   Sidebar,
@@ -27,16 +27,17 @@ import { mockAssets } from './dashboard/dashboardData';
 const Dashboard = () => {
   const [userName, setUserName] = useState('John');
   const [earnings, setEarnings] = useState({ daily: 0, monthly: 0, yearly: 0 });
-  const [activeAssets, setActiveAssets] = useState(0);
+  const [activeAssetCount, setActiveAssetCount] = useState(0);
   const [totalPotentialAssets, setTotalPotentialAssets] = useState(0);
   const [pendingActions, setPendingActions] = useState(0);
+  const [selectedView, setSelectedView] = useState('dashboard');
   const navigate = useNavigate();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const active = mockAssets.filter(asset => asset.status === 'active').length;
     const pending = mockAssets.filter(asset => asset.action !== 'None').length;
     
-    setActiveAssets(active);
+    setActiveAssetCount(active);
     setTotalPotentialAssets(mockAssets.length);
     setPendingActions(pending);
     
@@ -49,16 +50,6 @@ const Dashboard = () => {
       yearly: monthlyTotal * 12
     });
   }, []);
-
-  const renderStatusBadge = (status) => {
-    if (status === 'active') {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><Check className="w-3 h-3 mr-1" /> Active</span>;
-    } else if (status === 'pending') {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"><AlertTriangle className="w-3 h-3 mr-1" /> Pending</span>;
-    } else {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"><Info className="w-3 h-3 mr-1" /> Inactive</span>;
-    }
-  };
 
   const aiRevenueDescription = `Today's solar generation was 12% above average due to clear skies. Your internet bandwidth was utilized at 78% capacity with peak usage during evening hours. The EV charging stations were used for 7.5 hours today.`;
 
@@ -159,7 +150,14 @@ const Dashboard = () => {
               <Home className="h-5 w-5" />
             </Button>
             
-            {selectedView === 'dashboard' && <DashboardOverview />}
+            {selectedView === 'dashboard' && <DashboardOverview 
+              userName={userName} 
+              earnings={earnings} 
+              activeAssets={activeAssetCount}
+              totalPotentialAssets={totalPotentialAssets} 
+              pendingActions={pendingActions}
+              aiRevenueDescription={aiRevenueDescription}
+            />}
             {selectedView === 'rooftop' && <SolarAssetDetail />}
             {selectedView === 'internet' && <InternetAssetDetail />}
             {selectedView === 'ev' && <EVAssetDetail />}

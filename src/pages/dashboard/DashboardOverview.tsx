@@ -1,12 +1,25 @@
+
 import React from 'react';
 import { DollarSign, Check, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { distributionData, earningsData } from './dashboardData';
 import { AssetTable } from './components/AssetTable';
 import { EarningsSection } from './components/EarningsSection';
 import { DashboardCharts } from './components/DashboardCharts';
 
-const DashboardOverview = ({ userName, earnings, activeAssets, totalPotentialAssets, pendingActions }) => (
+interface DashboardOverviewProps {
+  userName: string;
+  earnings: {
+    daily: number;
+    monthly: number;
+    yearly: number;
+  };
+  activeAssets: number;
+  totalPotentialAssets: number;
+  pendingActions: number;
+  aiRevenueDescription: string;
+}
+
+const DashboardOverview = ({ userName, earnings, activeAssets, totalPotentialAssets, pendingActions, aiRevenueDescription }: DashboardOverviewProps) => (
   <div className="p-6 max-w-7xl mx-auto">
     <div className="mb-8">
       <h1 className="text-2xl">Dashboard</h1>
@@ -63,7 +76,7 @@ const DashboardOverview = ({ userName, earnings, activeAssets, totalPotentialAss
       </Card>
     </div>
     
-    <DashboardCharts earnings={earnings} />
+    <DashboardCharts earnings={earnings} aiRevenueDescription={aiRevenueDescription} />
     
     <AssetTable />
     
