@@ -1,13 +1,13 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
 import { generateModelFromImage } from '@/utils/meshyApi';
 import MapControls from './map/MapControls';
 import ModelJobInfo from './map/ModelJobInfo';
-import WeatherDisplay from './map/WeatherDisplay';
-import MapLoading from './map/MapLoading';
 import { useGoogleMapInstance } from '@/hooks/useGoogleMapInstance';
-import { usePropertyScreenshot } from '@/hooks/usePropertyScreenshot';
+import html2canvas from 'html2canvas';
+import { getWebhookUrl } from '@/utils/webhookConfig';
 
 interface PropertyMapProps {
   address: string;
@@ -21,35 +21,30 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [modelJobId, setModelJobId] = useState<string | null>(null);
   const [weatherTemp, setWeatherTemp] = useState<string>("26°");
   const [isAnalyzing, setIsAnalyzing] = useState(true);
-  const [currentZoomLevel, setCurrentZoomLevel] = useState(12);
+  const [currentZoomLevel, setCurrentZoomLevel] = useState(12); // Track the current zoom level
   const analysisTimerRef = useRef<NodeJS.Timeout | null>(null);
   const zoomTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasExecutedZoom = useRef(false);
+  const screenshotCaptured = useRef(false);
 
   const { mapInstance, isLoaded, zoomMap } = useGoogleMapInstance({
     mapContainerRef,
     address,
     view,
-    initialZoom: 12,
+    initialZoom: 12, // Initial zoom level during analysis
     onZoomComplete: () => {
+      // Initial map loading is complete
       console.log("Map initial loading complete");
     }
   });
 
-  const { 
-    isCapturingScreenshot, 
-    screenshotCaptured,
-    captureAndSendPropertyScreenshot 
-  } = usePropertyScreenshot({
-    address,
-    mapContainerRef
-  });
-
+  // Handle analysis completion and zooming
   useEffect(() => {
     if (!isLoaded || !mapInstance || !isAnalyzing || hasExecutedZoom.current) return;
     
     console.log("Starting property analysis timer");
     
+    // Clear any existing timers
     if (analysisTimerRef.current) {
       clearTimeout(analysisTimerRef.current);
     }
@@ -58,40 +53,49 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       clearTimeout(zoomTimerRef.current);
     }
     
+    // Set a timer to complete "analysis" and trigger zoom
     analysisTimerRef.current = setTimeout(() => {
       console.log("Analysis complete, preparing to zoom");
       setIsAnalyzing(false);
       
+      // Wait a moment before zooming to make the transition apparent to the user
       zoomTimerRef.current = setTimeout(() => {
         console.log("Executing zoom to level 18");
         
+        // Mark that we've already executed the zoom to prevent duplicate calls
         hasExecutedZoom.current = true;
         
+        // Execute the zoom operation
         const success = zoomMap(18);
         
         if (success) {
           setCurrentZoomLevel(18);
           console.log("Zoom operation initiated to level 18");
           
+          // Allow time for zoom animation to complete before calling onZoomComplete
           setTimeout(() => {
             if (onZoomComplete) {
+              console.log("Executing zoom completion callback");
               onZoomComplete();
             }
             
-            if (!screenshotCaptured) {
+            // After zoom is complete and only if we haven't captured a screenshot yet
+            if (!screenshotCaptured.current) {
               captureAndSendPropertyScreenshot();
             }
           }, 1500);
         } else {
           console.error("Zoom operation failed");
+          // Try a direct approach if the zoomMap function fails
           if (mapInstance) {
             try {
               console.log("Attempting direct zoom to level 18");
               mapInstance.setZoom(18);
               setCurrentZoomLevel(18);
               
+              // Even if direct zoom was needed, try to capture screenshot
               setTimeout(() => {
-                if (!screenshotCaptured) {
+                if (!screenshotCaptured.current) {
                   captureAndSendPropertyScreenshot();
                 }
               }, 1500);
@@ -101,8 +105,9 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
           }
         }
       }, 500);
-    }, 3000);
+    }, 3000); // 3 seconds analysis time
     
+    // Cleanup
     return () => {
       if (analysisTimerRef.current) {
         clearTimeout(analysisTimerRef.current);
@@ -113,6 +118,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     };
   }, [isLoaded, mapInstance, isAnalyzing, onZoomComplete, zoomMap]);
 
+  // Monitor map zoom level changes
   useEffect(() => {
     if (!mapInstance) return;
     
@@ -129,6 +135,22 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     };
   }, [mapInstance]);
 
+  // Add an effect to ensure the zoom is applied correctly if initial zooming failed
+  useEffect(() => {
+    if (mapInstance && !isAnalyzing && currentZoomLevel < 18 && !hasExecutedZoom.current) {
+      console.log("Backup zoom mechanism triggered, current zoom:", currentZoomLevel);
+      hasExecutedZoom.current = true;
+      
+      try {
+        console.log("Forcing zoom to level 18");
+        mapInstance.setZoom(18);
+        setCurrentZoomLevel(18);
+      } catch (e) {
+        console.error("Backup zoom failed:", e);
+      }
+    }
+  }, [mapInstance, isAnalyzing, currentZoomLevel]);
+
   const toggleMapType = () => {
     if (!mapInstance) return;
     const newView = view === 'satellite' ? 'map' : 'satellite';
@@ -136,9 +158,69 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     setView(newView);
   };
 
+  const captureMapImage = async (): Promise<string> => {
+    try {
+      if (!mapContainerRef.current) {
+        throw new Error("Map container not found");
+      }
+      const canvas = await html2canvas(mapContainerRef.current);
+      const imageData = canvas.toDataURL('image/png');
+      console.log("Map image captured successfully");
+      return imageData;
+    } catch (error) {
+      console.error("Error capturing map image:", error);
+      throw error;
+    }
+  };
+
+  const captureAndSendPropertyScreenshot = async () => {
+    try {
+      console.log("Capturing property screenshot...");
+      screenshotCaptured.current = true;
+      
+      const webhookUrl = getWebhookUrl();
+      if (!webhookUrl) {
+        console.log("No webhook URL configured, skipping screenshot sending");
+        return;
+      }
+      
+      const imageData = await captureMapImage();
+      
+      // Send to webhook
+      console.log("Sending property screenshot to webhook:", webhookUrl);
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          address: address,
+          image: imageData,
+          timestamp: new Date().toISOString(),
+          source: "TipTop Property Analysis"
+        }),
+        mode: "no-cors" // Use no-cors to prevent CORS issues with external webhooks
+      });
+      
+      console.log("Property screenshot sent to webhook successfully");
+      
+      toast({
+        title: "Property Captured",
+        description: "Property screenshot has been sent for 3D model generation",
+      });
+    } catch (error) {
+      console.error("Error sending property screenshot to webhook:", error);
+      
+      toast({
+        title: "Screenshot Error",
+        description: "Failed to capture or send property screenshot",
+        variant: "destructive"
+      });
+    }
+  };
+
   const generate3DModel = async () => {
     if (is3DModelGenerating) return;
-    
     try {
       setIs3DModelGenerating(true);
       
@@ -147,8 +229,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
         description: "Capturing property view...",
       });
       
-      const canvas = await html2canvas(mapContainerRef.current!);
-      const imageData = canvas.toDataURL('image/png');
+      const imageData = await captureMapImage();
       
       toast({
         title: "Processing",
@@ -156,10 +237,12 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       });
 
       try {
+        // Actually call the Meshy API
         const jobId = await generateModelFromImage(imageData);
         console.log("3D model generation job created:", jobId);
         setModelJobId(jobId);
         
+        // Dispatch event to notify other components
         const modelEvent = new CustomEvent('modelJobCreated', {
           detail: { jobId }
         });
@@ -171,39 +254,43 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
         });
       } catch (error) {
         console.error("Error calling Meshy API:", error);
-        handleModelGenerationFallback();
+        
+        // Fallback to demo model if API fails
+        const demoJobId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
+        setModelJobId(demoJobId);
+        
+        // Dispatch event for demo model
+        const modelEvent = new CustomEvent('modelJobCreated', {
+          detail: { jobId: demoJobId }
+        });
+        document.dispatchEvent(modelEvent);
+        
+        toast({
+          title: "Using Demo Model",
+          description: "We encountered an issue with the 3D model API. Showing a demo model instead.",
+        });
       }
     } catch (error) {
       console.error("Error in 3D model generation process:", error);
-      handleModelGenerationFallback();
+      
+      toast({
+        title: "Error",
+        description: "Failed to generate 3D model. Please try again later.",
+        variant: "destructive"
+      });
+      
+      // Always provide a fallback
+      const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
+      setModelJobId(fallbackId);
+      
+      const modelEvent = new CustomEvent('modelJobCreated', {
+        detail: { jobId: fallbackId }
+      });
+      document.dispatchEvent(modelEvent);
     } finally {
       setIs3DModelGenerating(false);
     }
   };
-
-  const handleModelGenerationFallback = () => {
-    const demoJobId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
-    setModelJobId(demoJobId);
-    
-    const modelEvent = new CustomEvent('modelJobCreated', {
-      detail: { jobId: demoJobId }
-    });
-    document.dispatchEvent(modelEvent);
-    
-    toast({
-      title: "Using Demo Model",
-      description: "We encountered an issue with the 3D model API. Showing a demo model instead.",
-    });
-  };
-
-  useEffect(() => {
-    if (!isLoaded || !mapInstance || !address || isAnalyzing || !hasExecutedZoom.current || isCapturingScreenshot) return;
-    
-    if (currentZoomLevel >= 18 && !screenshotCaptured) {
-      console.log("Map zoomed in, capturing screenshot");
-      captureAndSendPropertyScreenshot();
-    }
-  }, [currentZoomLevel, isLoaded, mapInstance, address, isAnalyzing, hasExecutedZoom.current, isCapturingScreenshot]);
 
   return (
     <motion.div
@@ -216,7 +303,11 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
         ref={mapContainerRef} 
         className="w-full h-full"
       />
-      {!isLoaded && <MapLoading />}
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-tiptop-accent" />
+        </div>
+      )}
       {isLoaded && (
         <>
           <MapControls
@@ -225,7 +316,9 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
             onGenerate3DModel={generate3DModel}
             isGenerating={is3DModelGenerating}
           />
-          <WeatherDisplay temperature={weatherTemp} />
+          <div className="absolute bottom-4 left-4 bg-black/70 text-white rounded-full p-2 flex items-center justify-center">
+            <span className="text-yellow-300 mr-1">☀</span>{weatherTemp}
+          </div>
           <div className="absolute top-4 left-4 bg-tiptop-accent/90 text-white rounded-lg px-3 py-1 text-xs font-bold shadow-lg">
             {isAnalyzing ? 'Analyzing Property...' : view === 'satellite' ? 'Satellite View' : 'Map View'}
           </div>
