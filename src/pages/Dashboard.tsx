@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Home } from 'lucide-react';
@@ -423,7 +422,7 @@ const AddAssetPage = () => (
           <h3 className="text-lg font-medium text-center">Garden Space</h3>
           <p className="text-sm text-center text-muted-foreground">Rent your garden for urban farming</p>
           <p className="text-primary font-medium">$40-$120/month</p>
-        </CardContent>
+        </Card>
       </Card>
     </div>
   </div>
