@@ -1,27 +1,31 @@
-
 import React, { useState, useEffect } from 'react';
-import { 
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import {
   LayoutDashboard,
+  Plus,
+  Sun,
+  Wifi,
+  Car,
+  FileText,
+  Check,
+  LogOut
+} from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
+import { 
   ChevronRight, 
   DollarSign, 
   Edit, 
   Eye, 
-  FileText, 
   Trash2,
   PieChart,
   Calendar,
   Search,
   AlertTriangle,
-  Check,
   Info,
   TrendingUp,
-  Wifi,
-  Sun,
   Settings,
-  Bell,
-  Plus,
-  Car,
-  LogOut
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,8 +53,6 @@ import {
   BarChart,
   Bar
 } from 'recharts';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 import {
   SidebarProvider,
   Sidebar,
@@ -719,180 +721,4 @@ const DashboardOverview = () => {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium">Earnings Chart</CardTitle>
-              <CardDescription>Last 6 months</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={earningsData}>
-                    <defs>
-                      <linearGradient id="total" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#AA94E2" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#AA94E2" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <RechartsTooltip />
-                    <Area type="monotone" 
-                          dataKey={(data) => data.solar + data.internet + data.ev + data.storage} 
-                          stroke="#9b87f5" 
-                          fillOpacity={1} 
-                          fill="url(#total)" 
-                          name="Total" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Main Dashboard Component
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const [selectedView, setSelectedView] = useState('dashboard');
-  const [user, setUser] = useState(null);
-  
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Session check error:', error);
-          navigate('/login');
-          return;
-        }
-        
-        if (!data.session) {
-          console.info('No active session found, redirecting to login');
-          navigate('/login');
-          return;
-        }
-        
-        console.info('Active session found:', data.session);
-        setUser(data.session.user);
-      } catch (error) {
-        console.error('Session check exception:', error);
-        navigate('/login');
-      }
-    };
-    
-    checkSession();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.info('Auth state changed:', event);
-        if (event === 'SIGNED_OUT') {
-          navigate('/login');
-        } else if (session) {
-          setUser(session.user);
-        }
-      }
-    );
-    
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
-      } else {
-        navigate('/login');
-      }
-    } catch (error) {
-      console.error('Exception signing out:', error);
-    }
-  };
-
-  // Get active assets for sidebar menu
-  const activeAssets = mockAssets.filter(asset => asset.status === 'active');
-
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-background flex w-full">
-        <Sidebar>
-          <SidebarHeader>
-            <div className="flex items-center px-2">
-              <span className="font-bold text-xl text-primary">Tiptop</span>
-              <SidebarTrigger className="ml-auto" />
-            </div>
-          </SidebarHeader>
-          
-          <SidebarContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  isActive={selectedView === 'dashboard'} 
-                  onClick={() => setSelectedView('dashboard')}
-                >
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  <span>Dashboard</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              
-              {/* Dynamic menu items for active assets */}
-              {activeAssets.map((asset) => (
-                <SidebarMenuItem key={asset.id}>
-                  <SidebarMenuButton 
-                    isActive={selectedView === asset.type} 
-                    onClick={() => setSelectedView(asset.type)}
-                  >
-                    {asset.type === 'rooftop' && <Sun className="h-4 w-4 mr-2" />}
-                    {asset.type === 'internet' && <Wifi className="h-4 w-4 mr-2" />}
-                    {asset.type === 'ev' && <Car className="h-4 w-4 mr-2" />}
-                    {asset.type === 'storage' && <FileText className="h-4 w-4 mr-2" />}
-                    {asset.type === 'garden' && <Check className="h-4 w-4 mr-2" />}
-                    <span>
-                      {asset.type === 'ev' ? 'EV Charging' : (asset.type.charAt(0).toUpperCase() + asset.type.slice(1))}
-                    </span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  isActive={selectedView === 'add'} 
-                  onClick={() => setSelectedView('add')}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  <span>Add Asset</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarContent>
-          
-          <SidebarFooter>
-            <div className="p-2">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start" 
-                onClick={handleSignOut}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </Button>
-            </div>
-          </SidebarFooter>
-        </Sidebar>
-        
-        <SidebarInset>
-          {selectedView === 'dashboard' && <DashboardOverview />}
-          {selectedView === 'rooftop' && <SolarAssetDetail />}
-          {selectedView === 'internet' && <InternetAssetDetail />}
-          {selectedView === 'ev' && <EVAssetDetail />}
-          {selectedView === 'add' && <AddAssetPage />}
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
-  );
-};
-
-export default Dashboard;
+              <CardTitle
