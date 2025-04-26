@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
@@ -40,10 +39,10 @@ const Hero = () => {
             <div className="w-full relative flex flex-col items-center">
               <div className="w-full h-80 overflow-hidden bg-[#FFFDED] flex flex-col items-center justify-center relative mb-3 rounded-3xl">
                 <img 
-                  alt="3D House Visualization" 
+                  alt="Modern Smart Home" 
                   className="w-auto h-64 object-contain" 
                   style={{ zIndex: 1 }} 
-                  src="/lovable-uploads/b2b09e18-36b8-4e94-b1a1-042c72b8cee0.jpg" 
+                  src="/lovable-uploads/85895768-18f5-427a-acc9-8dbf4ed59c73.png" 
                 />
                 <div className="absolute top-0 left-0 w-full h-full z-10">
                   <div className="absolute top-4 left-4">
