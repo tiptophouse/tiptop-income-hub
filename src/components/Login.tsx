@@ -45,7 +45,6 @@ const Login = () => {
     },
   });
 
-  // Check session on component load
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -97,7 +96,7 @@ const Login = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: 'https://preview--tiptop-income-hub.lovable.app/dashboard'
         }
       });
       
@@ -314,7 +313,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Forgot Password Dialog */}
       <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
