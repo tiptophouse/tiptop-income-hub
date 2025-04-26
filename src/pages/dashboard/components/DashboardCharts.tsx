@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,14 +14,14 @@ interface DashboardChartsProps {
 }
 
 export const DashboardCharts = ({ earnings, aiRevenueDescription }: DashboardChartsProps) => (
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
     <Card className="col-span-1">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Asset Distribution</CardTitle>
+        <CardTitle className="text-base md:text-lg font-medium">Asset Distribution</CardTitle>
         <CardDescription>Revenue by asset type</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-64">
+        <div className="h-48 md:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <ReChartPieChart>
               <Pie
@@ -47,7 +46,7 @@ export const DashboardCharts = ({ earnings, aiRevenueDescription }: DashboardCha
     
     <Card className="col-span-1">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Today's Revenue</CardTitle>
+        <CardTitle className="text-base md:text-lg font-medium">Today's Revenue</CardTitle>
         <CardDescription>Daily performance</CardDescription>
       </CardHeader>
       <CardContent>
@@ -61,13 +60,13 @@ export const DashboardCharts = ({ earnings, aiRevenueDescription }: DashboardCha
       </CardContent>
     </Card>
     
-    <Card className="col-span-1">
+    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Revenue Over Time</CardTitle>
+        <CardTitle className="text-base md:text-lg font-medium">Revenue Over Time</CardTitle>
         <CardDescription>Monthly breakdown</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-64">
+        <div className="h-48 md:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={earningsData}>
               <CartesianGrid strokeDasharray="3 3" />

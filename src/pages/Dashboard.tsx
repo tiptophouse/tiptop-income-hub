@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { LayoutDashboard, Plus, Car, FileText, Check, LogOut, Home, Sun, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   SidebarProvider,
   Sidebar,
@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [pendingActions, setPendingActions] = useState(0);
   const [selectedView, setSelectedView] = useState('dashboard');
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   React.useEffect(() => {
     const active = mockAssets.filter(asset => asset.status === 'active').length;
@@ -73,7 +74,7 @@ const Dashboard = () => {
   const activeAssets = mockAssets.filter(asset => asset.status === 'active');
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen bg-background flex w-full">
         <Sidebar collapsible="icon">
           <SidebarHeader>
@@ -140,11 +141,11 @@ const Dashboard = () => {
         </Sidebar>
         
         <SidebarInset className="flex-1">
-          <div className="p-6 max-w-7xl mx-auto relative">
+          <div className="p-4 md:p-6 max-w-7xl mx-auto relative">
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-6 right-6"
+              className="absolute top-4 md:top-6 right-4 md:right-6"
               onClick={navigateHome}
             >
               <Home className="h-5 w-5" />

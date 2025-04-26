@@ -20,13 +20,13 @@ interface DashboardOverviewProps {
 }
 
 const DashboardOverview = ({ userName, earnings, activeAssets, totalPotentialAssets, pendingActions, aiRevenueDescription }: DashboardOverviewProps) => (
-  <div className="p-6 max-w-7xl mx-auto">
-    <div className="mb-8">
-      <h1 className="text-2xl">Dashboard</h1>
+  <div className="space-y-6">
+    <div>
+      <h1 className="text-xl md:text-2xl">Dashboard</h1>
       <p className="text-muted-foreground mt-1">Hello, {userName}! Here's your property summary.</p>
     </div>
     
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
       <Property3DModel jobId="demo-3d-model-1" address="123 Main St" />
       <Card>
         <CardHeader>
@@ -51,10 +51,10 @@ const DashboardOverview = ({ userName, earnings, activeAssets, totalPotentialAss
       </Card>
     </div>
     
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">Total Earnings</CardTitle>
+          <CardTitle className="text-base md:text-lg font-medium">Total Earnings</CardTitle>
           <CardDescription>Monthly passive income</CardDescription>
         </CardHeader>
         <CardContent>
@@ -103,9 +103,12 @@ const DashboardOverview = ({ userName, earnings, activeAssets, totalPotentialAss
     
     <DashboardCharts earnings={earnings} aiRevenueDescription={aiRevenueDescription} />
     
-    <AssetTable />
-    
-    <EarningsSection />
+    <div className="space-y-6">
+      <div className="overflow-x-auto">
+        <AssetTable />
+      </div>
+      <EarningsSection />
+    </div>
   </div>
 );
 

@@ -8,10 +8,10 @@ import { renderStatusBadge } from '../utils';
 
 export const EarningsSection = () => {
   return (
-    <div className="mb-8">
-      <div className="flex justify-between items-center mb-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-xl font-medium">Earnings</h2>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
             <Calendar className="h-4 w-4 mr-1" /> Filter Date
           </Button>
@@ -21,7 +21,7 @@ export const EarningsSection = () => {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -55,11 +55,11 @@ export const EarningsSection = () => {
           
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-medium">Earnings Chart</CardTitle>
+            <CardTitle className="text-base md:text-lg font-medium">Earnings Chart</CardTitle>
             <CardDescription>Last 6 months</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
+            <div className="h-48 md:h-64">
               {/* Add your chart component here */}
             </div>
           </CardContent>
