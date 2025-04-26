@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard,
@@ -21,7 +20,8 @@ import {
   Bell,
   Plus,
   Car,
-  LogOut
+  LogOut,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -420,9 +420,8 @@ const AddAssetPage = () => (
           <h3 className="text-lg font-medium text-center">Garden Space</h3>
           <p className="text-sm text-center text-muted-foreground">Rent your garden for urban farming</p>
           <p className="text-primary font-medium">$40-$120/month</p>
-        </CardContent>
-      </Card>
-    </div>
+        </Card>
+      </div>
   </div>
 );
 
@@ -816,9 +815,9 @@ const Dashboard = () => {
   const activeAssets = mockAssets.filter(asset => asset.status === 'active');
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen bg-background flex w-full">
-        <Sidebar>
+        <Sidebar collapsible="icon">
           <SidebarHeader>
             <div className="flex items-center px-2">
               <span className="font-bold text-xl text-primary">Tiptop</span>
@@ -883,12 +882,23 @@ const Dashboard = () => {
           </SidebarFooter>
         </Sidebar>
         
-        <SidebarInset>
-          {selectedView === 'dashboard' && <DashboardOverview />}
-          {selectedView === 'rooftop' && <SolarAssetDetail />}
-          {selectedView === 'internet' && <InternetAssetDetail />}
-          {selectedView === 'ev' && <EVAssetDetail />}
-          {selectedView === 'add' && <AddAssetPage />}
+        <SidebarInset className="flex-1">
+          <div className="p-6 max-w-7xl mx-auto relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-6 right-6"
+              onClick={navigateHome}
+            >
+              <Home className="h-5 w-5" />
+            </Button>
+            
+            {selectedView === 'dashboard' && <DashboardOverview />}
+            {selectedView === 'rooftop' && <SolarAssetDetail />}
+            {selectedView === 'internet' && <InternetAssetDetail />}
+            {selectedView === 'ev' && <EVAssetDetail />}
+            {selectedView === 'add' && <AddAssetPage />}
+          </div>
         </SidebarInset>
       </div>
     </SidebarProvider>
