@@ -62,6 +62,14 @@ import {
   SidebarMenuButton,
   SidebarInset
 } from "@/components/ui/sidebar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const assetTypes = ['rooftop', 'internet', 'parking', 'storage', 'garden'];
 const assetStatuses = ['active', 'pending', 'inactive'];
