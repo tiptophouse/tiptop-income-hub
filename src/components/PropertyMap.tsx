@@ -25,7 +25,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const zoomTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasExecutedZoom = useRef(false);
   const screenshotCaptured = useRef(false);
-  const isCapturingScreenshot = useRef(false);
+  const [isCapturingScreenshot, setIsCapturingScreenshot] = useState(false);
 
   const { mapInstance, isLoaded, zoomMap } = useGoogleMapInstance({
     mapContainerRef,
@@ -159,7 +159,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   };
 
   const captureAndSendPropertyScreenshot = async () => {
-    if (!mapContainerRef.current || isCapturingScreenshot.current) return;
+    if (!mapContainerRef.current || isCapturingScreenshot) return;
     
     try {
       setIsCapturingScreenshot(true);
