@@ -1,5 +1,19 @@
+
 import React from 'react';
 import { DashboardLayout } from '../DashboardLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Eye, FileText } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+
+const solarData = [
+  { month: 'Jan', solar: 120 },
+  { month: 'Feb', solar: 135 },
+  { month: 'Mar', solar: 140 },
+  { month: 'Apr', solar: 145 },
+  { month: 'May', solar: 150 },
+  { month: 'Jun', solar: 155 },
+];
 
 const SolarAssetDetailPage = () => (
   <DashboardLayout onSignOut={() => {}}>
@@ -44,7 +58,7 @@ const SolarAssetDetailPage = () => (
           </CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={earningsData}>
+              <AreaChart data={solarData}>
                 <defs>
                   <linearGradient id="solar" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#AA94E2" stopOpacity={0.8}/>

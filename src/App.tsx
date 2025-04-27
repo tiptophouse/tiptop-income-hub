@@ -16,6 +16,7 @@ import ModelsGallery from "./pages/ModelsGallery";
 import InternetAssetDetail from "./pages/dashboard/assetDetails/InternetAssetDetail";
 import EVAssetDetail from "./pages/dashboard/assetDetails/EVAssetDetail";
 import SolarAssetDetail from "./pages/dashboard/assetDetails/SolarAssetDetail";
+import AddAssetPage from "./pages/dashboard/AddAssetPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/dashboard/rooftop" element={<SolarAssetDetail />} />
             <Route path="/dashboard/internet" element={<InternetAssetDetail />} />
             <Route path="/dashboard/ev-charging" element={<EVAssetDetail />} />
+            <Route path="/dashboard/add-asset" element={<AddAssetPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <InternetSpeedDisplay />
