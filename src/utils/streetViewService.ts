@@ -1,5 +1,10 @@
 
-declare const google: any;
+// Declare the google namespace to avoid TypeScript errors
+declare global {
+  interface Window {
+    google: any;
+  }
+}
 
 export const getStreetViewImageUrl = (
   address: string,

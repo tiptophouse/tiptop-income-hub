@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Card,
@@ -12,6 +13,8 @@ import Property3DModelViewer from "./3d/Property3DModelViewer";
 import Property3DModelLoading from "./Property3DModelLoading";
 import ModelStatusDisplay from "./3d/ModelStatusDisplay";
 import { use3DModel } from "@/hooks/use3DModel";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 
 interface Property3DModelDisplayProps {
   jobId: string;
@@ -27,6 +30,9 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   const [rotateModel, setRotateModel] = useState(true);
   const [modelRotation, setModelRotation] = useState(0);
   const [isModelViewerLoaded, setIsModelViewerLoaded] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(105);
+  const [backgroundColor, setBackgroundColor] = useState("#f5f5f5");
+  const [showControls, setShowControls] = useState(false);
 
   const { modelStatus, modelUrl, isLoading, handleRefresh } = use3DModel(jobId);
 
@@ -58,6 +64,8 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
     return <Property3DModelFailed onRetry={handleRefresh} />;
   }
 
+  const backgroundOptions = ["#f5f5f5", "#1a1a1a", "#e0f2fe", "#f0fdf4", "#fffbeb"];
+
   return (
     <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
       <CardHeader className="pb-2">
@@ -67,9 +75,44 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
         </CardTitle>
         <CardDescription>
           3D model for {address}
+          <Button 
+            variant="link" 
+            className="p-0 h-auto text-xs text-tiptop-accent" 
+            onClick={() => setShowControls(!showControls)}
+          >
+            {showControls ? "Hide advanced controls" : "Show advanced controls"}
+          </Button>
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {showControls && (
+          <div className="mb-4 space-y-4 p-4 bg-gray-50 rounded-md">
+            <div>
+              <label className="text-sm font-medium block mb-2">Zoom Level</label>
+              <Slider
+                value={[zoomLevel]}
+                min={50}
+                max={200}
+                step={5}
+                onValueChange={(value) => setZoomLevel(value[0])}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium block mb-2">Background Color</label>
+              <div className="flex flex-wrap gap-2">
+                {backgroundOptions.map((color) => (
+                  <div 
+                    key={color}
+                    className={`w-6 h-6 rounded-full cursor-pointer ${backgroundColor === color ? 'ring-2 ring-tiptop-accent' : ''}`}
+                    style={{ backgroundColor: color }}
+                    onClick={() => setBackgroundColor(color)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <Property3DModelViewer
           modelUrl={modelUrl}
           isModelViewerLoaded={isModelViewerLoaded}
@@ -83,6 +126,8 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
             }
           }}
           jobId={jobId}
+          zoomLevel={zoomLevel}
+          backgroundColor={backgroundColor}
         />
         <ModelStatusDisplay jobId={jobId} modelStatus={modelStatus} />
       </CardContent>

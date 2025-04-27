@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -60,6 +61,19 @@ const Login = () => {
     };
     
     checkSession();
+
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session) {
+          navigate('/dashboard');
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
   
   const onSubmit = async (data: LoginFormValues) => {
@@ -78,6 +92,10 @@ const Login = () => {
           variant: "destructive",
         });
       } else if (authData.session) {
+        toast({
+          title: "Sign In Successful",
+          description: "You are now logged in.",
+        });
         navigate('/dashboard');
       }
     } catch (error) {
@@ -93,10 +111,11 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     try {
+      const currentUrl = window.location.origin;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://preview--tiptop-income-hub.lovable.app/dashboard'
+          redirectTo: `${currentUrl}/dashboard`
         }
       });
       

@@ -14,6 +14,8 @@ interface Property3DModelViewerProps {
   handleRefresh: () => void;
   handleDownload: () => void;
   jobId: string;
+  zoomLevel?: number;
+  backgroundColor?: string;
 }
 
 const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
@@ -25,6 +27,8 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
   handleRefresh,
   handleDownload,
   jobId,
+  zoomLevel = 105,
+  backgroundColor = "#f5f5f5"
 }) => (
   <div className="space-y-4 relative">
     <ModelViewerDisplay
@@ -32,6 +36,8 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
       isModelViewerLoaded={isModelViewerLoaded}
       rotateModel={rotateModel}
       modelRotation={modelRotation}
+      zoomLevel={zoomLevel}
+      backgroundColor={backgroundColor}
     />
     <ModelViewerControls
       onRotate={toggleRotate}

@@ -6,13 +6,17 @@ interface ModelViewerDisplayProps {
   isModelViewerLoaded: boolean;
   rotateModel: boolean;
   modelRotation: number;
+  zoomLevel?: number;
+  backgroundColor?: string;
 }
 
 const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
   modelUrl,
   isModelViewerLoaded,
   rotateModel,
-  modelRotation
+  modelRotation,
+  zoomLevel = 105,
+  backgroundColor = "#f5f5f5"
 }) => {
   if (!modelUrl) {
     return (
@@ -43,13 +47,18 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
         style={{
           width: "100%",
           height: "300px",
-          backgroundColor: "#f5f5f5",
+          backgroundColor: backgroundColor,
           borderRadius: "0.375rem"
         }}
-        camera-orbit={`${modelRotation}deg 75deg 105%`}
+        camera-orbit={`${modelRotation}deg 75deg ${zoomLevel}%`}
         shadow-intensity="1"
         shadow-softness="0.7"
         environment-image="neutral"
+        exposure="1"
+        interaction-prompt="none"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        touch-action="pan-y"
       />
     </div>
   );
