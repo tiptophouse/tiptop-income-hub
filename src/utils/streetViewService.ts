@@ -1,4 +1,3 @@
-
 export const getStreetViewImageUrl = (
   address: string,
   size: { width: number; height: number } = { width: 600, height: 400 }
@@ -33,4 +32,24 @@ export const checkStreetViewAvailability = async (
       }
     );
   });
+};
+
+export const getStreetViewImageAsBase64 = async (address: string): Promise<string> => {
+  try {
+    const streetViewUrl = getStreetViewImageUrl(address);
+    console.log("Fetching Street View image from:", streetViewUrl);
+    
+    const response = await fetch(streetViewUrl);
+    const blob = await response.blob();
+    
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error("Error getting Street View image:", error);
+    throw error;
+  }
 };

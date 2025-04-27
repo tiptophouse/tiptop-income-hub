@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Card,
@@ -38,56 +37,57 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   useEffect(() => {
     if (!jobId) return;
 
-    const checkAndUpdateModelStatus = async () => {
+    const initializeModel = async () => {
       try {
         setIsLoading(true);
         
-        // If this is a demo job or we've already found the URL, skip API calls
-        if (jobId.startsWith('demo-') && !modelUrl) {
-          // Simulate API delay for demo jobs
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          setModelUrl(`https://storage.googleapis.com/realestate-3d-models/demo-property.glb`);
+        // For demo jobs or if we already have the URL, skip API calls
+        if (jobId.startsWith('demo-')) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
+          setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
           setModelStatus("completed");
           setIsLoading(false);
           return;
         }
         
         // For real jobs, check status with the API
-        if (!jobId.startsWith('demo-')) {
-          const status = await checkModelStatus(jobId);
-          
-          if (status.state === 'completed') {
-            const url = await getModelDownloadUrl(jobId);
-            setModelUrl(url);
-            setModelStatus("completed");
-          } else if (status.state === 'failed') {
-            setModelStatus("failed");
-            toast({
-              title: "3D Model Failed",
-              description: "Could not generate the 3D model. Please try again.",
-              variant: "destructive",
-            });
-          } else if (checkCount < 10) {
-            // Still processing, schedule another check after delay
-            setTimeout(() => {
-              setCheckCount(prevCount => prevCount + 1);
-            }, 5000); // Check every 5 seconds
-          } else {
-            // Too many checks, assume failure
-            setModelStatus("failed");
-            toast({
-              title: "Processing Timeout",
-              description: "3D model processing took too long. Please try again later.",
-              variant: "destructive",
-            });
-          }
+        const status = await checkModelStatus(jobId);
+        
+        if (status.state === 'completed') {
+          const url = await getModelDownloadUrl(jobId);
+          setModelUrl(url);
+          setModelStatus("completed");
+        } else if (status.state === 'failed') {
+          setModelStatus("failed");
+          toast({
+            title: "3D Model Failed",
+            description: "Could not generate the 3D model. Please try again.",
+            variant: "destructive",
+          });
+        } else if (checkCount < 10) {
+          // Still processing, schedule another check
+          setTimeout(() => {
+            setCheckCount(prevCount => prevCount + 1);
+          }, 5000);
+        } else {
+          setModelStatus("failed");
+          toast({
+            title: "Processing Timeout",
+            description: "3D model processing took too long. Please try again later.",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("Error checking 3D model status:", error);
         setModelStatus("failed");
+        
+        // Use demo model as fallback
+        const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
+        setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
+        
         toast({
           title: "Error",
-          description: "Failed to check 3D model status. Please try again later.",
+          description: "Failed to check 3D model status. Using demo model instead.",
           variant: "destructive",
         });
       } finally {
@@ -95,8 +95,8 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
       }
     };
 
-    checkAndUpdateModelStatus();
-  }, [jobId, checkCount, modelUrl]);
+    initializeModel();
+  }, [jobId, checkCount]);
 
   useEffect(() => {
     // Load model-viewer script if not already loaded

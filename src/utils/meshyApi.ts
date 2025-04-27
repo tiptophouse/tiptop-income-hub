@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for interacting with the Meshy API
  */
@@ -9,11 +8,6 @@ const SAMPLE_MODEL_URL = "https://storage.googleapis.com/realestate-3d-models/de
 
 /**
  * Generates a 3D model from an image using Meshy API
- * 
- * Note: For solar potential data, Google's Project Sunroof API could be integrated
- * to measure sun exposure on rooftops. This would require additional API keys and
- * implementation. The Project Sunroof Data Explorer provides solar potential data
- * based on address: https://sunroof.withgoogle.com/data-explorer/
  */
 export const generateModelFromImage = async (imageData: string): Promise<string> => {
   try {
@@ -37,7 +31,7 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
         mode: "geometry",         // Focus on accurate geometry
         background_removal: true, // Remove background for cleaner model
         generate_material: true,  // Generate realistic materials
-        prompt: "Create a realistic 3D model of this residential property front view, preserving architectural details", 
+        prompt: "Create a detailed 3D model of this residential property, focusing on the front facade and architectural details. Preserve scale and proportions.", 
         reference_model_id: "house",
         preserve_topology: true,  // Better for architectural models
         mesh_quality: "high"     // Higher quality for detailed structures
