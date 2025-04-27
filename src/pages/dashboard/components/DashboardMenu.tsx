@@ -1,20 +1,22 @@
 
-import { Calendar, Home, Inbox, Search, Settings, Plus, LogOut } from 'lucide-react';
+import { Calendar, Home, Sun, Wifi, Car, Plus, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface DashboardMenuProps {
-  onItemClick?: () => void;
   onSignOut: () => void;
 }
 
-export const DashboardMenu = ({ onItemClick = () => {}, onSignOut }: DashboardMenuProps) => {
+export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const items = [
-    { title: "Home", url: "#", icon: Home },
-    { title: "Inbox", url: "#", icon: Inbox },
-    { title: "Calendar", url: "#", icon: Calendar },
-    { title: "Search", url: "#", icon: Search },
-    { title: "Settings", url: "#", icon: Settings },
+    { title: "Dashboard", url: "/dashboard", icon: Home },
+    { title: "Rooftop", url: "/dashboard/rooftop", icon: Sun },
+    { title: "Internet", url: "/dashboard/internet", icon: Wifi },
+    { title: "EV Charging", url: "/dashboard/ev-charging", icon: Car },
   ];
 
   return (
@@ -25,19 +27,17 @@ export const DashboardMenu = ({ onItemClick = () => {}, onSignOut }: DashboardMe
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton 
                 asChild 
-                onClick={onItemClick}
+                className={location.pathname === item.url ? "bg-accent" : ""}
               >
-                <a href={item.url}>
+                <button onClick={() => navigate(item.url)}>
                   <item.icon className="h-4 w-4 mr-2" />
                   <span>{item.title}</span>
-                </a>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => {
-              onItemClick();
-            }}>
+            <SidebarMenuButton onClick={() => navigate('/dashboard/add-asset')}>
               <Plus className="h-4 w-4 mr-2" />
               <span>Add Asset</span>
             </SidebarMenuButton>
@@ -48,10 +48,7 @@ export const DashboardMenu = ({ onItemClick = () => {}, onSignOut }: DashboardMe
         <Button 
           variant="outline" 
           className="w-full justify-start" 
-          onClick={() => {
-            onItemClick();
-            onSignOut();
-          }}
+          onClick={onSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
           Sign Out

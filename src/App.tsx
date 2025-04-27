@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,9 @@ import GoogleMapsInit from "./components/GoogleMapsInit";
 import InternetSpeedDisplay from "./components/InternetSpeedDisplay";
 import ModelViewerScript from "./components/ModelViewerScript";
 import ModelsGallery from "./pages/ModelsGallery";
+import InternetAssetDetail from "./pages/dashboard/assetDetails/InternetAssetDetail";
+import EVAssetDetail from "./pages/dashboard/assetDetails/EVAssetDetail";
+import SolarAssetDetail from "./pages/dashboard/assetDetails/SolarAssetDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +39,9 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/models" element={<ModelsGallery />} />
+            <Route path="/dashboard/rooftop" element={<SolarAssetDetail />} />
+            <Route path="/dashboard/internet" element={<InternetAssetDetail />} />
+            <Route path="/dashboard/ev-charging" element={<EVAssetDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <InternetSpeedDisplay />
