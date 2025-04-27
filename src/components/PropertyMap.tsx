@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
@@ -8,6 +7,7 @@ import ModelJobInfo from './map/ModelJobInfo';
 import { useGoogleMapInstance } from '@/hooks/useGoogleMapInstance';
 import html2canvas from 'html2canvas';
 import { getWebhookUrl } from '@/utils/webhookConfig';
+import { getStreetViewImageUrl, checkStreetViewAvailability } from '@/utils/streetViewService';
 
 interface PropertyMapProps {
   address: string;
@@ -21,7 +21,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   const [modelJobId, setModelJobId] = useState<string | null>(null);
   const [weatherTemp, setWeatherTemp] = useState<string>("26°");
   const [isAnalyzing, setIsAnalyzing] = useState(true);
-  const [currentZoomLevel, setCurrentZoomLevel] = useState(12); // Track the current zoom level
+  const [currentZoomLevel, setCurrentZoomLevel] = useState(12);
   const analysisTimerRef = useRef<NodeJS.Timeout | null>(null);
   const zoomTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasExecutedZoom = useRef(false);
@@ -31,20 +31,17 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     mapContainerRef,
     address,
     view,
-    initialZoom: 12, // Initial zoom level during analysis
+    initialZoom: 12,
     onZoomComplete: () => {
-      // Initial map loading is complete
       console.log("Map initial loading complete");
     }
   });
 
-  // Handle analysis completion and zooming
   useEffect(() => {
     if (!isLoaded || !mapInstance || !isAnalyzing || hasExecutedZoom.current) return;
     
     console.log("Starting property analysis timer");
     
-    // Clear any existing timers
     if (analysisTimerRef.current) {
       clearTimeout(analysisTimerRef.current);
     }
@@ -53,47 +50,38 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       clearTimeout(zoomTimerRef.current);
     }
     
-    // Set a timer to complete "analysis" and trigger zoom
     analysisTimerRef.current = setTimeout(() => {
       console.log("Analysis complete, preparing to zoom");
       setIsAnalyzing(false);
       
-      // Wait a moment before zooming to make the transition apparent to the user
       zoomTimerRef.current = setTimeout(() => {
         console.log("Executing zoom to level 18");
         
-        // Mark that we've already executed the zoom to prevent duplicate calls
         hasExecutedZoom.current = true;
         
-        // Execute the zoom operation
         const success = zoomMap(18);
         
         if (success) {
           setCurrentZoomLevel(18);
           console.log("Zoom operation initiated to level 18");
           
-          // Allow time for zoom animation to complete before calling onZoomComplete
           setTimeout(() => {
             if (onZoomComplete) {
-              console.log("Executing zoom completion callback");
               onZoomComplete();
             }
             
-            // After zoom is complete and only if we haven't captured a screenshot yet
             if (!screenshotCaptured.current) {
               captureAndSendPropertyScreenshot();
             }
           }, 1500);
         } else {
           console.error("Zoom operation failed");
-          // Try a direct approach if the zoomMap function fails
           if (mapInstance) {
             try {
               console.log("Attempting direct zoom to level 18");
               mapInstance.setZoom(18);
               setCurrentZoomLevel(18);
               
-              // Even if direct zoom was needed, try to capture screenshot
               setTimeout(() => {
                 if (!screenshotCaptured.current) {
                   captureAndSendPropertyScreenshot();
@@ -105,9 +93,8 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
           }
         }
       }, 500);
-    }, 3000); // 3 seconds analysis time
+    }, 3000);
     
-    // Cleanup
     return () => {
       if (analysisTimerRef.current) {
         clearTimeout(analysisTimerRef.current);
@@ -118,7 +105,6 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     };
   }, [isLoaded, mapInstance, isAnalyzing, onZoomComplete, zoomMap]);
 
-  // Monitor map zoom level changes
   useEffect(() => {
     if (!mapInstance) return;
     
@@ -135,7 +121,6 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     };
   }, [mapInstance]);
 
-  // Add an effect to ensure the zoom is applied correctly if initial zooming failed
   useEffect(() => {
     if (mapInstance && !isAnalyzing && currentZoomLevel < 18 && !hasExecutedZoom.current) {
       console.log("Backup zoom mechanism triggered, current zoom:", currentZoomLevel);
@@ -183,11 +168,42 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
         console.log("No webhook URL configured, skipping screenshot sending");
         return;
       }
+
+      let imageData = null;
+      if (mapInstance) {
+        const center = mapInstance.getCenter();
+        const location = {
+          lat: center.lat(),
+          lng: center.lng()
+        };
+
+        const hasStreetView = await checkStreetViewAvailability(location);
+        
+        if (hasStreetView) {
+          const streetViewUrl = getStreetViewImageUrl(address);
+          console.log("Using Street View image:", streetViewUrl);
+          
+          try {
+            const response = await fetch(streetViewUrl);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            
+            imageData = await new Promise((resolve) => {
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          } catch (error) {
+            console.error("Error fetching Street View image:", error);
+          }
+        }
+      }
+
+      if (!imageData) {
+        console.log("Falling back to map screenshot");
+        imageData = await captureMapImage();
+      }
       
-      const imageData = await captureMapImage();
-      
-      // Send to webhook
-      console.log("Sending property screenshot to webhook:", webhookUrl);
+      console.log("Sending property image to webhook:", webhookUrl);
       const response = await fetch(webhookUrl, {
         method: "POST",
         headers: {
@@ -199,21 +215,21 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
           timestamp: new Date().toISOString(),
           source: "TipTop Property Analysis"
         }),
-        mode: "no-cors" // Use no-cors to prevent CORS issues with external webhooks
+        mode: "no-cors"
       });
       
-      console.log("Property screenshot sent to webhook successfully");
+      console.log("Property image sent to webhook successfully");
       
       toast({
         title: "Property Captured",
-        description: "Property screenshot has been sent for 3D model generation",
+        description: "Property image has been sent for 3D model generation",
       });
     } catch (error) {
-      console.error("Error sending property screenshot to webhook:", error);
+      console.error("Error sending property image to webhook:", error);
       
       toast({
         title: "Screenshot Error",
-        description: "Failed to capture or send property screenshot",
+        description: "Failed to capture or send property image",
         variant: "destructive"
       });
     }
@@ -237,12 +253,10 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       });
 
       try {
-        // Actually call the Meshy API
         const jobId = await generateModelFromImage(imageData);
         console.log("3D model generation job created:", jobId);
         setModelJobId(jobId);
         
-        // Dispatch event to notify other components
         const modelEvent = new CustomEvent('modelJobCreated', {
           detail: { jobId }
         });
@@ -255,11 +269,9 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
       } catch (error) {
         console.error("Error calling Meshy API:", error);
         
-        // Fallback to demo model if API fails
         const demoJobId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
         setModelJobId(demoJobId);
         
-        // Dispatch event for demo model
         const modelEvent = new CustomEvent('modelJobCreated', {
           detail: { jobId: demoJobId }
         });
@@ -279,7 +291,6 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
         variant: "destructive"
       });
       
-      // Always provide a fallback
       const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
       setModelJobId(fallbackId);
       

@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for interacting with the Meshy API
  */
@@ -37,10 +36,10 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
         mode: "geometry",         // Focus on accurate geometry
         background_removal: true, // Remove background for cleaner model
         generate_material: true,  // Generate realistic materials
-        prompt: "Realistic residential house architecture, detailed building structure with accurate proportions", // Improved prompt for better results
-        reference_model_id: "house", // Use house as reference model 
-        preserve_topology: true,     // Better for architectural models
-        mesh_quality: "high"         // Higher quality for detailed structures
+        prompt: "Create a realistic 3D model of this residential property front view, preserving architectural details", 
+        reference_model_id: "house",
+        preserve_topology: true,  // Better for architectural models
+        mesh_quality: "high"     // Higher quality for detailed structures
       })
     });
 
@@ -53,7 +52,6 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
     const data = await response.json();
     console.log("Meshy API response:", data);
     
-    // Return the job ID for later retrieval
     return data.id;
   } catch (error) {
     console.error("Error generating 3D model:", error);
@@ -154,5 +152,3 @@ export const getModelDownloadUrl = async (jobId: string): Promise<string> => {
  * 
  * 3. If enterprise-level access is needed, contact Google directly about
  *    potential partnership or enterprise access to Project Sunroof data.
- */
-
