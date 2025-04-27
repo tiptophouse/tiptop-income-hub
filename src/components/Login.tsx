@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +10,7 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { generatePropertyModels } from '@/utils/modelGeneration';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -96,7 +96,7 @@ const Login = () => {
           title: "Sign In Successful",
           description: "You are now logged in.",
         });
-        navigate('/dashboard');
+        await handleSuccessfulLogin();
       }
     } catch (error) {
       toast({
@@ -114,7 +114,6 @@ const Login = () => {
     try {
       console.log('Starting Google auth flow...');
       
-      // Get the current URL origin for proper redirect
       const currentUrl = window.location.origin;
       console.log('Current URL origin:', currentUrl);
       
@@ -123,7 +122,6 @@ const Login = () => {
         options: {
           redirectTo: `${currentUrl}/dashboard`,
           queryParams: {
-            // Add prompt consent to ensure the user sees the Google login screen every time
             prompt: 'select_account',
             access_type: 'offline'
           }
@@ -143,6 +141,7 @@ const Login = () => {
           title: "Redirecting to Google",
           description: "Please complete the authentication in the Google popup.",
         });
+        // Model generation will be handled after redirect in Dashboard component
       }
     } catch (error) {
       console.error('Exception during Google sign in:', error);
@@ -188,7 +187,17 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-  
+
+  const handleSuccessfulLogin = async (address: string = "123 Main St") => {
+    try {
+      await generatePropertyModels(address);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error("Error generating models:", error);
+      navigate('/dashboard');
+    }
+  };
+
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   return (

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Plus, Car, FileText, Check, LogOut, Home, Sun, Wifi, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -25,6 +24,7 @@ import InternetAssetDetail from './dashboard/assetDetails/InternetAssetDetail';
 import EVAssetDetail from './dashboard/assetDetails/EVAssetDetail';
 import AddAssetPage from './dashboard/AddAssetPage';
 import { mockAssets } from './dashboard/dashboardData';
+import { generatePropertyModels } from '@/utils/modelGeneration';
 
 const Dashboard = () => {
   const [userName, setUserName] = useState('John');
@@ -37,7 +37,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const active = mockAssets.filter(asset => asset.status === 'active').length;
     const pending = mockAssets.filter(asset => asset.action !== 'None').length;
     
@@ -53,6 +53,27 @@ const Dashboard = () => {
       monthly: monthlyTotal,
       yearly: monthlyTotal * 12
     });
+  }, []);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Session check error:', error);
+        } else if (session) {
+          // Check if we need to generate models after OAuth redirect
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user && !user.user_metadata.propertyModelJobId) {
+            await generatePropertyModels(user.user_metadata.propertyAddress || "123 Main St");
+          }
+        }
+      } catch (error) {
+        console.error('Session check exception:', error);
+      }
+    };
+    
+    checkSession();
   }, []);
 
   const aiRevenueDescription = `Today's solar generation was 12% above average due to clear skies. Your internet bandwidth was utilized at 78% capacity with peak usage during evening hours. The EV charging stations were used for 7.5 hours today.`;
@@ -76,7 +97,6 @@ const Dashboard = () => {
 
   const activeAssets = mockAssets.filter(asset => asset.status === 'active');
 
-  // Render menu items - used for both desktop sidebar and mobile menu
   const renderMenuItems = (onItemClick = () => {}) => (
     <>
       <SidebarMenuItem>
@@ -131,7 +151,6 @@ const Dashboard = () => {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen bg-background flex w-full">
-        {/* Desktop Sidebar */}
         <Sidebar collapsible="icon">
           <SidebarHeader>
             <div className="flex items-center px-2">
@@ -163,7 +182,6 @@ const Dashboard = () => {
         <SidebarInset className="flex-1">
           <div className="p-4 md:p-6 max-w-7xl mx-auto relative">
             <div className="flex justify-between items-center mb-4">
-              {/* Mobile Menu Button */}
               <div className="md:hidden">
                 <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                   <SheetTrigger asChild>
@@ -199,7 +217,6 @@ const Dashboard = () => {
                 </Sheet>
               </div>
 
-              {/* Home Button */}
               <Button
                 variant="ghost"
                 size="icon"
