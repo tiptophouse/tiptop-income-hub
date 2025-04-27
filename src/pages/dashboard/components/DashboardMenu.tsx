@@ -1,5 +1,4 @@
-
-import { Calendar, Home, Sun, Wifi, Car, Plus, LogOut } from 'lucide-react';
+import { Calendar, Home, Sun, Wifi, Car, Plus, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -19,6 +18,8 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
     { title: "Rooftop", url: "/dashboard/rooftop", icon: Sun },
     { title: "Internet", url: "/dashboard/internet", icon: Wifi },
     { title: "EV Charging", url: "/dashboard/ev-charging", icon: Car },
+    { title: "Add Asset", url: "/dashboard/add-asset", icon: Plus },
+    { title: "My Account", url: "/dashboard/account", icon: User },
   ];
 
   const buttonClasses = isMobile 
@@ -46,15 +47,6 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={() => navigate('/dashboard/add-asset')}
-              className={location.pathname === '/dashboard/add-asset' ? activeClasses : buttonClasses}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              <span>Add Asset</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
       </div>
       <div className="border-t border-white/20 mt-auto p-4">

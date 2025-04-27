@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import DashboardHeader from './components/DashboardHeader';
 import PropertyOverviewCard from './components/PropertyOverviewCard';
@@ -30,7 +31,7 @@ const DashboardOverview = ({
   pendingActions, 
   aiRevenueDescription 
 }: DashboardOverviewProps) => {
-  const [propertyAddress, setPropertyAddress] = useState("Enter an address...");
+  const [propertyAddress, setPropertyAddress] = useState<string>("Enter an address...");
   
   useEffect(() => {
     const handleAddressFound = (event: CustomEvent) => {
@@ -58,7 +59,7 @@ const DashboardOverview = ({
               <Building className="h-4 w-4 sm:h-5 sm:w-5 text-tiptop-accent" />
               Property 3D Model
             </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">{propertyAddress}</CardDescription>
+            <CardDescription className="text-xs sm:text-sm truncate">{propertyAddress}</CardDescription>
           </CardHeader>
           <CardContent className={isMobile ? 'p-3 pt-0' : 'pt-0'}>
             <div className="w-full overflow-hidden rounded-lg max-h-[200px] sm:max-h-none">
@@ -74,10 +75,10 @@ const DashboardOverview = ({
       </div>
       
       <StatisticsCards
-        earnings={earnings}
-        activeAssets={activeAssets}
-        totalPotentialAssets={totalPotentialAssets}
-        pendingActions={pendingActions}
+        earnings={{ daily: 12.67, monthly: 380, yearly: 4560 }}
+        activeAssets={5}
+        totalPotentialAssets={9}
+        pendingActions={3}
       />
       
       <DashboardCharts earnings={earnings} aiRevenueDescription={aiRevenueDescription} />

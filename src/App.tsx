@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,7 +15,7 @@ import InternetAssetDetail from "./pages/dashboard/assetDetails/InternetAssetDet
 import EVAssetDetail from "./pages/dashboard/assetDetails/EVAssetDetail";
 import SolarAssetDetail from "./pages/dashboard/assetDetails/SolarAssetDetail";
 import AddAssetPage from "./pages/dashboard/AddAssetPage";
-// Removed InternetSpeedDisplay import
+import AccountPage from "./pages/dashboard/AccountPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,9 +42,9 @@ const App = () => (
             <Route path="/dashboard/internet" element={<InternetAssetDetail />} />
             <Route path="/dashboard/ev-charging" element={<EVAssetDetail />} />
             <Route path="/dashboard/add-asset" element={<AddAssetPage />} />
+            <Route path="/dashboard/account" element={<AccountPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          {/* Removed InternetSpeedDisplay component */}
           <Toaster />
           <Sonner />
         </GoogleMapsInit>
