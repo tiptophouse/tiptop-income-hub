@@ -18,6 +18,7 @@ import SolarAssetDetail from "./pages/dashboard/assetDetails/SolarAssetDetail";
 import AddAssetPage from "./pages/dashboard/AddAssetPage";
 import AccountPage from "./pages/dashboard/AccountPage";
 import ModelViewerScript from "./components/ModelViewerScript";
+import AdminPage from "./pages/dashboard/AdminPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/dashboard/ev-charging" element={<EVAssetDetail />} />
             <Route path="/dashboard/add-asset" element={<AddAssetPage />} />
             <Route path="/dashboard/account" element={<AccountPage />} />
+            <Route path="/dashboard/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
