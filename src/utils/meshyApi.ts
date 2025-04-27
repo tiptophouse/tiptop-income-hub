@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for interacting with the Meshy API
  */
@@ -152,3 +153,4 @@ export const getModelDownloadUrl = async (jobId: string): Promise<string> => {
  * 
  * 3. If enterprise-level access is needed, contact Google directly about
  *    potential partnership or enterprise access to Project Sunroof data.
+ */
