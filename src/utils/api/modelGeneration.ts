@@ -18,16 +18,41 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
       throw new Error("Invalid image data for model generation");
     }
     
-    // Enhance the prompt with property features
-    let enhancedPrompt = `Create a photorealistic 3D model of this residential property with:
-- 800 sq ft usable roof for solar panels (6.5kW potential)
-- 2 parking spaces available for rent
-- 300 sq ft garden space
-- Facade suitable for internet antenna placement
-Maintain precise scale and proportions.`;
+    // Create enhanced prompt with property features
+    let enhancedPrompt = `Create a photorealistic 3D model of this residential property with:`;
+    
+    // Add roof details if available
+    if (propertyFeatures?.roofSize) {
+      enhancedPrompt += `\n- ${propertyFeatures.roofSize} sq ft usable roof for solar panels (${propertyFeatures.solarPotentialKw || 6.5}kW potential)`;
+    } else {
+      enhancedPrompt += `\n- 800 sq ft usable roof for solar panels (6.5kW potential)`;
+    }
+    
+    // Add parking details
+    if (propertyFeatures?.parkingSpaces) {
+      enhancedPrompt += `\n- ${propertyFeatures.parkingSpaces} parking spaces available for rent`;
+    } else {
+      enhancedPrompt += `\n- 2 parking spaces available for rent`;
+    }
+    
+    // Add garden details
+    if (propertyFeatures?.hasGarden) {
+      enhancedPrompt += `\n- ${propertyFeatures?.gardenSqFt || 300} sq ft garden space`;
+    }
+    
+    // Add internet details if available
+    if (propertyFeatures?.internetMbps) {
+      enhancedPrompt += `\n- Facade suitable for internet antenna placement (${propertyFeatures.internetMbps}Mbps)`;
+    } else {
+      enhancedPrompt += `\n- Facade suitable for internet antenna placement`;
+    }
+    
+    enhancedPrompt += `\nMaintain precise scale and proportions.`;
     
     const MESHY_API_TOKEN = getMeshyApiToken();
+    console.log("Using Meshy API with enhanced prompt:", enhancedPrompt);
     
+    // Make API call to Meshy.ai
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
       method: 'POST',
       headers: {
@@ -42,7 +67,8 @@ Maintain precise scale and proportions.`;
         prompt: enhancedPrompt, 
         reference_model_id: "house",
         preserve_topology: true,
-        mesh_quality: "high"
+        mesh_quality: "high",
+        callback_url: window.location.origin + "/api/meshy-webhook" // Optional webhook for completion notification
       })
     });
 
@@ -55,9 +81,17 @@ Maintain precise scale and proportions.`;
     const data = await response.json();
     console.log("Meshy API response:", data);
     
+    // Store the job ID in localStorage for status checking
+    localStorage.setItem('meshy_latest_job_id', data.id);
+    localStorage.setItem('meshy_job_created_at', new Date().toString());
+    
     return data.id;
   } catch (error) {
     console.error("Error in model generation:", error);
-    return "demo-model-" + Math.random().toString(36).substring(2, 8);
+    // Generate a demo model ID for fallback
+    const demoId = "demo-model-" + Math.random().toString(36).substring(2, 8);
+    localStorage.setItem('meshy_latest_job_id', demoId);
+    localStorage.setItem('meshy_job_created_at', new Date().toString());
+    return demoId;
   }
 };

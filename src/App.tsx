@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,7 @@ import AddAssetPage from "./pages/dashboard/AddAssetPage";
 import AccountPage from "./pages/dashboard/AccountPage";
 import ModelViewerScript from "./components/ModelViewerScript";
 import AdminPage from "./pages/dashboard/AdminPage";
+import { startModelCompletionChecker } from './utils/modelNotificationService';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,33 +29,42 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <TooltipProvider>
-        <GoogleMapsInit>
-          <ModelViewerScript />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/models" element={<ModelsGallery />} />
-            <Route path="/dashboard/rooftop" element={<SolarAssetDetail />} />
-            <Route path="/dashboard/internet" element={<InternetAssetDetail />} />
-            <Route path="/dashboard/ev-charging" element={<EVAssetDetail />} />
-            <Route path="/dashboard/add-asset" element={<AddAssetPage />} />
-            <Route path="/dashboard/account" element={<AccountPage />} />
-            <Route path="/dashboard/admin" element={<AdminPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-          <Sonner />
-        </GoogleMapsInit>
-      </TooltipProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+function App() {
+  React.useEffect(() => {
+    const stopChecker = startModelCompletionChecker();
+    return () => {
+      stopChecker();
+    };
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <TooltipProvider>
+          <GoogleMapsInit>
+            <ModelViewerScript />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/models" element={<ModelsGallery />} />
+              <Route path="/dashboard/rooftop" element={<SolarAssetDetail />} />
+              <Route path="/dashboard/internet" element={<InternetAssetDetail />} />
+              <Route path="/dashboard/ev-charging" element={<EVAssetDetail />} />
+              <Route path="/dashboard/add-asset" element={<AddAssetPage />} />
+              <Route path="/dashboard/account" element={<AccountPage />} />
+              <Route path="/dashboard/admin" element={<AdminPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+            <Sonner />
+          </GoogleMapsInit>
+        </TooltipProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

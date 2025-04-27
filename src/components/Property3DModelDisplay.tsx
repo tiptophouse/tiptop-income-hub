@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -85,18 +84,20 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-tiptop-accent" />
           <p className="text-sm text-center text-muted-foreground">{statusMessage}</p>
           <Progress value={progress} className="w-3/4 max-w-xs" />
+          <p className="text-xs text-muted-foreground">
+            {progress < 100 ? "This may take up to 5 minutes" : "Almost ready!"}
+          </p>
         </CardContent>
       </Card>
     );
   }
 
   if (modelStatus === "failed" && !modelUrl) {
-    return <Property3DModelFailed onRetry={handleRefresh} />;
+    return <Property3DModelFailed onRetry={handleRefresh} address={address} className={className} />;
   }
 
   const backgroundOptions = ["#f5f5f5", "#1a1a1a", "#e0f2fe", "#f0fdf4", "#fffbeb"];
 
-  // Property features info for display
   const propertyFeaturesText = propertyFeatures ? [
     propertyFeatures.roofSize ? `Solar potential: ${propertyFeatures.roofSize}sq ft roof` : null,
     propertyFeatures.hasPool ? "Pool: Available for smart systems" : null,
@@ -137,9 +138,15 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
         )}
         
         {modelStatus === 'processing' && (
-          <div className="mb-4 flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>{statusMessage}</span>
+          <div className="mb-4 flex flex-col gap-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>{statusMessage}</span>
+            </div>
+            <Progress value={progress} className="w-full h-1" />
+            <p className="text-xs text-amber-500">
+              You'll receive an email when your model is ready
+            </p>
           </div>
         )}
         

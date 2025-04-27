@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { generatePropertyModels } from '@/utils/modelGeneration';
+import { startModelCompletionChecker } from '@/utils/modelNotificationService';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -24,7 +25,7 @@ const forgotPasswordSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
-const Login = () => {
+const Login: React.FC = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,7 +99,7 @@ const Login = () => {
           title: "Sign In Successful",
           description: "You are now logged in.",
         });
-        await handleSuccessfulLogin();
+        handleLoginSuccess();
       }
     } catch (error) {
       toast({
@@ -190,9 +191,12 @@ const Login = () => {
     }
   };
 
-  const handleSuccessfulLogin = async (address: string = "123 Main St") => {
+  const handleLoginSuccess = () => {
+    // Start model completion checker
+    startModelCompletionChecker();
+    
     try {
-      await generatePropertyModels(address);
+      await generatePropertyModels("123 Main St");
       navigate('/dashboard');
     } catch (error) {
       console.error("Error generating models:", error);

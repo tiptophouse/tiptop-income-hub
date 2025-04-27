@@ -1,127 +1,143 @@
 
 import { useState, useEffect } from 'react';
-import { toast } from "@/components/ui/use-toast";
-import { checkModelStatus, getModelDownloadUrl } from '@/utils/meshyApi';
+import { checkModelStatus, getModelDownloadUrl, startPeriodicStatusCheck } from '@/utils/api/modelStatus';
+
+type ModelStatus = 'loading' | 'processing' | 'completed' | 'failed';
 
 export const use3DModel = (jobId: string) => {
-  const [modelStatus, setModelStatus] = useState<'processing' | 'completed' | 'failed'>('processing');
+  const [modelStatus, setModelStatus] = useState<ModelStatus>('loading');
   const [modelUrl, setModelUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [checkCount, setCheckCount] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string>("Initializing 3D model...");
-  const [progress, setProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string>('Initializing model...');
+  const [progress, setProgress] = useState<number>(0);
+  const [lastCheckTime, setLastCheckTime] = useState<Date>(new Date());
 
   useEffect(() => {
-    if (!jobId) return;
-
-    const initializeModel = async () => {
+    let isMounted = true;
+    let timer: NodeJS.Timeout;
+    
+    // Function to fetch model status
+    const fetchModelStatus = async () => {
       try {
-        setIsLoading(true);
-        console.log("Initializing 3D model with job ID:", jobId);
-        
-        // For demo jobs or if we already have the URL, skip API calls
-        if (jobId.startsWith('demo-')) {
-          console.log("Using demo model");
-          await simulateProgressWithDelay(5000);
-          setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
-          setModelStatus("completed");
+        if (!jobId) {
           setIsLoading(false);
-          setProgress(100);
           return;
         }
+
+        // Update progress based on time passed (estimated 5 minute completion time)
+        const now = new Date();
+        const elapsedTime = (now.getTime() - lastCheckTime.getTime()) / 1000; // in seconds
+        const estimatedTotalTime = 300; // 5 minutes in seconds
+        let newProgress = Math.min(95, (elapsedTime / estimatedTotalTime) * 100);
         
-        // For real jobs, check status with the API
-        console.log("Checking model status for job:", jobId);
-        setStatusMessage(`Checking model generation status (Attempt ${checkCount + 1})...`);
+        setStatusMessage('Checking model status...');
         const status = await checkModelStatus(jobId);
-        
-        if (status.state === 'completed') {
-          console.log("Model generation completed. Getting download URL...");
-          setStatusMessage("Model completed! Loading 3D view...");
-          setProgress(95);
-          const url = await getModelDownloadUrl(jobId);
-          setModelUrl(url);
-          setModelStatus("completed");
+        setLastCheckTime(new Date());
+
+        if (!isMounted) return;
+
+        if (status.state === 'processing') {
+          setModelStatus('processing');
+          setStatusMessage('Building 3D model... This can take up to 5 minutes.');
+          setProgress(Math.min(newProgress, 95));
+          
+          // Check again in 30 seconds
+          timer = setTimeout(fetchModelStatus, 30000);
+        } else if (status.state === 'completed') {
+          setModelStatus('completed');
+          setStatusMessage('3D model ready!');
           setProgress(100);
-          toast({
-            title: "3D Model Ready",
-            description: "Your property's 3D model is now ready to view.",
-          });
+          
+          try {
+            const url = await getModelDownloadUrl(jobId);
+            if (isMounted) {
+              setModelUrl(url);
+              setIsLoading(false);
+            }
+          } catch (urlError) {
+            if (isMounted) {
+              setError(urlError instanceof Error ? urlError : new Error('Failed to get model URL'));
+              setIsLoading(false);
+            }
+          }
         } else if (status.state === 'failed') {
-          console.error("Model generation failed");
-          setModelStatus("failed");
-          setError("Model generation failed");
-          toast({
-            title: "3D Model Failed",
-            description: "Could not generate the 3D model. Using demo model instead.",
-            variant: "destructive",
-          });
-          
-          // Use demo model as fallback
-          await simulateProgressWithDelay(1000);
-          setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
-          setModelStatus("completed");
-          setProgress(100);
+          setModelStatus('failed');
+          setStatusMessage('Model generation failed.');
+          setError(new Error('Model generation failed'));
+          setIsLoading(false);
         } else {
-          // Still processing, schedule another check with exponential backoff
-          console.log("Model still processing. Scheduling another check...");
-          const backoffTime = Math.min(5000 * Math.pow(1.5, checkCount), 30000); // Max 30 seconds
-          const progressIncrement = Math.min(10 + (checkCount * 5), 20); // Increase progress with each check
-          setProgress(Math.min(progress + progressIncrement, 90)); // Cap at 90% until complete
-          setStatusMessage(`Model generation in progress... (${Math.round(backoffTime/1000)}s until next update)`);
+          // Unknown state, treat as processing
+          setModelStatus('processing');
+          setStatusMessage(`Processing model (${status.state || 'unknown'})...`);
+          setProgress(Math.min(newProgress, 90));
           
-          setTimeout(() => {
-            setCheckCount(prevCount => prevCount + 1);
-          }, backoffTime);
+          // Check again in 30 seconds
+          timer = setTimeout(fetchModelStatus, 30000);
         }
       } catch (error) {
-        console.error("Error checking 3D model status:", error);
-        setModelStatus("failed");
-        setError(error instanceof Error ? error.message : "Unknown error");
+        if (!isMounted) return;
+        console.error("Error fetching 3D model status:", error);
         
-        // Use demo model as fallback
-        console.log("Using demo model as fallback due to error");
-        await simulateProgressWithDelay(1000);
-        setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
-        setModelStatus("completed");
-        setProgress(100);
-        
-        toast({
-          title: "Error",
-          description: "Failed to check 3D model status. Using demo model instead.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+        // For demo models, treat any error as completed
+        if (jobId.startsWith('demo-')) {
+          setModelStatus('completed');
+          setStatusMessage('Demo model ready!');
+          setProgress(100);
+          setModelUrl(null);  // Will use sample model in getModelDownloadUrl
+          setIsLoading(false);
+        } else {
+          setError(error instanceof Error ? error : new Error('Failed to get model status'));
+          setModelStatus('failed');
+          setIsLoading(false);
+        }
       }
     };
 
-    initializeModel();
-  }, [jobId, checkCount, progress]);
-
-  // Helper function to simulate progress with delay for demo models
-  const simulateProgressWithDelay = async (totalTime: number) => {
-    const startProgress = progress;
-    const targetProgress = 95;
-    const steps = 10;
-    const stepTime = totalTime / steps;
+    fetchModelStatus();
     
-    for (let i = 0; i < steps; i++) {
-      await new Promise(resolve => setTimeout(resolve, stepTime));
-      const newProgress = startProgress + ((targetProgress - startProgress) * (i + 1)) / steps;
-      setProgress(Math.min(newProgress, 95));
-      setStatusMessage(`Processing 3D model... ${Math.round(newProgress)}%`);
-    }
-  };
+    // Listen for model completed events from the periodic checker
+    const handleModelCompleted = (event: CustomEvent) => {
+      if (event.detail && event.detail.jobId === jobId) {
+        setModelStatus('completed');
+        setStatusMessage('3D model ready!');
+        setProgress(100);
+        setModelUrl(event.detail.modelUrl || null);
+        setIsLoading(false);
+      }
+    };
+    
+    document.addEventListener('modelCompleted', handleModelCompleted as EventListener);
+    
+    // Start periodic status checking when this hook is used
+    const stopStatusCheck = startPeriodicStatusCheck();
 
-  const handleRefresh = () => {
+    return () => {
+      isMounted = false;
+      if (timer) clearTimeout(timer);
+      document.removeEventListener('modelCompleted', handleModelCompleted as EventListener);
+      stopStatusCheck();
+    };
+  }, [jobId]);
+
+  // Function to manually refresh the model status
+  const handleRefresh = async () => {
     setIsLoading(true);
-    setModelStatus("processing");
-    setCheckCount(0);
     setError(null);
     setProgress(0);
-    setStatusMessage("Refreshing 3D model...");
+    setStatusMessage('Refreshing model status...');
+    try {
+      const url = await getModelDownloadUrl(jobId);
+      setModelUrl(url);
+      setModelStatus('completed');
+      setStatusMessage('3D model ready!');
+      setProgress(100);
+    } catch (error) {
+      setError(error instanceof Error ? error : new Error('Failed to refresh model'));
+      setModelStatus('failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return {
@@ -131,6 +147,6 @@ export const use3DModel = (jobId: string) => {
     error,
     statusMessage,
     progress,
-    handleRefresh
+    handleRefresh,
   };
 };
