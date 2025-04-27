@@ -23,6 +23,10 @@ interface Property3DModelViewerProps {
   hasSatelliteImage?: boolean;
   propertyFeatures?: {
     roofSize?: number;
+    solarPotentialKw?: number;
+    internetMbps?: number;
+    parkingSpaces?: number;
+    gardenSqFt?: number;
     hasPool?: boolean;
     hasGarden?: boolean;
     hasParking?: boolean;
@@ -42,10 +46,21 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
   zoomLevel = 105,
   backgroundColor = "#f5f5f5",
   hasSatelliteImage = false,
-  propertyFeatures
+  propertyFeatures = {
+    roofSize: 800,
+    solarPotentialKw: 6.5,
+    internetMbps: 100,
+    parkingSpaces: 2,
+    gardenSqFt: 300,
+    hasPool: false,
+    hasGarden: true,
+    hasParking: true,
+    hasEVCharging: false
+  }
 }) => {
   const isMobile = useIsMobile();
   const [showHotspots, setShowHotspots] = React.useState(true);
+  const [selectedAsset, setSelectedAsset] = React.useState<string | null>(null);
   
   // Generate hotspots based on propertyFeatures
   const hotspots = React.useMemo(() => {
@@ -53,12 +68,24 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
     
     // Always add roof hotspot
     spots.push({
-      id: "roof",
+      id: "solar",
       position: "0 1 0",
       normal: "0 1 0",
       label: propertyFeatures?.roofSize 
-        ? `Roof (${propertyFeatures.roofSize}sq ft) - Solar Panel Potential`
-        : "Roof - Solar Panel Potential"
+        ? `${propertyFeatures.roofSize} sq ft usable with ${propertyFeatures.solarPotentialKw || 6.5}kW potential`
+        : "Solar Panel Potential",
+      active: selectedAsset === "solar"
+    });
+    
+    // Add internet hotspot
+    spots.push({
+      id: "internet",
+      position: "0 0.5 0.5",
+      normal: "0 0 1",
+      label: propertyFeatures?.internetMbps
+        ? `${propertyFeatures.internetMbps} Mbps available for sharing`
+        : "Internet Bandwidth Sharing",
+      active: selectedAsset === "internet"
     });
     
     if (propertyFeatures?.hasParking) {
@@ -66,7 +93,10 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
         id: "parking",
         position: "0.5 0 0.5",
         normal: "0 1 0",
-        label: "Parking - EV Charging Potential"
+        label: propertyFeatures?.parkingSpaces
+          ? `${propertyFeatures.parkingSpaces} parking spaces available`
+          : "Parking Space Rental",
+        active: selectedAsset === "parking"
       });
     }
     
@@ -75,7 +105,10 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
         id: "garden",
         position: "-0.5 0 0.5",
         normal: "0 1 0",
-        label: "Garden - Smart Irrigation Potential"
+        label: propertyFeatures?.gardenSqFt
+          ? `${propertyFeatures.gardenSqFt} sq ft garden space`
+          : "Garden Space",
+        active: selectedAsset === "garden"
       });
     }
     
@@ -84,20 +117,13 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
         id: "pool",
         position: "-0.5 0 -0.5",
         normal: "0 1 0",
-        label: "Swimming Pool - Smart Pool System"
+        label: "Swimming Pool - Smart Pool System",
+        active: selectedAsset === "pool"
       });
     }
     
-    // Always add facade/internet hotspot
-    spots.push({
-      id: "internet",
-      position: "0 0.5 0.5",
-      normal: "0 0 1",
-      label: "Facade - Internet Antenna Potential"
-    });
-    
     return spots;
-  }, [propertyFeatures]);
+  }, [propertyFeatures, selectedAsset]);
   
   return (
     <div className="space-y-2 sm:space-y-4 relative">
@@ -114,7 +140,11 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
         />
         
         {showHotspots && propertyFeatures && (
-          <PropertyHotspots features={propertyFeatures} />
+          <PropertyHotspots 
+            features={propertyFeatures} 
+            selectedAsset={selectedAsset}
+            onSelectAsset={setSelectedAsset}
+          />
         )}
       </div>
       

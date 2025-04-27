@@ -1,35 +1,63 @@
+
 import React from 'react';
 import { 
-  Home, 
   Sun, 
-  BatteryCharging, 
   Wifi, 
   ParkingSquare,
-  Droplets,
-  Waves
+  Flower
 } from 'lucide-react';
 
 interface PropertyHotspotsProps {
   features: {
     roofSize?: number;
+    solarPotentialKw?: number;
+    internetMbps?: number;
+    parkingSpaces?: number;
+    gardenSqFt?: number;
     hasPool?: boolean;
     hasGarden?: boolean;
     hasParking?: boolean;
     hasEVCharging?: boolean;
   };
+  selectedAsset?: string | null;
+  onSelectAsset?: (assetId: string | null) => void;
 }
 
-const PropertyHotspots: React.FC<PropertyHotspotsProps> = ({ features }) => {
+const PropertyHotspots: React.FC<PropertyHotspotsProps> = ({ 
+  features, 
+  selectedAsset,
+  onSelectAsset = () => {}
+}) => {
+  // Define financial values for each asset
+  const financialData = {
+    solar: { value: 120, unit: 'month' },
+    internet: { value: 200, unit: 'month' },
+    parking: { value: 300, unit: 'month' },
+    garden: { value: 80, unit: 'month' }
+  };
+
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
       {/* Solar Panel Hotspot */}
       <div className="absolute top-[15%] right-[30%] transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
         <div className="relative group">
-          <div className="bg-yellow-500 text-white h-7 w-7 rounded-full flex items-center justify-center shadow-lg pulse-animation">
-            <Sun size={14} />
+          <div 
+            className={`${selectedAsset === 'solar' ? 'bg-amber-500 scale-110' : 'bg-amber-400'} 
+                       text-white h-8 w-8 rounded-full flex items-center justify-center shadow-lg
+                       hover:scale-110 transition-all cursor-pointer`}
+            onClick={() => onSelectAsset(selectedAsset === 'solar' ? null : 'solar')}
+          >
+            <Sun size={16} />
           </div>
-          <div className="absolute opacity-0 group-hover:opacity-100 bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white text-xs rounded py-1 px-2 whitespace-nowrap transition-opacity duration-200">
-            {features.roofSize ? `Solar Panels (${features.roofSize}sq ft roof)` : "Solar Panel Potential"}
+          <div className={`absolute ${selectedAsset === 'solar' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} 
+                          bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white 
+                          text-xs rounded py-2 px-3 whitespace-nowrap transition-opacity duration-200 z-20`}>
+            <div className="font-semibold mb-1">Rooftop Solar</div>
+            <div className="text-amber-300 font-bold">${financialData.solar.value}/{financialData.solar.unit}</div>
+            <div className="text-xs mt-1">
+              {features.roofSize ? `${features.roofSize} sq ft usable` : "Solar panel potential"}
+              {features.solarPotentialKw ? ` with ${features.solarPotentialKw}kW potential` : ""}
+            </div>
           </div>
         </div>
       </div>
@@ -37,24 +65,46 @@ const PropertyHotspots: React.FC<PropertyHotspotsProps> = ({ features }) => {
       {/* Internet Antenna Hotspot */}
       <div className="absolute top-[40%] left-[60%] transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
         <div className="relative group">
-          <div className="bg-blue-500 text-white h-7 w-7 rounded-full flex items-center justify-center shadow-lg">
-            <Wifi size={14} />
+          <div 
+            className={`${selectedAsset === 'internet' ? 'bg-blue-600 scale-110' : 'bg-blue-500'} 
+                       text-white h-8 w-8 rounded-full flex items-center justify-center shadow-lg
+                       hover:scale-110 transition-all cursor-pointer`}
+            onClick={() => onSelectAsset(selectedAsset === 'internet' ? null : 'internet')}
+          >
+            <Wifi size={16} />
           </div>
-          <div className="absolute opacity-0 group-hover:opacity-100 bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white text-xs rounded py-1 px-2 whitespace-nowrap transition-opacity duration-200">
-            Internet Antenna Placement
+          <div className={`absolute ${selectedAsset === 'internet' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} 
+                          bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white 
+                          text-xs rounded py-2 px-3 whitespace-nowrap transition-opacity duration-200 z-20`}>
+            <div className="font-semibold mb-1">Internet Bandwidth</div>
+            <div className="text-blue-300 font-bold">${financialData.internet.value}/{financialData.internet.unit}</div>
+            <div className="text-xs mt-1">
+              {features.internetMbps ? `${features.internetMbps} Mbps available for sharing` : "Sharable internet bandwidth"}
+            </div>
           </div>
         </div>
       </div>
       
-      {/* EV Charging Hotspot */}
+      {/* Parking Space Hotspot */}
       {features.hasParking && (
-        <div className="absolute top-[75%] right-[60%] transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
+        <div className="absolute top-[75%] right-[40%] transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
           <div className="relative group">
-            <div className="bg-green-500 text-white h-7 w-7 rounded-full flex items-center justify-center shadow-lg">
-              <BatteryCharging size={14} />
+            <div 
+              className={`${selectedAsset === 'parking' ? 'bg-purple-600 scale-110' : 'bg-purple-500'} 
+                         text-white h-8 w-8 rounded-full flex items-center justify-center shadow-lg
+                         hover:scale-110 transition-all cursor-pointer`}
+              onClick={() => onSelectAsset(selectedAsset === 'parking' ? null : 'parking')}
+            >
+              <ParkingSquare size={16} />
             </div>
-            <div className="absolute opacity-0 group-hover:opacity-100 bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white text-xs rounded py-1 px-2 whitespace-nowrap transition-opacity duration-200">
-              EV Charging Station Potential
+            <div className={`absolute ${selectedAsset === 'parking' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} 
+                            bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white 
+                            text-xs rounded py-2 px-3 whitespace-nowrap transition-opacity duration-200 z-20`}>
+              <div className="font-semibold mb-1">Parking Space</div>
+              <div className="text-purple-300 font-bold">${financialData.parking.value}/{financialData.parking.unit}</div>
+              <div className="text-xs mt-1">
+                {features.parkingSpaces ? `${features.parkingSpaces} spaces available for rent` : "Parking spaces available"}
+              </div>
             </div>
           </div>
         </div>
@@ -64,25 +114,22 @@ const PropertyHotspots: React.FC<PropertyHotspotsProps> = ({ features }) => {
       {features.hasGarden && (
         <div className="absolute top-[70%] left-[30%] transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
           <div className="relative group">
-            <div className="bg-emerald-500 text-white h-7 w-7 rounded-full flex items-center justify-center shadow-lg">
-              <Droplets size={14} />
+            <div 
+              className={`${selectedAsset === 'garden' ? 'bg-emerald-600 scale-110' : 'bg-emerald-500'} 
+                         text-white h-8 w-8 rounded-full flex items-center justify-center shadow-lg
+                         hover:scale-110 transition-all cursor-pointer`}
+              onClick={() => onSelectAsset(selectedAsset === 'garden' ? null : 'garden')}
+            >
+              <Flower size={16} />
             </div>
-            <div className="absolute opacity-0 group-hover:opacity-100 bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white text-xs rounded py-1 px-2 whitespace-nowrap transition-opacity duration-200">
-              Smart Irrigation System
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Swimming Pool Hotspot */}
-      {features.hasPool && (
-        <div className="absolute top-[60%] left-[45%] transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-          <div className="relative group">
-            <div className="bg-cyan-500 text-white h-7 w-7 rounded-full flex items-center justify-center shadow-lg">
-              <Waves size={14} />
-            </div>
-            <div className="absolute opacity-0 group-hover:opacity-100 bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white text-xs rounded py-1 px-2 whitespace-nowrap transition-opacity duration-200">
-              Smart Pool System
+            <div className={`absolute ${selectedAsset === 'garden' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} 
+                            bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white 
+                            text-xs rounded py-2 px-3 whitespace-nowrap transition-opacity duration-200 z-20`}>
+              <div className="font-semibold mb-1">Garden Space</div>
+              <div className="text-emerald-300 font-bold">${financialData.garden.value}/{financialData.garden.unit}</div>
+              <div className="text-xs mt-1">
+                {features.gardenSqFt ? `${features.gardenSqFt} sq ft available` : "Garden space available"}
+              </div>
             </div>
           </div>
         </div>

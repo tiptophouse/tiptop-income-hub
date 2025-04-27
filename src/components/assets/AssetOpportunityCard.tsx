@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface AssetOpportunityCardProps {
@@ -20,16 +20,16 @@ const AssetOpportunityCard: React.FC<AssetOpportunityCardProps> = ({
   checked,
   onChange,
 }) => (
-  <Card className="border border-[#E5DEFF] hover:shadow-lg transition-shadow">
-    <CardHeader className="flex flex-row items-center gap-4">
-      <div className="bg-[#F3ECFF] p-3 rounded-full">
-        {asset.icon}
-      </div>
-      <div className="flex-1">
-        <CardTitle className="text-lg text-[#6E59A5]">
-          {asset.title}
-        </CardTitle>
-        <p className="text-lg font-bold text-[#8B5CF6]">{asset.estimatedIncome}</p>
+  <Card className="border border-[#f5f5f5] hover:shadow-lg transition-shadow p-4 bg-[#fffffe] rounded-xl">
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-3">
+        <div className="bg-[#f8f4ff] p-3 rounded-full">
+          {asset.icon}
+        </div>
+        <div>
+          <h3 className="font-semibold text-lg text-[#6E59A5]">{asset.title}</h3>
+          <p className="text-lg font-bold text-[#8B5CF6]">{asset.estimatedIncome}</p>
+        </div>
       </div>
       <Checkbox
         id={`check-${asset.id}`}
@@ -37,8 +37,8 @@ const AssetOpportunityCard: React.FC<AssetOpportunityCardProps> = ({
         onCheckedChange={onChange}
         className="h-6 w-6 border-2 border-[#8B5CF6] rounded-md"
       />
-    </CardHeader>
-    <CardContent>
+    </div>
+    <CardContent className="p-0">
       <p className="text-[#552B1B]">{asset.details}</p>
     </CardContent>
   </Card>

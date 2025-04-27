@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sun, Wifi, CarFront, Droplet, Store, Camera, Car, BatteryCharging, Scissors, Home, Flower } from 'lucide-react';
+import { Sun, Wifi, ParkingSquare, Flower } from 'lucide-react';
 import AssetOpportunityCard from './AssetOpportunityCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -19,134 +19,87 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
   insights,
   isLoading
 }) => {
-  // Define all possible monetization opportunities
-  const getImmediateOpportunities = () => {
-    if (insights?.monetization_opportunities) {
-      const mo = insights.monetization_opportunities;
-      const opportunities = [];
-      
-      if (mo.rooftop_solar && mo.rooftop_solar.confidence > 0.3) {
-        opportunities.push({
-          id: "solar",
-          title: "Rooftop Solar",
-          icon: <Sun className="h-8 w-8 text-yellow-500" />,
-          estimatedIncome: `$${Math.round(mo.rooftop_solar.est_monthly_savings_usd)}/month`,
-          details: `${mo.rooftop_solar.usable_rooftop_sq_ft} sq ft usable with ${mo.rooftop_solar.max_kw_installed}kW potential`
-        });
-      }
-      
-      if (mo.internet_bandwidth && mo.internet_bandwidth.confidence > 0.3) {
-        opportunities.push({
-          id: "bandwidth",
-          title: "Internet Bandwidth",
-          icon: <Wifi className="h-8 w-8 text-blue-500" />,
-          estimatedIncome: `$${Math.round(mo.internet_bandwidth.est_monthly_revenue_usd)}/month`,
-          details: `${mo.internet_bandwidth.shareable_capacity_mbps} Mbps available for sharing`
-        });
-      }
-      
-      if (mo.parking_space && mo.parking_space.confidence > 0.3) {
-        opportunities.push({
-          id: "parking",
-          title: "Parking Space",
-          icon: <CarFront className="h-8 w-8 text-purple-500" />,
-          estimatedIncome: `$${Math.round(mo.parking_space.est_monthly_rent_usd_total)}/month`,
-          details: `${mo.parking_space.spaces_available_for_rent} spaces available for rent`
-        });
-      }
-
-      if (mo.garden_space && mo.garden_space.confidence > 0.3) {
-        opportunities.push({
-          id: "garden",
-          title: "Garden Space",
-          icon: <Flower className="h-8 w-8 text-green-500" />,
-          estimatedIncome: `$${Math.round(mo.garden_space.est_monthly_revenue_usd)}/month`,
-          details: `${mo.garden_space.garden_sq_ft} sq ft available`
-        });
-      }
-
-      return opportunities;
-    }
-  
-    // Fallback opportunities if no insights available
-    return [
-      {
-        id: "solar",
-        title: "Rooftop Solar",
-        icon: <Sun className="h-8 w-8 text-yellow-500" />,
-        estimatedIncome: "$120-150/month",
-        details: "Your roof has excellent solar potential with 92% sun exposure"
-      },
-      {
-        id: "bandwidth",
-        title: "Internet Bandwidth",
-        icon: <Wifi className="h-8 w-8 text-blue-500" />,
-        estimatedIncome: "$75-95/month",
-        details: "Share unused bandwidth with 0.5% packet loss detected"
-      },
-      {
-        id: "parking",
-        title: "Parking Space",
-        icon: <CarFront className="h-8 w-8 text-purple-500" />,
-        estimatedIncome: "$80-120/month",
-        details: "2 parking spaces detected available for sharing"
-      }
-    ];
-  };
-  
-  // All other potential opportunities
-  const allOpportunities = [
+  // Define fixed opportunities based on the image
+  const immediateOpportunities = [
     {
-      id: "pool",
-      title: "Swimming Pool",
-      icon: <Droplet className="h-8 w-8 text-blue-500" />,
-      estimatedIncome: "$200-300/month",
-      details: "Rent your pool hourly during summer months"
+      id: "solar",
+      title: "Rooftop Solar",
+      icon: <Sun className="h-8 w-8 text-yellow-500" />,
+      estimatedIncome: "$120/month",
+      details: "800 sq ft usable with 6.5kW potential"
     },
     {
-      id: "storage",
-      title: "Storage Space",
-      icon: <Store className="h-8 w-8 text-green-500" />,
-      estimatedIncome: "$60-90/month",
-      details: "Unused garage or basement space can be rented"
+      id: "internet",
+      title: "Internet Bandwidth",
+      icon: <Wifi className="h-8 w-8 text-blue-500" />,
+      estimatedIncome: "$200/month",
+      details: "100 Mbps available for sharing"
     },
     {
-      id: "items",
-      title: "Items (Equipment)",
-      icon: <Camera className="h-8 w-8 text-gray-500" />,
-      estimatedIncome: "$40-80/month",
-      details: "Rent out cameras, tools, and other equipment"
+      id: "parking",
+      title: "Parking Space",
+      icon: <ParkingSquare className="h-8 w-8 text-purple-500" />,
+      estimatedIncome: "$300/month",
+      details: "2 spaces available for rent"
     },
     {
-      id: "car",
-      title: "Car Sharing",
-      icon: <Car className="h-8 w-8 text-red-500" />,
-      estimatedIncome: "$300-500/month",
-      details: "Share your vehicle when not in use"
-    },
-    {
-      id: "ev-charger",
-      title: "EV Charger",
-      icon: <BatteryCharging className="h-8 w-8 text-green-600" />,
-      estimatedIncome: "$60-120/month",
-      details: "Allow others to use your EV charging station"
-    },
-    {
-      id: "full-house",
-      title: "Full House Rental",
-      icon: <Home className="h-8 w-8 text-indigo-500" />,
-      estimatedIncome: "$500-1000/month",
-      details: "Rent your entire home on Airbnb while away"
+      id: "garden",
+      title: "Garden Space",
+      icon: <Flower className="h-8 w-8 text-green-500" />,
+      estimatedIncome: "$80/month",
+      details: "300 sq ft available"
     }
   ];
-
-  // Get immediate opportunities based on insights or fallback data
-  const immediateOpportunities = getImmediateOpportunities();
   
-  // Display all other opportunities that are not in immediate opportunities
-  const otherOpportunities = immediateOpportunities?.length > 0 
-    ? allOpportunities.filter(asset => !immediateOpportunities.some(imm => imm.id === asset.id))
-    : allOpportunities;
+  // Use dynamic data from insights if available, otherwise use fixed data
+  const getOpportunities = () => {
+    if (insights?.monetization_opportunities) {
+      return immediateOpportunities.map(opp => {
+        const insightData = insights.monetization_opportunities;
+        
+        switch (opp.id) {
+          case 'solar':
+            if (insightData.rooftop_solar) {
+              return {
+                ...opp,
+                estimatedIncome: `$${Math.round(insightData.rooftop_solar.est_monthly_savings_usd)}/month`,
+                details: `${insightData.rooftop_solar.usable_rooftop_sq_ft} sq ft usable with ${insightData.rooftop_solar.max_kw_installed}kW potential`
+              };
+            }
+            break;
+          case 'internet':
+            if (insightData.internet_bandwidth) {
+              return {
+                ...opp,
+                estimatedIncome: `$${Math.round(insightData.internet_bandwidth.est_monthly_revenue_usd)}/month`,
+                details: `${insightData.internet_bandwidth.shareable_capacity_mbps} Mbps available for sharing`
+              };
+            }
+            break;
+          case 'parking':
+            if (insightData.parking_space) {
+              return {
+                ...opp,
+                estimatedIncome: `$${Math.round(insightData.parking_space.est_monthly_rent_usd_total)}/month`,
+                details: `${insightData.parking_space.spaces_available_for_rent} spaces available for rent`
+              };
+            }
+            break;
+          case 'garden':
+            if (insightData.garden_space) {
+              return {
+                ...opp,
+                estimatedIncome: `$${Math.round(insightData.garden_space.est_monthly_revenue_usd)}/month`,
+                details: `${insightData.garden_space.garden_sq_ft} sq ft available`
+              };
+            }
+            break;
+        }
+        return opp;
+      });
+    }
+    return immediateOpportunities;
+  };
 
   if (isLoading) {
     return (
@@ -172,51 +125,25 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
     );
   }
 
+  const availableOpportunities = getOpportunities();
+
   return (
     <div className="w-full">
-      {immediateOpportunities && immediateOpportunities.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 text-[#6E59A5] font-fahkwang">
-            Immediately Available Asset Opportunities
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {immediateOpportunities.map(asset => (
-              <AssetOpportunityCard
-                key={asset.id}
-                asset={asset}
-                checked={selectedAssets.includes(asset.id)}
-                onChange={() => onAssetToggle(asset.id)}
-              />
-            ))}
-          </div>
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold mb-6 text-[#6E59A5] font-fahkwang">
+          Immediately Available Asset Opportunities
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {availableOpportunities.map(asset => (
+            <AssetOpportunityCard
+              key={asset.id}
+              asset={asset}
+              checked={selectedAssets.includes(asset.id)}
+              onChange={() => onAssetToggle(asset.id)}
+            />
+          ))}
         </div>
-      )}
-
-      {otherOpportunities.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 text-[#6E59A5] font-fahkwang">
-            Other Monetization Opportunities
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {otherOpportunities.map(asset => (
-              <AssetOpportunityCard
-                key={asset.id}
-                asset={asset}
-                checked={selectedAssets.includes(asset.id)}
-                onChange={() => onAssetToggle(asset.id)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {!immediateOpportunities?.length && !otherOpportunities.length && (
-        <div className="text-center py-12">
-          <p className="text-lg text-gray-500">
-            No asset opportunities found for this address. Try a different location.
-          </p>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
