@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import {
 } from 'recharts';
 import { measureInternetSpeed } from '@/utils/speedTest';
 import { Wifi } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const monthlyData = [
   { month: 'Jan', rooftop: 720, internet: 320, parking: 150, storage: 50 },
@@ -32,6 +34,7 @@ const monthlyData = [
 
 const DashboardPreview = () => {
   const [speedTest, setSpeedTest] = useState<{ download: number; upload: number; latency: number } | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const runSpeedTest = async () => {
@@ -60,16 +63,16 @@ const DashboardPreview = () => {
   };
 
   return (
-    <section id="dashboard-preview" className="py-16 md:py-24 px-6 md:px-12 max-w-5xl mx-auto">
+    <section id="dashboard-preview" className="py-8 md:py-24 px-3 md:px-12 max-w-5xl mx-auto">
       <motion.div
-        className="text-center mb-12"
+        className="text-center mb-6 md:mb-12"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">Your Earnings Dashboard</h2>
-        <p className="text-lg text-tiptop-dark/70 max-w-2xl mx-auto">
+        <h2 className="text-2xl md:text-4xl font-bold mb-2 md:mb-4">Your Earnings Dashboard</h2>
+        <p className="text-sm md:text-lg text-tiptop-dark/70 max-w-2xl mx-auto">
           Get a preview of how you can track and maximize your passive income.
         </p>
       </motion.div>
@@ -81,70 +84,70 @@ const DashboardPreview = () => {
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <div className="bg-tiptop-accent p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-tiptop-accent p-3 md:p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
             <Card className="bg-white/10 border-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-white text-lg">Today's Revenue</CardTitle>
+              <CardHeader className="pb-1 p-2 md:p-4">
+                <CardTitle className="text-white text-sm md:text-lg">Today's Revenue</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-white">${calculateTodayRevenue().toFixed(2)}</div>
+              <CardContent className="p-2 md:p-4 pt-0">
+                <div className="text-lg md:text-3xl font-bold text-white">${calculateTodayRevenue().toFixed(2)}</div>
               </CardContent>
             </Card>
             
             <Card className="bg-white/10 border-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-white text-lg">Monthly Average</CardTitle>
+              <CardHeader className="pb-1 p-2 md:p-4">
+                <CardTitle className="text-white text-sm md:text-lg">Monthly Average</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-white">${calculateMonthlyAverage()}</div>
+              <CardContent className="p-2 md:p-4 pt-0">
+                <div className="text-lg md:text-3xl font-bold text-white">${calculateMonthlyAverage()}</div>
               </CardContent>
             </Card>
             
             <Card className="bg-white/10 border-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-white text-lg">Yearly Total</CardTitle>
+              <CardHeader className="pb-1 p-2 md:p-4">
+                <CardTitle className="text-white text-sm md:text-lg">Yearly Total</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-white">${calculateYearlyTotal()}</div>
+              <CardContent className="p-2 md:p-4 pt-0">
+                <div className="text-lg md:text-3xl font-bold text-white">${calculateYearlyTotal()}</div>
               </CardContent>
             </Card>
 
             <Card className="bg-white/10 border-0">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-white text-lg">
-                  <Wifi className="h-4 w-4" />
+              <CardHeader className="pb-1 p-2 md:p-4">
+                <CardTitle className="flex items-center gap-1 md:gap-2 text-white text-sm md:text-lg">
+                  <Wifi className="h-3 w-3 md:h-4 md:w-4" />
                   Internet Speed
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-2 md:p-4 pt-0">
                 {speedTest ? (
-                  <div className="text-white space-y-1">
-                    <div className="text-xl font-bold">{speedTest.download} Mbps</div>
-                    <div className="text-sm opacity-80">
+                  <div className="text-white">
+                    <div className="text-lg md:text-xl font-bold">{speedTest.download} Mbps</div>
+                    <div className="text-xs md:text-sm opacity-80">
                       ↑ {speedTest.upload} Mbps | {speedTest.latency}ms
                     </div>
                   </div>
                 ) : (
-                  <div className="text-white text-sm">Testing speed...</div>
+                  <div className="text-white text-xs md:text-sm">Testing speed...</div>
                 )}
               </CardContent>
             </Card>
           </div>
         </div>
 
-        <div className="p-6">
-          <div className="h-[400px]">
+        <div className="p-2 md:p-6">
+          <div className={isMobile ? "h-[220px]" : "h-[400px]"}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData}>
+              <BarChart data={isMobile ? monthlyData.slice(0, 6) : monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
+                <XAxis dataKey="month" tick={{fontSize: isMobile ? 10 : 12}} />
+                <YAxis tick={{fontSize: isMobile ? 10 : 12}} />
+                <Tooltip contentStyle={{fontSize: isMobile ? 10 : 12}} />
+                <Legend wrapperStyle={{fontSize: isMobile ? 10 : 12}} />
                 <Bar dataKey="rooftop" name="Rooftop Solar" fill="#AA94E2" stackId="a" />
-                <Bar dataKey="internet" name="Internet Sharing" fill="#4A3F68" stackId="a" />
-                <Bar dataKey="parking" name="Parking Space" fill="#B5EAD7" stackId="a" />
+                <Bar dataKey="internet" name="Internet" fill="#4A3F68" stackId="a" />
+                <Bar dataKey="parking" name="Parking" fill="#B5EAD7" stackId="a" />
                 <Bar dataKey="storage" name="Storage" fill="#FFD7BA" stackId="a" />
               </BarChart>
             </ResponsiveContainer>

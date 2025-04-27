@@ -47,7 +47,7 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
         <SidebarInset className="flex-1">
           <div className="p-2 sm:p-4 md:p-6 max-w-7xl mx-auto relative">
             {/* Mobile Menu */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="icon" className="md:hidden">
@@ -69,10 +69,10 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[240px] p-0 bg-[#6E59A5] text-white overflow-y-auto">
-                  <div className="p-4 border-b border-white/10">
+                  <div className="p-3 border-b border-white/10">
                     <h2 className="text-lg font-bold text-white">Tiptop</h2>
                   </div>
-                  <div className="py-4">
+                  <div className="py-2">
                     <DashboardMenu onSignOut={onSignOut} />
                   </div>
                 </SheetContent>

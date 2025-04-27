@@ -23,21 +23,21 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
   
   if (!modelUrl) {
     return (
-      <div className="w-full h-48 bg-gray-100 rounded-md flex items-center justify-center">
-        <p className="text-gray-500 text-sm">Loading 3D model...</p>
+      <div className="w-full h-36 sm:h-48 bg-gray-100 rounded-md flex items-center justify-center">
+        <p className="text-gray-500 text-xs sm:text-sm">Loading 3D model...</p>
       </div>
     );
   }
 
   if (!isModelViewerLoaded) {
     return (
-      <div className="w-full h-48 bg-gray-100 rounded-md flex items-center justify-center">
-        <p className="text-gray-500 text-sm">Loading model viewer...</p>
+      <div className="w-full h-36 sm:h-48 bg-gray-100 rounded-md flex items-center justify-center">
+        <p className="text-gray-500 text-xs sm:text-sm">Loading model viewer...</p>
       </div>
     );
   }
 
-  const modelHeight = isMobile ? "220px" : "300px";
+  const modelHeight = isMobile ? "180px" : "300px";
 
   // Using model-viewer web component but with correct TypeScript handling
   return (

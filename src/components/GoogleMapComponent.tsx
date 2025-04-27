@@ -109,18 +109,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
 
   return (
     <div className="w-full px-2 sm:px-0">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         <div className="md:col-span-2">
           <div 
             ref={mapRef} 
-            className={`w-full ${isMobile ? 'h-64' : 'h-80'} rounded-lg shadow-md border border-gray-200`}
+            className={`w-full ${isMobile ? 'h-52' : 'h-80'} rounded-lg shadow-md border border-gray-200`}
             style={{ 
               opacity: isLoaded ? 1 : 0.5,
               transition: 'opacity 0.3s ease'
             }}
           />
           {!isLoaded && (
-            <div className="mt-2 text-center text-sm text-gray-500">
+            <div className="mt-2 text-center text-xs sm:text-sm text-gray-500">
               Loading map...
             </div>
           )}
@@ -132,7 +132,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
           )}
         </div>
         
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           <PropertyDetails 
             location={currentLocation}
             propertyDetails={propertyDetails}

@@ -49,7 +49,7 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
         onDownload={handleDownload}
       />
       <div className="text-center">
-        <p className="text-xs sm:text-sm text-muted-foreground mb-2">
+        <p className="text-xs text-muted-foreground mb-1 sm:mb-2">
           3D Model ID: #{jobId.substring(0, 6)}
         </p>
         <Button
