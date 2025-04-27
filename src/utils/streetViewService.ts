@@ -63,7 +63,9 @@ export const captureStreetViewForModel = async (address: string): Promise<string
     }
 
     const geocoder = new window.google.maps.Geocoder();
-    const geocodeResult = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+    
+    // Use any type for the geocoder results to avoid TypeScript errors
+    const geocodeResult = await new Promise<any>((resolve, reject) => {
       geocoder.geocode({ address }, (results: any, status: string) => {
         if (status === 'OK' && results) {
           resolve(results);
