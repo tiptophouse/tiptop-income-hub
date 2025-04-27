@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,13 +11,12 @@ import Dashboard from "./pages/Dashboard";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import GoogleMapsInit from "./components/GoogleMapsInit";
-import InternetSpeedDisplay from "./components/InternetSpeedDisplay";
-import ModelViewerScript from "./components/ModelViewerScript";
 import ModelsGallery from "./pages/ModelsGallery";
 import InternetAssetDetail from "./pages/dashboard/assetDetails/InternetAssetDetail";
 import EVAssetDetail from "./pages/dashboard/assetDetails/EVAssetDetail";
 import SolarAssetDetail from "./pages/dashboard/assetDetails/SolarAssetDetail";
 import AddAssetPage from "./pages/dashboard/AddAssetPage";
+// Removed InternetSpeedDisplay import
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +32,6 @@ const App = () => (
     <BrowserRouter>
       <TooltipProvider>
         <GoogleMapsInit>
-          <ModelViewerScript />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<SignUp />} />
@@ -46,7 +45,7 @@ const App = () => (
             <Route path="/dashboard/add-asset" element={<AddAssetPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <InternetSpeedDisplay />
+          {/* Removed InternetSpeedDisplay component */}
           <Toaster />
           <Sonner />
         </GoogleMapsInit>
