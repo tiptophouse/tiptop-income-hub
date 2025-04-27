@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +12,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { measureInternetSpeed } from '@/utils/speedTest';
 import { Wifi } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -33,16 +31,7 @@ const monthlyData = [
 ];
 
 const DashboardPreview = () => {
-  const [speedTest, setSpeedTest] = useState<{ download: number; upload: number; latency: number } | null>(null);
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    const runSpeedTest = async () => {
-      const result = await measureInternetSpeed();
-      setSpeedTest(result);
-    };
-    runSpeedTest();
-  }, []);
 
   const calculateTodayRevenue = () => {
     const lastMonth = monthlyData[monthlyData.length - 1];
@@ -121,16 +110,7 @@ const DashboardPreview = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2 md:p-4 pt-0">
-                {speedTest ? (
-                  <div className="text-white">
-                    <div className="text-lg md:text-xl font-bold">{speedTest.download} Mbps</div>
-                    <div className="text-xs md:text-sm opacity-80">
-                      ↑ {speedTest.upload} Mbps | {speedTest.latency}ms
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-white text-xs md:text-sm">Testing speed...</div>
-                )}
+                <div className="text-white text-xs md:text-sm">Speed test removed</div>
               </CardContent>
             </Card>
           </div>
