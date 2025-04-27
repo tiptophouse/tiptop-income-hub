@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { 
   Card, 
@@ -247,7 +246,7 @@ const AdminCsvImport: React.FC = () => {
             )}
 
             {importSuccess && (
-              <Alert variant="success" className="bg-green-50 text-green-800 border-green-200">
+              <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
                 <Check className="h-4 w-4" />
                 <AlertTitle>Import successful</AlertTitle>
                 <AlertDescription>

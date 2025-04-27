@@ -3,6 +3,7 @@ import React from 'react';
 import { Sun, Wifi, ParkingSquare, Flower } from 'lucide-react';
 import AssetOpportunityCard from './AssetOpportunityCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PropertyAnalysisResult } from '@/utils/api/propertyAnalysis';
 
 interface AssetOpportunitiesListProps {
   selectedAssets: string[];
@@ -10,6 +11,7 @@ interface AssetOpportunitiesListProps {
   address: string;
   insights: any | null;
   isLoading: boolean;
+  propertyAnalysis?: PropertyAnalysisResult | null;
 }
 
 const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
@@ -17,7 +19,8 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
   onAssetToggle,
   address,
   insights,
-  isLoading
+  isLoading,
+  propertyAnalysis
 }) => {
   // Define fixed opportunities based on the image
   const immediateOpportunities = [

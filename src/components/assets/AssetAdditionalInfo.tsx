@@ -8,17 +8,20 @@ import { toast } from '@/components/ui/use-toast';
 import { Sun, Wifi, CarFront, Flower, Droplet, Store } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
+import { PropertyAnalysisResult } from '@/utils/api/propertyAnalysis';
 
 interface AssetAdditionalInfoProps {
   selectedAssets: string[];
   onComplete: () => void;
   insights?: any;
+  propertyAnalysis?: PropertyAnalysisResult | null;
 }
 
 const AssetAdditionalInfo: React.FC<AssetAdditionalInfoProps> = ({ 
   selectedAssets,
   onComplete,
-  insights
+  insights,
+  propertyAnalysis
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>(() => {
     // Pre-populate form with AI insights if available
