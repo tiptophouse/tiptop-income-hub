@@ -4,6 +4,29 @@ import { getStreetViewImageAsBase64, captureStreetViewForModel, captureMapScreen
 import { generateModelFromImage } from './meshyApi';
 import { toast } from '@/components/ui/use-toast';
 
+export const storePropertyData = async (address: string, imageData: string | null) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      // Store the address and image data in user metadata
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { 
+          propertyAddress: address,
+          propertyImage: imageData
+        }
+      });
+
+      if (updateError) {
+        console.error("Error storing property data:", updateError);
+        throw updateError;
+      }
+    }
+  } catch (error) {
+    console.error("Error in storePropertyData:", error);
+    throw error;
+  }
+};
+
 export const generatePropertyModels = async (address: string) => {
   try {
     console.log("Starting property model generation for address:", address);
@@ -13,20 +36,27 @@ export const generatePropertyModels = async (address: string) => {
       description: "Capturing property views for 3D model generation...",
     });
 
-    // Get street view image
-    let imageData = await captureStreetViewForModel(address);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    // Try to use stored image first
+    let imageData = user.user_metadata.propertyImage;
     
-    // If no Street View image is available, try to find a map element to screenshot
+    // If no stored image, try to capture new one
     if (!imageData) {
-      console.log("No Street View available, looking for map container to capture");
+      imageData = await captureStreetViewForModel(address);
       
-      // Find a map container
-      const mapElement = document.querySelector('[id^="map-"], [class*="map-container"]') ||
-        document.querySelector('[class*="property-map"]');
-      
-      if (mapElement) {
-        console.log("Found map element, capturing screenshot");
-        imageData = await captureMapScreenshot({ current: mapElement as HTMLElement });
+      if (!imageData) {
+        console.log("No Street View available, looking for map container to capture");
+        const mapElement = document.querySelector('[id^="map-"], [class*="map-container"]') ||
+          document.querySelector('[class*="property-map"]');
+        
+        if (mapElement) {
+          console.log("Found map element, capturing screenshot");
+          imageData = await captureMapScreenshot({ current: mapElement as HTMLElement });
+        }
       }
     }
     
@@ -35,7 +65,7 @@ export const generatePropertyModels = async (address: string) => {
       throw new Error("Failed to capture property image");
     }
 
-    console.log(`Successfully captured property image: ${imageData.substring(0, 50)}... (${imageData.length} chars)`);
+    console.log(`Successfully captured/retrieved property image: ${imageData.substring(0, 50)}... (${imageData.length} chars)`);
 
     // Generate 3D model using Meshy
     console.log("Calling Meshy API to generate 3D model...");
@@ -44,21 +74,16 @@ export const generatePropertyModels = async (address: string) => {
       console.log("Started 3D model generation with job ID:", modelJobId);
       
       // Store model ID in user metadata
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        console.log("Updating user metadata with model job ID:", modelJobId);
-        const { error: updateError } = await supabase.auth.updateUser({
-          data: { 
-            propertyModelJobId: modelJobId,
-            propertyAddress: address
-          }
-        });
-
-        if (updateError) {
-          console.error("Error updating user metadata:", updateError);
-        } else {
-          console.log("Successfully updated user metadata");
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { 
+          propertyModelJobId: modelJobId
         }
+      });
+
+      if (updateError) {
+        console.error("Error updating user metadata:", updateError);
+      } else {
+        console.log("Successfully updated user metadata");
       }
 
       // Dispatch event for the dashboard to pick up
@@ -71,7 +96,7 @@ export const generatePropertyModels = async (address: string) => {
       return modelJobId;
     } catch (meshyError) {
       console.error("Error in Meshy API call:", meshyError);
-      throw meshyError; // Let the outer catch handle this
+      throw meshyError;
     }
   } catch (error) {
     console.error("Error in generatePropertyModels:", error);
@@ -91,3 +116,4 @@ export const generatePropertyModels = async (address: string) => {
     return fallbackId;
   }
 };
+

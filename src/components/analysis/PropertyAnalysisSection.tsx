@@ -1,9 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import PropertyMap from '../PropertyMap';
 import PropertyInsights from '../PropertyInsights';
 import Property3DModel from '../Property3DModel';
+import { storePropertyData } from '@/utils/modelGeneration';
+import { captureStreetViewForModel } from '@/utils/streetViewService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PropertyAnalysisSectionProps {
   address: string;
@@ -12,8 +16,24 @@ interface PropertyAnalysisSectionProps {
 
 const PropertyAnalysisSection = ({ address, show }: PropertyAnalysisSectionProps) => {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const navigate = useNavigate();
   
-  // Listen for model job creation events
+  useEffect(() => {
+    const captureAndStoreImage = async () => {
+      try {
+        // Only capture and store image if we have an address
+        if (address) {
+          const imageData = await captureStreetViewForModel(address);
+          await storePropertyData(address, imageData);
+        }
+      } catch (error) {
+        console.error('Error capturing and storing image:', error);
+      }
+    };
+
+    captureAndStoreImage();
+  }, [address]);
+  
   useEffect(() => {
     const handleModelJobCreated = (event: CustomEvent) => {
       if (event.detail && event.detail.jobId) {
@@ -27,6 +47,20 @@ const PropertyAnalysisSection = ({ address, show }: PropertyAnalysisSectionProps
       document.removeEventListener('modelJobCreated', handleModelJobCreated as EventListener);
     };
   }, []);
+
+  // Check auth status and redirect if needed
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session && currentJobId) {
+        // Store the return URL in localStorage
+        localStorage.setItem('redirectAfterAuth', window.location.pathname);
+        navigate('/login');
+      }
+    };
+    
+    checkAuth();
+  }, [currentJobId, navigate]);
   
   if (!show) return null;
 

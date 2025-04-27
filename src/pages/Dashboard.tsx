@@ -76,6 +76,27 @@ const Dashboard = () => {
     checkSession();
   }, []);
 
+  useEffect(() => {
+    const initializeDashboard = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Session check error:', error);
+        } else if (session) {
+          // Check if we need to generate models after successful auth
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user && !user.user_metadata.propertyModelJobId && user.user_metadata.propertyAddress) {
+            await generatePropertyModels(user.user_metadata.propertyAddress);
+          }
+        }
+      } catch (error) {
+        console.error('Dashboard initialization error:', error);
+      }
+    };
+    
+    initializeDashboard();
+  }, []);
+
   const aiRevenueDescription = `Today's solar generation was 12% above average due to clear skies. Your internet bandwidth was utilized at 78% capacity with peak usage during evening hours. The EV charging stations were used for 7.5 hours today.`;
 
   const handleSignOut = async () => {

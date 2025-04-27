@@ -49,14 +49,14 @@ const Login = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Session check error:', error);
-        } else if (data.session) {
-          navigate('/dashboard');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const redirectPath = localStorage.getItem('redirectAfterAuth') || '/dashboard';
+          localStorage.removeItem('redirectAfterAuth'); // Clean up
+          navigate(redirectPath);
         }
       } catch (error) {
-        console.error('Session check exception:', error);
+        console.error('Session check error:', error);
       }
     };
     
@@ -66,7 +66,9 @@ const Login = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session) {
-          navigate('/dashboard');
+          const redirectPath = localStorage.getItem('redirectAfterAuth') || '/dashboard';
+          localStorage.removeItem('redirectAfterAuth'); // Clean up
+          navigate(redirectPath);
         }
       }
     );
