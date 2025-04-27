@@ -1,30 +1,18 @@
+
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Plus, Car, FileText, Check, LogOut, Home, Sun, Wifi, Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarFooter,
-  SidebarTrigger,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarInset
-} from "@/components/ui/sidebar";
-
+import { generatePropertyModels } from '@/utils/modelGeneration';
+import { DashboardLayout } from './dashboard/DashboardLayout';
+import { DashboardHeader } from './dashboard/components/DashboardHeader';
+import { MobileSidebar } from './dashboard/components/MobileSidebar';
 import DashboardOverview from './dashboard/DashboardOverview';
 import SolarAssetDetail from './dashboard/assetDetails/SolarAssetDetail';
 import InternetAssetDetail from './dashboard/assetDetails/InternetAssetDetail';
 import EVAssetDetail from './dashboard/assetDetails/EVAssetDetail';
 import AddAssetPage from './dashboard/AddAssetPage';
 import { mockAssets } from './dashboard/dashboardData';
-import { generatePropertyModels } from '@/utils/modelGeneration';
 
 const Dashboard = () => {
   const [userName, setUserName] = useState('John');
@@ -76,29 +64,6 @@ const Dashboard = () => {
     checkSession();
   }, []);
 
-  useEffect(() => {
-    const initializeDashboard = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Session check error:', error);
-        } else if (session) {
-          // Check if we need to generate models after successful auth
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user && !user.user_metadata.propertyModelJobId && user.user_metadata.propertyAddress) {
-            await generatePropertyModels(user.user_metadata.propertyAddress);
-          }
-        }
-      } catch (error) {
-        console.error('Dashboard initialization error:', error);
-      }
-    };
-    
-    initializeDashboard();
-  }, []);
-
-  const aiRevenueDescription = `Today's solar generation was 12% above average due to clear skies. Your internet bandwidth was utilized at 78% capacity with peak usage during evening hours. The EV charging stations were used for 7.5 hours today.`;
-
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -112,158 +77,53 @@ const Dashboard = () => {
     }
   };
 
-  const navigateHome = () => {
-    navigate('/');
+  const aiRevenueDescription = `Today's solar generation was 12% above average due to clear skies. Your internet bandwidth was utilized at 78% capacity with peak usage during evening hours. The EV charging stations were used for 7.5 hours today.`;
+
+  const renderContent = () => {
+    switch (selectedView) {
+      case 'dashboard':
+        return (
+          <DashboardOverview 
+            userName={userName} 
+            earnings={earnings} 
+            activeAssets={activeAssetCount}
+            totalPotentialAssets={totalPotentialAssets} 
+            pendingActions={pendingActions}
+            aiRevenueDescription={aiRevenueDescription}
+          />
+        );
+      case 'rooftop':
+        return <SolarAssetDetail />;
+      case 'internet':
+        return <InternetAssetDetail />;
+      case 'ev':
+        return <EVAssetDetail />;
+      case 'add':
+        return <AddAssetPage />;
+      default:
+        return <DashboardOverview 
+          userName={userName} 
+          earnings={earnings} 
+          activeAssets={activeAssetCount}
+          totalPotentialAssets={totalPotentialAssets} 
+          pendingActions={pendingActions}
+          aiRevenueDescription={aiRevenueDescription}
+        />;
+    }
   };
 
-  const activeAssets = mockAssets.filter(asset => asset.status === 'active');
-
-  const renderMenuItems = (onItemClick = () => {}) => (
-    <>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={selectedView === 'dashboard'} 
-          onClick={() => {
-            setSelectedView('dashboard');
-            onItemClick();
-          }}
-        >
-          <LayoutDashboard className="h-4 w-4 mr-2" />
-          <span>Dashboard</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      
-      {activeAssets.map((asset) => (
-        <SidebarMenuItem key={asset.id}>
-          <SidebarMenuButton 
-            isActive={selectedView === asset.type} 
-            onClick={() => {
-              setSelectedView(asset.type);
-              onItemClick();
-            }}
-          >
-            {asset.type === 'rooftop' && <Sun className="h-4 w-4 mr-2" />}
-            {asset.type === 'internet' && <Wifi className="h-4 w-4 mr-2" />}
-            {asset.type === 'ev' && <Car className="h-4 w-4 mr-2" />}
-            {asset.type === 'storage' && <FileText className="h-4 w-4 mr-2" />}
-            {asset.type === 'garden' && <Check className="h-4 w-4 mr-2" />}
-            <span>
-              {asset.type === 'ev' ? 'EV Charging' : (asset.type.charAt(0).toUpperCase() + asset.type.slice(1))}
-            </span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
-      
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={selectedView === 'add'} 
-          onClick={() => {
-            setSelectedView('add');
-            onItemClick();
-          }}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          <span>Add Asset</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    </>
-  );
-
   return (
-    <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen bg-background flex w-full">
-        <Sidebar collapsible="icon">
-          <SidebarHeader>
-            <div className="flex items-center px-2">
-              <span className="font-bold text-xl text-primary">Tiptop</span>
-              <SidebarTrigger className="ml-auto" />
-            </div>
-          </SidebarHeader>
-          
-          <SidebarContent>
-            <SidebarMenu>
-              {renderMenuItems()}
-            </SidebarMenu>
-          </SidebarContent>
-          
-          <SidebarFooter>
-            <div className="p-2">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start" 
-                onClick={handleSignOut}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </Button>
-            </div>
-          </SidebarFooter>
-        </Sidebar>
-        
-        <SidebarInset className="flex-1">
-          <div className="p-4 md:p-6 max-w-7xl mx-auto relative">
-            <div className="flex justify-between items-center mb-4">
-              <div className="md:hidden">
-                <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden">
-                      <Menu className="h-5 w-5" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-[240px] sm:w-[300px] p-0">
-                    <div className="py-4 border-b border-border">
-                      <div className="flex items-center px-4">
-                        <span className="font-bold text-xl text-primary">Tiptop</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col py-2">
-                      <SidebarMenu>
-                        {renderMenuItems(() => setMobileMenuOpen(false))}
-                      </SidebarMenu>
-                    </div>
-                    <div className="border-t border-border mt-auto p-4">
-                      <Button 
-                        variant="outline" 
-                        className="w-full justify-start" 
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          handleSignOut();
-                        }}
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Sign Out
-                      </Button>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-auto"
-                onClick={navigateHome}
-              >
-                <Home className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            {selectedView === 'dashboard' && <DashboardOverview 
-              userName={userName} 
-              earnings={earnings} 
-              activeAssets={activeAssetCount}
-              totalPotentialAssets={totalPotentialAssets} 
-              pendingActions={pendingActions}
-              aiRevenueDescription={aiRevenueDescription}
-            />}
-            {selectedView === 'rooftop' && <SolarAssetDetail />}
-            {selectedView === 'internet' && <InternetAssetDetail />}
-            {selectedView === 'ev' && <EVAssetDetail />}
-            {selectedView === 'add' && <AddAssetPage />}
-          </div>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    <DashboardLayout onSignOut={handleSignOut}>
+      <DashboardHeader />
+      {isMobile && (
+        <MobileSidebar
+          isOpen={mobileMenuOpen}
+          onOpenChange={setMobileMenuOpen}
+          onSignOut={handleSignOut}
+        />
+      )}
+      {renderContent()}
+    </DashboardLayout>
   );
 };
 
