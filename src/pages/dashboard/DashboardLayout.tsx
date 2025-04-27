@@ -72,7 +72,9 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
                   <div className="p-4 border-b border-white/10">
                     <h2 className="text-lg font-bold text-white">Tiptop</h2>
                   </div>
-                  <DashboardMenu onSignOut={onSignOut} />
+                  <div className="py-4">
+                    <DashboardMenu onSignOut={onSignOut} />
+                  </div>
                 </SheetContent>
               </Sheet>
               <Button 

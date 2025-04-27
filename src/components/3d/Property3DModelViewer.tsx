@@ -58,7 +58,7 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
           onClick={handleDownload}
           className="w-full text-xs sm:text-sm"
         >
-          <FileDown className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+          <FileDown className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
           Download 3D Model
         </Button>
       </div>

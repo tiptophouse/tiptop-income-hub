@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Wifi, Info } from 'lucide-react';
 import { measureInternetSpeed } from '@/utils/speedTest';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const InternetSpeedDisplay = () => {
   const [speedTest, setSpeedTest] = useState<{
@@ -12,6 +13,7 @@ const InternetSpeedDisplay = () => {
     latency: number;
   } | null>(null);
   const [dataSource, setDataSource] = useState<string>("Simulated data");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const runSpeedTest = async () => {
@@ -36,19 +38,19 @@ const InternetSpeedDisplay = () => {
   if (!speedTest) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <Card className="bg-tiptop-accent text-white w-[220px]">
-        <CardHeader className="p-3 pb-0">
+    <div className={`fixed ${isMobile ? 'bottom-20 right-2 z-40' : 'bottom-4 right-4 z-50'}`}>
+      <Card className={`bg-tiptop-accent text-white ${isMobile ? 'w-[180px]' : 'w-[220px]'}`}>
+        <CardHeader className="p-2 pb-0">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium flex items-center gap-1.5">
-              <Wifi className="h-4 w-4" />
+            <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1.5">
+              <Wifi className="h-3 w-3 sm:h-4 sm:w-4" />
               Internet Speed
             </CardTitle>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button className="rounded-full p-1 hover:bg-white/20">
-                    <Info className="h-3.5 w-3.5" />
+                    <Info className="h-3 w-3" />
                     <span className="sr-only">Info</span>
                   </button>
                 </TooltipTrigger>
@@ -59,7 +61,7 @@ const InternetSpeedDisplay = () => {
             </TooltipProvider>
           </div>
         </CardHeader>
-        <CardContent className="p-3 pt-2">
+        <CardContent className="p-2">
           <div className="grid grid-cols-3 gap-1 text-xs">
             <div>
               <p className="text-white/70">Download</p>
