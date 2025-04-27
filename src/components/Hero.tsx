@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
@@ -50,22 +51,12 @@ const Hero = () => {
                     <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Parking Space</span>
                     <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Items</span>
                     <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Unused Bandwidth</span>
+                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
+                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
+                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
+                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
+                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Car</span>
                   </div>
-                </div>
-                <div className="absolute top-8 right-4">
-                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
-                </div>
-                <div className="absolute top-1/4 right-4">
-                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
-                </div>
-                <div className="absolute bottom-1/4 right-4">
-                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
-                </div>
-                <div className="absolute bottom-8 right-4">
-                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
-                </div>
-                <div className="absolute top-1/2 right-4">
-                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Car</span>
                 </div>
               </div>
             </div>
