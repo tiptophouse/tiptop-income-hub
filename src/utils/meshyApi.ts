@@ -1,8 +1,9 @@
+
 /**
  * Utility functions for interacting with the Meshy API
  */
 
-const MESHY_API_TOKEN = "msy_0qltUPlTWaFsH6P35O2k63BS4olznK8x0Qzm";
+const MESHY_API_TOKEN = "msy_PRKZaCCaJijJsvgUmYg8VNttvNDO3xPFgiux";
 const MESHY_API_URL = "https://api.meshy.ai/v1";
 const SAMPLE_MODEL_URL = "https://storage.googleapis.com/realestate-3d-models/demo-property.glb";
 
