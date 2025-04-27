@@ -1,14 +1,31 @@
-
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
 import PropertyMap from './PropertyMap';
 import AssetOpportunities from './AssetOpportunities';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 
 const Hero = () => {
   const [address, setAddress] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
+
+  const assetLabels = [
+    "Parking Space",
+    "Items",
+    "Unused Bandwidth",
+    "Rooftop",
+    "Swimming Pool",
+    "Garden",
+    "Storage Space",
+    "Car"
+  ];
 
   return (
     <GoogleMapsInit>
@@ -36,46 +53,64 @@ const Hero = () => {
 
         <div className="w-full">
           {!showAnalysis ? (
-          <div className="w-full relative flex flex-col items-center">
-            <div className="w-full h-80 overflow-hidden bg-[#FFFDED] flex flex-col items-center justify-center relative mb-3 rounded-3xl">
-              <img 
-                alt="3D House Visualization" 
-                className="w-auto h-64 object-contain" 
-                style={{ zIndex: 1 }} 
-                src="/lovable-uploads/10603114-d9a7-40ea-afe1-229cb7a86511.png" 
-              />
-              <div className="absolute top-0 left-0 w-full h-full z-10">
-                <div className="absolute top-4 left-4">
-                  <p className="text-lg font-semibold text-[#552B1B] mb-2">Rent your</p>
-                  <div className="flex flex-col gap-3">
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Parking Space</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Items</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Unused Bandwidth</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
-                    <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Car</span>
+            <div className="w-full relative flex flex-col items-center">
+              <div className="w-full h-96 overflow-hidden bg-[#FFFDED] flex flex-col items-center justify-center relative mb-3 rounded-3xl">
+                <img 
+                  alt="3D House Visualization" 
+                  className="w-auto h-64 object-contain mt-20" 
+                  style={{ zIndex: 1 }} 
+                  src="/lovable-uploads/10603114-d9a7-40ea-afe1-229cb7a86511.png" 
+                />
+                <div className="absolute top-0 left-0 w-full h-full z-10">
+                  <div className="absolute top-4 left-4">
+                    <p className="text-lg font-semibold text-[#552B1B] mb-2">Rent your</p>
+                    <div className="hidden md:flex flex-wrap gap-3 max-w-[600px]">
+                      {assetLabels.map((label) => (
+                        <span key={label} className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">
+                          {label}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="md:hidden w-[300px]">
+                      <Carousel
+                        opts={{
+                          align: "start",
+                          loop: true,
+                        }}
+                        className="w-full"
+                      >
+                        <CarouselContent>
+                          {assetLabels.map((label) => (
+                            <CarouselItem key={label} className="basis-auto">
+                              <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B] whitespace-nowrap">
+                                {label}
+                              </span>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious />
+                        <CarouselNext />
+                      </Carousel>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="w-full mx-auto">
-            <div className="w-full mb-8">
-              <PropertyMap 
-                address={address} 
-                onZoomComplete={() => console.log("Map zoom completed")} 
-              />
+          ) : (
+            <div className="w-full mx-auto">
+              <div className="w-full mb-8">
+                <PropertyMap 
+                  address={address} 
+                  onZoomComplete={() => console.log("Map zoom completed")} 
+                />
+              </div>
+              <div className="w-full">
+                <AssetOpportunities address={address} />
+              </div>
             </div>
-            <div className="w-full">
-              <AssetOpportunities address={address} />
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
+          )}
+        </div>
+      </section>
     </GoogleMapsInit>
   );
 };
