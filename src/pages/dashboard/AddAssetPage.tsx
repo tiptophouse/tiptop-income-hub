@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DashboardLayout } from './DashboardLayout';
 import { Sun, Wifi, Car, Droplet, Store, Camera, Home, Flower } from 'lucide-react';
@@ -72,16 +73,16 @@ const AddAssetPage = () => (
         </div>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
         {monetizationOptions.map((option) => (
           <Card key={option.id} className="hover:border-primary hover:shadow-md cursor-pointer transition-all">
-            <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center space-y-3 md:space-y-4">
-              <div className="h-12 w-12 md:h-16 md:w-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <CardContent className="p-3 md:p-4 flex flex-col items-center text-center space-y-2 md:space-y-3 h-full">
+              <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary/10 flex items-center justify-center mt-3">
                 {option.icon}
               </div>
-              <h3 className="text-base md:text-lg font-medium text-center">{option.title}</h3>
-              <p className="text-xs md:text-sm text-center text-muted-foreground">{option.description}</p>
-              <p className="text-sm md:text-base text-primary font-medium">{option.earnings}</p>
+              <h3 className="text-sm md:text-base font-medium">{option.title}</h3>
+              <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">{option.description}</p>
+              <p className="text-xs md:text-sm text-primary font-medium">{option.earnings}</p>
             </CardContent>
           </Card>
         ))}

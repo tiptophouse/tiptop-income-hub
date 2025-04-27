@@ -44,7 +44,7 @@ const DashboardOverview = ({
         </CardHeader>
         <CardContent>
           <img 
-            src="public/lovable-uploads/bc1d5ec4-4a58-4238-85d9-66e0d999e65a.png"
+            src="/lovable-uploads/bc1d5ec4-4a58-4238-85d9-66e0d999e65a.png"
             alt="Heritage Manor Property"
             className="aspect-[4/3] w-full h-full object-cover rounded-lg"
           />
@@ -72,4 +72,3 @@ const DashboardOverview = ({
 );
 
 export default DashboardOverview;
-

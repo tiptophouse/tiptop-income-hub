@@ -66,7 +66,7 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
                     </svg>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[240px] p-0">
+                <SheetContent side="left" className="w-[240px] p-0 bg-[#6E59A5] text-white">
                   <DashboardMenu onSignOut={onSignOut} />
                 </SheetContent>
               </Sheet>

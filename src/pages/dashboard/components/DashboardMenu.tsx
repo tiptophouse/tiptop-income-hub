@@ -27,7 +27,7 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton 
                 asChild 
-                className={location.pathname === item.url ? "bg-accent" : ""}
+                className={location.pathname === item.url ? "bg-tiptop-hover text-white" : "text-white hover:bg-tiptop-hover"}
               >
                 <button onClick={() => navigate(item.url)}>
                   <item.icon className="h-4 w-4 mr-2" />
@@ -37,17 +37,20 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
             </SidebarMenuItem>
           ))}
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => navigate('/dashboard/add-asset')}>
+            <SidebarMenuButton 
+              onClick={() => navigate('/dashboard/add-asset')}
+              className="text-white hover:bg-tiptop-hover"
+            >
               <Plus className="h-4 w-4 mr-2" />
               <span>Add Asset</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </div>
-      <div className="border-t border-border mt-auto p-4">
+      <div className="border-t border-white/20 mt-auto p-4">
         <Button 
           variant="outline" 
-          className="w-full justify-start" 
+          className="w-full justify-start text-white border-white hover:bg-tiptop-hover" 
           onClick={onSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
