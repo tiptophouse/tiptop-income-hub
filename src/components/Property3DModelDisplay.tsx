@@ -16,6 +16,7 @@ import { use3DModel } from "@/hooks/use3DModel";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Property3DModelDisplayProps {
   jobId: string;
@@ -35,6 +36,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   const [backgroundColor, setBackgroundColor] = useState("#f5f5f5");
   const [showControls, setShowControls] = useState(false);
   const [errorDismissed, setErrorDismissed] = useState(false);
+  const isMobile = useIsMobile();
 
   const { modelStatus, modelUrl, isLoading, error, handleRefresh } = use3DModel(jobId);
 
@@ -71,15 +73,15 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   return (
     <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <Building className="h-5 w-5 text-tiptop-accent" />
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
+          <Building className="h-4 w-4 sm:h-5 sm:w-5 text-tiptop-accent" />
           Property 3D Model
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-xs sm:text-sm">
           3D model for {address}
           <Button 
             variant="link" 
-            className="p-0 h-auto text-xs text-tiptop-accent" 
+            className="p-0 h-auto text-[10px] sm:text-xs text-tiptop-accent" 
             onClick={() => setShowControls(!showControls)}
           >
             {showControls ? "Hide advanced controls" : "Show advanced controls"}
@@ -91,7 +93,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           <Alert variant="destructive" className="mb-4 border-2 border-red-300">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between">
-              <span>Failed to generate 3D model. Using demo model instead.</span>
+              <span className="text-xs sm:text-sm">Failed to generate 3D model. Using demo model instead.</span>
               <Button variant="ghost" size="sm" onClick={() => setErrorDismissed(true)}>
                 Dismiss
               </Button>
@@ -100,9 +102,9 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
         )}
         
         {showControls && (
-          <div className="mb-4 space-y-4 p-4 bg-gray-50 rounded-md">
+          <div className="mb-4 space-y-4 p-2 sm:p-4 bg-gray-50 rounded-md">
             <div>
-              <label className="text-sm font-medium block mb-2">Zoom Level</label>
+              <label className="text-xs sm:text-sm font-medium block mb-2">Zoom Level</label>
               <Slider
                 value={[zoomLevel]}
                 min={50}
@@ -112,7 +114,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
               />
             </div>
             <div>
-              <label className="text-sm font-medium block mb-2">Background Color</label>
+              <label className="text-xs sm:text-sm font-medium block mb-2">Background Color</label>
               <div className="flex flex-wrap gap-2">
                 {backgroundOptions.map((color) => (
                   <div 

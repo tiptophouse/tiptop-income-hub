@@ -3,6 +3,7 @@ import { Calendar, Home, Sun, Wifi, Car, Plus, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DashboardMenuProps {
   onSignOut: () => void;
@@ -11,6 +12,7 @@ interface DashboardMenuProps {
 export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const items = [
     { title: "Dashboard", url: "/dashboard", icon: Home },
@@ -18,6 +20,14 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
     { title: "Internet", url: "/dashboard/internet", icon: Wifi },
     { title: "EV Charging", url: "/dashboard/ev-charging", icon: Car },
   ];
+
+  const buttonClasses = isMobile 
+    ? "text-white hover:bg-white/10" 
+    : "text-white hover:bg-tiptop-hover";
+
+  const activeClasses = isMobile
+    ? "bg-white/20 text-white"
+    : "bg-tiptop-hover text-white";
 
   return (
     <>
@@ -27,7 +37,7 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton 
                 asChild 
-                className={location.pathname === item.url ? "bg-tiptop-hover text-white" : "text-white hover:bg-tiptop-hover"}
+                className={location.pathname === item.url ? activeClasses : buttonClasses}
               >
                 <button onClick={() => navigate(item.url)}>
                   <item.icon className="h-4 w-4 mr-2" />
@@ -39,7 +49,7 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
           <SidebarMenuItem>
             <SidebarMenuButton 
               onClick={() => navigate('/dashboard/add-asset')}
-              className="text-white hover:bg-tiptop-hover"
+              className={location.pathname === '/dashboard/add-asset' ? activeClasses : buttonClasses}
             >
               <Plus className="h-4 w-4 mr-2" />
               <span>Add Asset</span>
@@ -50,7 +60,7 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
       <div className="border-t border-white/20 mt-auto p-4">
         <Button 
           variant="outline" 
-          className="w-full justify-start text-white border-white hover:bg-tiptop-hover" 
+          className="w-full justify-start text-white border-white/40 hover:bg-white/10" 
           onClick={onSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />

@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ModelViewerDisplayProps {
   modelUrl: string | null;
@@ -18,10 +19,12 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
   zoomLevel = 105,
   backgroundColor = "#f5f5f5"
 }) => {
+  const isMobile = useIsMobile();
+  
   if (!modelUrl) {
     return (
       <div className="w-full h-48 bg-gray-100 rounded-md flex items-center justify-center">
-        <p className="text-gray-500">Loading 3D model...</p>
+        <p className="text-gray-500 text-sm">Loading 3D model...</p>
       </div>
     );
   }
@@ -29,14 +32,16 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
   if (!isModelViewerLoaded) {
     return (
       <div className="w-full h-48 bg-gray-100 rounded-md flex items-center justify-center">
-        <p className="text-gray-500">Loading model viewer...</p>
+        <p className="text-gray-500 text-sm">Loading model viewer...</p>
       </div>
     );
   }
 
+  const modelHeight = isMobile ? "220px" : "300px";
+
   // Using model-viewer web component but with correct TypeScript handling
   return (
-    <div className="model-viewer-container w-full h-[300px]">
+    <div className="model-viewer-container w-full">
       {/* @ts-ignore - model-viewer element is added by the script */}
       <model-viewer
         src={modelUrl}
@@ -46,7 +51,7 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
         rotation-per-second="30deg"
         style={{
           width: "100%",
-          height: "300px",
+          height: modelHeight,
           backgroundColor: backgroundColor,
           borderRadius: "0.375rem"
         }}

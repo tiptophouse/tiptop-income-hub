@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DashboardMenu } from './components/DashboardMenu';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -22,9 +23,10 @@ interface DashboardLayoutProps {
 
 export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen bg-background flex w-full">
         {/* Desktop Sidebar */}
         <Sidebar collapsible="icon" className="hidden md:flex">
@@ -43,9 +45,9 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
         </Sidebar>
         
         <SidebarInset className="flex-1">
-          <div className="p-4 md:p-6 max-w-7xl mx-auto relative">
+          <div className="p-2 sm:p-4 md:p-6 max-w-7xl mx-auto relative">
             {/* Mobile Menu */}
-            <div className="flex items-center justify-between mb-4 md:hidden">
+            <div className="flex items-center justify-between mb-4">
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="icon" className="md:hidden">
@@ -66,7 +68,10 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
                     </svg>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[240px] p-0 bg-[#6E59A5] text-white">
+                <SheetContent side="left" className="w-[240px] p-0 bg-[#6E59A5] text-white overflow-y-auto">
+                  <div className="p-4 border-b border-white/10">
+                    <h2 className="text-lg font-bold text-white">Tiptop</h2>
+                  </div>
                   <DashboardMenu onSignOut={onSignOut} />
                 </SheetContent>
               </Sheet>
@@ -74,17 +79,7 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
                 variant="ghost" 
                 size="icon"
                 onClick={() => navigate('/')}
-                className="ml-auto"
-              >
-                <Home className="h-5 w-5" />
-              </Button>
-            </div>
-            {/* Desktop Home Button */}
-            <div className="hidden md:block absolute top-0 right-0 p-4">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => navigate('/')}
+                className="md:absolute md:top-0 md:right-0 md:p-4"
               >
                 <Home className="h-5 w-5" />
               </Button>

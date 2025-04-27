@@ -23,9 +23,9 @@ const AssetCard: React.FC<AssetCardProps> = ({
     <CardHeader className="pb-1 pt-3 pr-2 bg-transparent flex flex-col">
       <div className="flex items-center gap-2 mb-1">
         {icon}
-        <CardTitle className="text-base md:text-lg font-bold text-[#6E59A5] truncate max-w-[150px]">{main}</CardTitle>
+        <CardTitle className="text-sm md:text-lg font-bold text-[#6E59A5] truncate max-w-[90%]">{main}</CardTitle>
       </div>
-      <CardDescription className="text-xs md:text-sm font-medium text-gray-700 line-clamp-2 h-8 md:h-10 max-w-full">{details}</CardDescription>
+      <CardDescription className="text-xs md:text-sm font-medium text-gray-700 line-clamp-2 min-h-[2.5rem]">{details}</CardDescription>
     </CardHeader>
     <CardContent className="pt-0 pb-3 md:pb-4">
       <div className="text-xl md:text-2xl font-extrabold text-[#8B5CF6]">{value}</div>
