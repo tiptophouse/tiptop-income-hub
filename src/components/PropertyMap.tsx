@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import MapControls from './map/MapControls';
 import ModelJobInfo from './map/ModelJobInfo';
@@ -22,6 +21,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     setView,
     is3DModelGenerating,
     isAnalyzing,
+    setIsAnalyzing,
     weatherTemp,
     handleModelGeneration,
   } = usePropertyMap(address);
@@ -31,7 +31,10 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     address,
     view,
     initialZoom: 12,
-    onZoomComplete,
+    onZoomComplete: () => {
+      setIsAnalyzing(false);
+      if (onZoomComplete) onZoomComplete();
+    },
   });
 
   const toggleMapType = () => {
@@ -80,6 +83,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
         isLoaded={isLoaded}
         weatherTemp={weatherTemp}
         isAnalyzing={isAnalyzing}
+        analysisText={isAnalyzing ? "Analyzing Property..." : "Check Results"}
         view={view}
         showError={showError}
       />

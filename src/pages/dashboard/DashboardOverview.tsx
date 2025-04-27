@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardHeader from './components/DashboardHeader';
 import PropertyOverviewCard from './components/PropertyOverviewCard';
 import StatisticsCards from './components/StatisticsCards';
@@ -31,6 +30,21 @@ const DashboardOverview = ({
   pendingActions, 
   aiRevenueDescription 
 }: DashboardOverviewProps) => {
+  const [propertyAddress, setPropertyAddress] = useState("Enter an address...");
+  
+  useEffect(() => {
+    const handleAddressFound = (event: CustomEvent) => {
+      if (event.detail?.address) {
+        setPropertyAddress(event.detail.address);
+      }
+    };
+    
+    document.addEventListener('addressFound', handleAddressFound as EventListener);
+    return () => {
+      document.removeEventListener('addressFound', handleAddressFound as EventListener);
+    };
+  }, []);
+
   const isMobile = useIsMobile();
   
   return (
@@ -44,7 +58,7 @@ const DashboardOverview = ({
               <Building className="h-4 w-4 sm:h-5 sm:w-5 text-tiptop-accent" />
               Property 3D Model
             </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">456 Heritage Manor</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">{propertyAddress}</CardDescription>
           </CardHeader>
           <CardContent className={isMobile ? 'p-3 pt-0' : 'pt-0'}>
             <div className="w-full overflow-hidden rounded-lg max-h-[200px] sm:max-h-none">

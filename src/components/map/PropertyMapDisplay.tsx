@@ -9,6 +9,7 @@ interface PropertyMapDisplayProps {
   isLoaded: boolean;
   weatherTemp: string;
   isAnalyzing: boolean;
+  analysisText: string;
   view: 'satellite' | 'map';
   showError?: boolean;
 }
@@ -18,6 +19,7 @@ const PropertyMapDisplay: React.FC<PropertyMapDisplayProps> = ({
   isLoaded,
   weatherTemp,
   isAnalyzing,
+  analysisText,
   view,
   showError = false,
 }) => {
@@ -43,7 +45,7 @@ const PropertyMapDisplay: React.FC<PropertyMapDisplayProps> = ({
             <span className="text-yellow-300 mr-1">☀</span>{weatherTemp}
           </div>
           <div className="absolute top-4 left-4 bg-tiptop-accent/90 text-white rounded-lg px-3 py-1 text-xs font-bold shadow-lg">
-            {isAnalyzing ? 'Analyzing Property...' : view === 'satellite' ? 'Satellite View' : 'Map View'}
+            {analysisText}
           </div>
           
           {showError && (
