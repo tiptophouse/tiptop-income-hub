@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -6,12 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { toast } from "@/components/ui/use-toast";
 import { Building } from "lucide-react";
 import Property3DModelFailed from "./3d/Property3DModelFailed";
 import Property3DModelViewer from "./3d/Property3DModelViewer";
 import Property3DModelLoading from "./Property3DModelLoading";
-import { generateModelFromImage, checkModelStatus, getModelDownloadUrl } from "@/utils/meshyApi";
+import ModelStatusDisplay from "./3d/ModelStatusDisplay";
+import { use3DModel } from "@/hooks/use3DModel";
 
 interface Property3DModelDisplayProps {
   jobId: string;
@@ -24,81 +25,21 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   address,
   className,
 }) => {
-  const [modelStatus, setModelStatus] = useState<
-    "processing" | "completed" | "failed"
-  >("processing");
-  const [modelUrl, setModelUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [rotateModel, setRotateModel] = useState(true);
   const [modelRotation, setModelRotation] = useState(0);
   const [isModelViewerLoaded, setIsModelViewerLoaded] = useState(false);
-  const [checkCount, setCheckCount] = useState(0);
 
-  useEffect(() => {
-    if (!jobId) return;
+  const { modelStatus, modelUrl, isLoading, handleRefresh } = use3DModel(jobId);
 
-    const initializeModel = async () => {
-      try {
-        setIsLoading(true);
-        
-        // For demo jobs or if we already have the URL, skip API calls
-        if (jobId.startsWith('demo-')) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
-          setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
-          setModelStatus("completed");
-          setIsLoading(false);
-          return;
-        }
-        
-        // For real jobs, check status with the API
-        const status = await checkModelStatus(jobId);
-        
-        if (status.state === 'completed') {
-          const url = await getModelDownloadUrl(jobId);
-          setModelUrl(url);
-          setModelStatus("completed");
-        } else if (status.state === 'failed') {
-          setModelStatus("failed");
-          toast({
-            title: "3D Model Failed",
-            description: "Could not generate the 3D model. Please try again.",
-            variant: "destructive",
-          });
-        } else if (checkCount < 10) {
-          // Still processing, schedule another check
-          setTimeout(() => {
-            setCheckCount(prevCount => prevCount + 1);
-          }, 5000);
-        } else {
-          setModelStatus("failed");
-          toast({
-            title: "Processing Timeout",
-            description: "3D model processing took too long. Please try again later.",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Error checking 3D model status:", error);
-        setModelStatus("failed");
-        
-        // Use demo model as fallback
-        const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
-        setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
-        
-        toast({
-          title: "Error",
-          description: "Failed to check 3D model status. Using demo model instead.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  React.useEffect(() => {
+    if (!rotateModel) return;
+    const interval = setInterval(() => {
+      setModelRotation((prev) => (prev + 1) % 360);
+    }, 50);
+    return () => clearInterval(interval);
+  }, [rotateModel]);
 
-    initializeModel();
-  }, [jobId, checkCount]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     // Load model-viewer script if not already loaded
     if (!document.querySelector('script[src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"]')) {
       const script = document.createElement("script");
@@ -110,83 +51,6 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
       setIsModelViewerLoaded(true);
     }
   }, []);
-
-  useEffect(() => {
-    if (!rotateModel) return;
-    const interval = setInterval(() => {
-      setModelRotation((prev) => (prev + 1) % 360);
-    }, 50);
-    return () => clearInterval(interval);
-  }, [rotateModel]);
-
-  const handleDownload = () => {
-    if (!modelUrl) return;
-    window.open(modelUrl, "_blank");
-    toast({
-      title: "3D Model Downloaded",
-      description: "Your property's 3D model has been downloaded.",
-    });
-  };
-  
-  const handleRefresh = async () => {
-    setIsLoading(true);
-    setModelStatus("processing");
-    setCheckCount(0);
-    
-    const checkAndUpdateModelStatus = async () => {
-      try {
-        // If this is a demo job or we've already found the URL, skip API calls
-        if (jobId.startsWith('demo-') && !modelUrl) {
-          // Simulate API delay for demo jobs
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          setModelUrl(`https://storage.googleapis.com/realestate-3d-models/demo-property.glb`);
-          setModelStatus("completed");
-          setIsLoading(false);
-          return;
-        }
-        
-        // For real jobs, check status with the API
-        if (!jobId.startsWith('demo-')) {
-          const status = await checkModelStatus(jobId);
-          
-          if (status.state === 'completed') {
-            const url = await getModelDownloadUrl(jobId);
-            setModelUrl(url);
-            setModelStatus("completed");
-          } else if (status.state === 'failed') {
-            setModelStatus("failed");
-            toast({
-              title: "3D Model Failed",
-              description: "Could not generate the 3D model. Please try again.",
-              variant: "destructive",
-            });
-          } else {
-            setModelStatus("failed");
-            toast({
-              title: "Error",
-              description: "Failed to check 3D model status. Please try again later.",
-              variant: "destructive",
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error checking 3D model status:", error);
-        setModelStatus("failed");
-        toast({
-          title: "Error",
-          description: "Failed to check 3D model status. Please try again later.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    // Re-fetch the model
-    setTimeout(() => {
-      checkAndUpdateModelStatus();
-    }, 1000);
-  };
 
   if (isLoading) {
     return <Property3DModelLoading />;
@@ -215,9 +79,14 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           modelRotation={modelRotation}
           toggleRotate={() => setRotateModel(!rotateModel)}
           handleRefresh={handleRefresh}
-          handleDownload={() => handleDownload()}
+          onDownload={() => {
+            if (modelUrl) {
+              window.open(modelUrl, "_blank");
+            }
+          }}
           jobId={jobId}
         />
+        <ModelStatusDisplay jobId={jobId} modelStatus={modelStatus} />
       </CardContent>
     </Card>
   );

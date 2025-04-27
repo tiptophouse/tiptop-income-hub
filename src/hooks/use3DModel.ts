@@ -1,0 +1,87 @@
+
+import { useState, useEffect } from 'react';
+import { toast } from "@/components/ui/use-toast";
+import { checkModelStatus, getModelDownloadUrl } from '@/utils/meshyApi';
+
+export const use3DModel = (jobId: string) => {
+  const [modelStatus, setModelStatus] = useState<'processing' | 'completed' | 'failed'>('processing');
+  const [modelUrl, setModelUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [checkCount, setCheckCount] = useState(0);
+
+  useEffect(() => {
+    if (!jobId) return;
+
+    const initializeModel = async () => {
+      try {
+        setIsLoading(true);
+        
+        // For demo jobs or if we already have the URL, skip API calls
+        if (jobId.startsWith('demo-')) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
+          setModelStatus("completed");
+          setIsLoading(false);
+          return;
+        }
+        
+        // For real jobs, check status with the API
+        const status = await checkModelStatus(jobId);
+        
+        if (status.state === 'completed') {
+          const url = await getModelDownloadUrl(jobId);
+          setModelUrl(url);
+          setModelStatus("completed");
+        } else if (status.state === 'failed') {
+          setModelStatus("failed");
+          toast({
+            title: "3D Model Failed",
+            description: "Could not generate the 3D model. Please try again.",
+            variant: "destructive",
+          });
+        } else if (checkCount < 10) {
+          // Still processing, schedule another check
+          setTimeout(() => {
+            setCheckCount(prevCount => prevCount + 1);
+          }, 5000);
+        } else {
+          setModelStatus("failed");
+          toast({
+            title: "Processing Timeout",
+            description: "3D model processing took too long. Please try again later.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error checking 3D model status:", error);
+        setModelStatus("failed");
+        
+        // Use demo model as fallback
+        setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
+        
+        toast({
+          title: "Error",
+          description: "Failed to check 3D model status. Using demo model instead.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeModel();
+  }, [jobId, checkCount]);
+
+  const handleRefresh = () => {
+    setIsLoading(true);
+    setModelStatus("processing");
+    setCheckCount(0);
+  };
+
+  return {
+    modelStatus,
+    modelUrl,
+    isLoading,
+    handleRefresh
+  };
+};
