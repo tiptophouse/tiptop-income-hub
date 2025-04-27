@@ -1,3 +1,4 @@
+
 import { Calendar, Home, Sun, Wifi, Car, Plus, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -29,6 +30,11 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
   const activeClasses = isMobile
     ? "bg-white/20 text-white"
     : "bg-tiptop-hover text-white";
+    
+  const handleNavigation = (url: string) => {
+    navigate(url);
+    // Don't close mobile menu automatically - this was causing the menu to disappear
+  };
 
   return (
     <>
@@ -40,7 +46,7 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
                 asChild 
                 className={location.pathname === item.url ? activeClasses : buttonClasses}
               >
-                <button onClick={() => navigate(item.url)}>
+                <button onClick={() => handleNavigation(item.url)}>
                   <item.icon className="h-4 w-4 mr-2" />
                   <span>{item.title}</span>
                 </button>

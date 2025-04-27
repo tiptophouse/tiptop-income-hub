@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Calendar, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { mockAssets } from '../dashboardData';
 import { renderStatusBadge } from '../utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+// Sample data for the earnings chart
+const earningsChartData = [
+  { month: 'Nov', revenue: 320 },
+  { month: 'Dec', revenue: 340 },
+  { month: 'Jan', revenue: 350 },
+  { month: 'Feb', revenue: 360 },
+  { month: 'Mar', revenue: 370 },
+  { month: 'Apr', revenue: 380 },
+];
 
 export const EarningsSection = () => {
   const isMobile = useIsMobile();
@@ -96,7 +108,21 @@ export const EarningsSection = () => {
           </CardHeader>
           <CardContent>
             <div className="h-48 md:h-64">
-              {/* Add your chart component here */}
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={earningsChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#AA94E2" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#AA94E2" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
+                  <Area type="monotone" dataKey="revenue" stroke="#AA94E2" fillOpacity={1} fill="url(#colorRevenue)" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
