@@ -1,12 +1,11 @@
 
+declare const google: any;
+
 export const getStreetViewImageUrl = (
   address: string,
   size: { width: number; height: number } = { width: 600, height: 400 }
 ): string => {
-  // Base64 encode the address for URL safety
   const encodedAddress = encodeURIComponent(address);
-  
-  // Use the same API key as the map
   const API_KEY = "AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE";
   
   return `https://maps.googleapis.com/maps/api/streetview?size=${size.width}x${size.height}&location=${encodedAddress}&key=${API_KEY}`;
@@ -63,10 +62,9 @@ export const captureStreetViewForModel = async (address: string): Promise<string
       throw new Error("Google Maps API not loaded");
     }
 
-    // First check if Street View is available at this location by geocoding the address
     const geocoder = new window.google.maps.Geocoder();
     const geocodeResult = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
-      geocoder.geocode({ address }, (results, status) => {
+      geocoder.geocode({ address }, (results: any, status: string) => {
         if (status === 'OK' && results) {
           resolve(results);
         } else {
@@ -80,7 +78,6 @@ export const captureStreetViewForModel = async (address: string): Promise<string
       lng: geocodeResult[0].geometry.location.lng()
     };
     
-    // Check if Street View is available
     const hasStreetView = await checkStreetViewAvailability(location);
     
     if (!hasStreetView) {
@@ -88,7 +85,6 @@ export const captureStreetViewForModel = async (address: string): Promise<string
       return null;
     }
     
-    // Get the Street View image as base64
     return await getStreetViewImageAsBase64(address);
   } catch (error) {
     console.error("Error capturing Street View:", error);

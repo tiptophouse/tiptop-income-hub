@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -40,7 +39,6 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   }, [rotateModel]);
 
   React.useEffect(() => {
-    // Load model-viewer script if not already loaded
     if (!document.querySelector('script[src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"]')) {
       const script = document.createElement("script");
       script.src = "https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js";
@@ -79,7 +77,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           modelRotation={modelRotation}
           toggleRotate={() => setRotateModel(!rotateModel)}
           handleRefresh={handleRefresh}
-          onDownload={() => {
+          handleDownload={() => {
             if (modelUrl) {
               window.open(modelUrl, "_blank");
             }
