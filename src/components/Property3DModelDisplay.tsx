@@ -73,12 +73,12 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   return (
     <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <Building className="h-4 w-4 sm:h-5 sm:w-5 text-tiptop-accent" />
           Property 3D Model
         </CardTitle>
         <CardDescription className="text-xs sm:text-sm">
-          3D model for {address}
+          {address}
           <Button 
             variant="link" 
             className="p-0 h-auto text-[10px] sm:text-xs text-tiptop-accent" 

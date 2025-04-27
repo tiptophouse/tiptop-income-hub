@@ -151,7 +151,7 @@ const AddressSearchForm = ({
           ref={inputRef}
           type="text" 
           placeholder="Enter your property address..." 
-          className="pl-12 pr-36 py-6 w-full rounded-full text-base sm:text-lg shadow-lg border-none bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-tiptop-accent/50 transition-all duration-300"
+          className="pl-12 pr-32 py-6 w-full rounded-full text-base sm:text-lg shadow-lg border-none bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-tiptop-accent/50 transition-all duration-300"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
         />
