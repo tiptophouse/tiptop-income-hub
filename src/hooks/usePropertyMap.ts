@@ -65,6 +65,12 @@ export const usePropertyMap = (address: string) => {
       } catch (error) {
         console.error("Error calling Meshy API:", error);
         
+        // Create and dispatch a custom error event
+        const errorEvent = new CustomEvent('modelGenerationError', {
+          detail: { error: error instanceof Error ? error.message : "Unknown API error" }
+        });
+        document.dispatchEvent(errorEvent);
+        
         const demoJobId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
         
         const modelEvent = new CustomEvent('modelJobCreated', {
@@ -75,13 +81,21 @@ export const usePropertyMap = (address: string) => {
         toast({
           title: "Using Demo Model",
           description: "We encountered an issue with the 3D model API. Showing a demo model instead.",
+          variant: "destructive"
         });
       }
     } catch (error) {
       console.error("Error in 3D model generation process:", error);
+      
+      // Create and dispatch a custom error event
+      const errorEvent = new CustomEvent('modelGenerationError', {
+        detail: { error: error instanceof Error ? error.message : "Unknown error" }
+      });
+      document.dispatchEvent(errorEvent);
+      
       toast({
         title: "Error",
-        description: "Failed to generate 3D model. Please try again later.",
+        description: "Failed to generate 3D model. Using demo model instead.",
         variant: "destructive"
       });
       

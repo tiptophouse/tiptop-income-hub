@@ -59,6 +59,7 @@ export const use3DModel = (jobId: string) => {
         } else {
           console.error("Model processing timeout");
           setModelStatus("failed");
+          setError("Model processing timeout");
           
           // Use demo model as fallback after timeout
           console.log("Using demo model as fallback after timeout");

@@ -1,6 +1,8 @@
 
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface PropertyMapDisplayProps {
   mapContainerRef: React.RefObject<HTMLDivElement>;
@@ -8,6 +10,7 @@ interface PropertyMapDisplayProps {
   weatherTemp: string;
   isAnalyzing: boolean;
   view: 'satellite' | 'map';
+  showError?: boolean;
 }
 
 const PropertyMapDisplay: React.FC<PropertyMapDisplayProps> = ({
@@ -16,6 +19,7 @@ const PropertyMapDisplay: React.FC<PropertyMapDisplayProps> = ({
   weatherTemp,
   isAnalyzing,
   view,
+  showError = false,
 }) => {
   return (
     <motion.div
@@ -41,6 +45,17 @@ const PropertyMapDisplay: React.FC<PropertyMapDisplayProps> = ({
           <div className="absolute top-4 left-4 bg-tiptop-accent/90 text-white rounded-lg px-3 py-1 text-xs font-bold shadow-lg">
             {isAnalyzing ? 'Analyzing Property...' : view === 'satellite' ? 'Satellite View' : 'Map View'}
           </div>
+          
+          {showError && (
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-[90%] max-w-md z-10">
+              <Alert variant="warning" className="bg-amber-50 border-amber-200 text-amber-800">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Failed to generate 3D model. Using demo model instead.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
         </>
       )}
     </motion.div>

@@ -1,76 +1,58 @@
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import DashboardLayout from '@/pages/dashboard/DashboardLayout';
+import StatisticsCards from '@/pages/dashboard/components/StatisticsCards';
+import DashboardOverview from '@/pages/dashboard/DashboardOverview';
+import DashboardHeader from '@/pages/dashboard/components/DashboardHeader';
+import { toast } from '@/components/ui/use-toast';
 
-import React from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useDashboard } from '@/hooks/useDashboard';
-import { DashboardLayout } from './dashboard/DashboardLayout';
-import { DashboardHeader } from './dashboard/components/DashboardHeader';
-import { MobileSidebar } from './dashboard/components/MobileSidebar';
-import DashboardOverview from './dashboard/DashboardOverview';
-import SolarAssetDetail from './dashboard/assetDetails/SolarAssetDetail';
-import InternetAssetDetail from './dashboard/assetDetails/InternetAssetDetail';
-import EVAssetDetail from './dashboard/assetDetails/EVAssetDetail';
-import AddAssetPage from './dashboard/AddAssetPage';
+const Dashboard: React.FC = () => {
+  const [userName, setUserName] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-const Dashboard = () => {
-  const {
-    userName,
-    earnings,
-    activeAssetCount,
-    totalPotentialAssets,
-    pendingActions,
-    selectedView,
-    mobileMenuOpen,
-    setMobileMenuOpen,
-    handleSignOut,
-    aiRevenueDescription
-  } = useDashboard();
-  
-  const isMobile = useIsMobile();
+  useEffect(() => {
+    const fetchUserName = async () => {
+      setIsLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUserName(user.user_metadata?.full_name || user.email || 'User');
+        } else {
+          // Handle the case where there is no user
+          setUserName('Guest');
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch user data. Please try again.",
+          variant: "destructive"
+        });
+        setUserName('Guest');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const renderContent = () => {
-    switch (selectedView) {
-      case 'dashboard':
-        return (
-          <DashboardOverview 
-            userName={userName} 
-            earnings={earnings} 
-            activeAssets={activeAssetCount}
-            totalPotentialAssets={totalPotentialAssets} 
-            pendingActions={pendingActions}
-            aiRevenueDescription={aiRevenueDescription}
-          />
-        );
-      case 'rooftop':
-        return <SolarAssetDetail />;
-      case 'internet':
-        return <InternetAssetDetail />;
-      case 'ev':
-        return <EVAssetDetail />;
-      case 'add':
-        return <AddAssetPage />;
-      default:
-        return <DashboardOverview 
-          userName={userName} 
-          earnings={earnings} 
-          activeAssets={activeAssetCount}
-          totalPotentialAssets={totalPotentialAssets} 
-          pendingActions={pendingActions}
-          aiRevenueDescription={aiRevenueDescription}
-        />;
-    }
-  };
+    fetchUserName();
+  }, []);
 
   return (
-    <DashboardLayout onSignOut={handleSignOut}>
-      <DashboardHeader />
-      {isMobile && (
-        <MobileSidebar
-          isOpen={mobileMenuOpen}
-          onOpenChange={setMobileMenuOpen}
-          onSignOut={handleSignOut}
+    <DashboardLayout>
+      <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
+        <DashboardOverview 
+          userName={userName} 
+          earnings={{
+            daily: 49.80,
+            monthly: 1582.50,
+            yearly: 18990.00
+          }}
+          activeAssets={6}
+          totalPotentialAssets={12}
+          pendingActions={3}
+          aiRevenueDescription="Your assets are generating revenue at optimal levels. Solar panels are operating at 94% efficiency."
         />
-      )}
-      {renderContent()}
+      </div>
     </DashboardLayout>
   );
 };

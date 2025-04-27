@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Building } from "lucide-react";
+import { Building, AlertCircle } from "lucide-react";
 import Property3DModelFailed from "./3d/Property3DModelFailed";
 import Property3DModelViewer from "./3d/Property3DModelViewer";
 import Property3DModelLoading from "./Property3DModelLoading";
@@ -15,6 +15,7 @@ import ModelStatusDisplay from "./3d/ModelStatusDisplay";
 import { use3DModel } from "@/hooks/use3DModel";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Property3DModelDisplayProps {
   jobId: string;
@@ -33,8 +34,9 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   const [zoomLevel, setZoomLevel] = useState(105);
   const [backgroundColor, setBackgroundColor] = useState("#f5f5f5");
   const [showControls, setShowControls] = useState(false);
+  const [errorDismissed, setErrorDismissed] = useState(false);
 
-  const { modelStatus, modelUrl, isLoading, handleRefresh } = use3DModel(jobId);
+  const { modelStatus, modelUrl, isLoading, error, handleRefresh } = use3DModel(jobId);
 
   React.useEffect(() => {
     if (!rotateModel) return;
@@ -85,6 +87,18 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {error && !errorDismissed && (
+          <Alert variant="destructive" className="mb-4 border-2 border-red-300">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>Failed to generate 3D model. Using demo model instead.</span>
+              <Button variant="ghost" size="sm" onClick={() => setErrorDismissed(true)}>
+                Dismiss
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {showControls && (
           <div className="mb-4 space-y-4 p-4 bg-gray-50 rounded-md">
             <div>
