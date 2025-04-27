@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
@@ -45,19 +44,29 @@ const Hero = () => {
                 src="/lovable-uploads/10603114-d9a7-40ea-afe1-229cb7a86511.png" 
               />
               <div className="absolute top-0 left-0 w-full h-full z-10">
-                <div className="absolute top-4 left-4 flex flex-col items-start">
-                  <p className="text-lg font-semibold text-[#552B1B] text-left mb-2">Rent your</p>
-                  <div className="flex flex-col gap-3 pl-4">
+                <div className="absolute top-4 left-4">
+                  <p className="text-lg font-semibold text-[#552B1B] mb-2">Rent your</p>
+                  <div className="flex flex-col gap-3">
                     <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Parking Space</span>
                     <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Items</span>
                     <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Unused Bandwidth</span>
                   </div>
                 </div>
-                <span className="absolute top-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
-                <span className="absolute top-1/4 right-10 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
-                <span className="absolute bottom-1/4 right-12 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
-                <span className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
-                <span className="absolute top-1/2 right-4 bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Car</span>
+                <div className="absolute top-8 right-4">
+                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Rooftop</span>
+                </div>
+                <div className="absolute top-1/4 right-4">
+                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Swimming Pool</span>
+                </div>
+                <div className="absolute bottom-1/4 right-4">
+                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Garden</span>
+                </div>
+                <div className="absolute bottom-8 right-4">
+                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Storage Space</span>
+                </div>
+                <div className="absolute top-1/2 right-4">
+                  <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">Car</span>
+                </div>
               </div>
             </div>
           </div>

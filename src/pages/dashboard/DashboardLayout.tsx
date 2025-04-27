@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react';
@@ -32,7 +31,12 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
         <Sidebar collapsible="icon" className="hidden md:flex">
           <SidebarHeader>
             <div className="flex items-center px-2">
-              <span className="font-bold text-xl text-primary">Tiptop</span>
+              <button 
+                onClick={() => navigate('/')} 
+                className="font-bold text-xl text-primary hover:opacity-80 transition-opacity"
+              >
+                Tiptop
+              </button>
               <SidebarTrigger className="ml-auto" />
             </div>
           </SidebarHeader>
@@ -46,7 +50,7 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
         
         <SidebarInset className="flex-1">
           <div className="relative">
-            {/* Mobile Header - Now sticky */}
+            {/* Mobile Header */}
             <div className="sticky top-0 z-50 bg-background border-b md:hidden">
               <div className="flex items-center justify-between p-4">
                 <Sheet>
@@ -71,7 +75,12 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
                   </SheetTrigger>
                   <SheetContent side="left" className="w-[240px] p-0 bg-[#6E59A5] text-white overflow-y-auto">
                     <div className="p-3 border-b border-white/10">
-                      <h2 className="text-lg font-bold text-white">Tiptop</h2>
+                      <button 
+                        onClick={() => navigate('/')} 
+                        className="text-lg font-bold text-white hover:opacity-80 transition-opacity"
+                      >
+                        Tiptop
+                      </button>
                     </div>
                     <div className="py-2">
                       <DashboardMenu onSignOut={onSignOut} />
@@ -79,7 +88,12 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
                   </SheetContent>
                 </Sheet>
                 
-                <span className="font-bold text-xl text-primary">Tiptop</span>
+                <button 
+                  onClick={() => navigate('/')}
+                  className="font-bold text-xl text-primary hover:opacity-80 transition-opacity"
+                >
+                  Tiptop
+                </button>
                 
                 <Button 
                   variant="ghost" 

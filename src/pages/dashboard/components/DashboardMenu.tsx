@@ -1,4 +1,3 @@
-
 import { Calendar, Home, Sun, Wifi, Car, Plus, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -33,7 +32,6 @@ export const DashboardMenu = ({ onSignOut }: DashboardMenuProps) => {
     
   const handleNavigation = (url: string) => {
     navigate(url);
-    // Don't close mobile menu automatically - this was causing the menu to disappear
   };
 
   return (
