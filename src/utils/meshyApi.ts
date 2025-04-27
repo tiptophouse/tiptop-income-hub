@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for interacting with the Meshy API
  */

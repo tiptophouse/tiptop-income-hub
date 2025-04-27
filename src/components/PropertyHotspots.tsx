@@ -1,13 +1,12 @@
-
 import React from 'react';
 import { 
   Home, 
   Sun, 
-  Ev, 
+  BatteryCharging, 
   Wifi, 
   ParkingSquare,
   Droplets,
-  Pool
+  Waves
 } from 'lucide-react';
 
 interface PropertyHotspotsProps {
@@ -52,7 +51,7 @@ const PropertyHotspots: React.FC<PropertyHotspotsProps> = ({ features }) => {
         <div className="absolute top-[75%] right-[60%] transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
           <div className="relative group">
             <div className="bg-green-500 text-white h-7 w-7 rounded-full flex items-center justify-center shadow-lg">
-              <Ev size={14} />
+              <BatteryCharging size={14} />
             </div>
             <div className="absolute opacity-0 group-hover:opacity-100 bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white text-xs rounded py-1 px-2 whitespace-nowrap transition-opacity duration-200">
               EV Charging Station Potential
@@ -80,7 +79,7 @@ const PropertyHotspots: React.FC<PropertyHotspotsProps> = ({ features }) => {
         <div className="absolute top-[60%] left-[45%] transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
           <div className="relative group">
             <div className="bg-cyan-500 text-white h-7 w-7 rounded-full flex items-center justify-center shadow-lg">
-              <Pool size={14} />
+              <Waves size={14} />
             </div>
             <div className="absolute opacity-0 group-hover:opacity-100 bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/75 text-white text-xs rounded py-1 px-2 whitespace-nowrap transition-opacity duration-200">
               Smart Pool System

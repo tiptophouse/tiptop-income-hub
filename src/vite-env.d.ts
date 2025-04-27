@@ -13,11 +13,14 @@ declare namespace JSX {
       'environment-image'?: string;
       exposure?: string;
       poster?: string;
+      bounds?: string;
+      'enable-pan'?: boolean;
+      autoplay?: boolean;
+      ar?: boolean;
+      'ar-modes'?: string;
       'rotation-per-second'?: string;
       'camera-orbit'?: string;
       'interaction-prompt'?: string;
-      ar?: boolean;
-      'ar-modes'?: string;
       'touch-action'?: string;
       style?: React.CSSProperties;
     };
