@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DashboardLayout } from './DashboardLayout';
 import { Sun, Wifi, Car, Droplet, Store, Camera, Home, Flower } from 'lucide-react';
@@ -65,24 +64,24 @@ const monetizationOptions = [
 
 const AddAssetPage = () => (
   <DashboardLayout onSignOut={() => {}}>
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-medium">Add New Asset</h1>
-          <p className="text-muted-foreground">Start monetizing a new property asset</p>
+          <h1 className="text-xl md:text-2xl font-medium">Add New Asset</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Start monetizing a new property asset</p>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {monetizationOptions.map((option) => (
           <Card key={option.id} className="hover:border-primary hover:shadow-md cursor-pointer transition-all">
-            <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center space-y-3 md:space-y-4">
+              <div className="h-12 w-12 md:h-16 md:w-16 rounded-full bg-primary/10 flex items-center justify-center">
                 {option.icon}
               </div>
-              <h3 className="text-lg font-medium text-center">{option.title}</h3>
-              <p className="text-sm text-center text-muted-foreground">{option.description}</p>
-              <p className="text-primary font-medium">{option.earnings}</p>
+              <h3 className="text-base md:text-lg font-medium text-center">{option.title}</h3>
+              <p className="text-xs md:text-sm text-center text-muted-foreground">{option.description}</p>
+              <p className="text-sm md:text-base text-primary font-medium">{option.earnings}</p>
             </CardContent>
           </Card>
         ))}
@@ -92,4 +91,3 @@ const AddAssetPage = () => (
 );
 
 export default AddAssetPage;
-
