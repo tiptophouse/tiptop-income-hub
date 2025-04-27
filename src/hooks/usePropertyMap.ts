@@ -38,23 +38,34 @@ export const usePropertyMap = (address: string) => {
         description: "Capturing property view...",
       });
       
-      let imageData = await captureStreetViewForModel(address);
+      // Get both Street View and satellite images
+      const imageData = await captureStreetViewForModel(address);
+      let primaryImage = imageData.streetView;
       
-      if (!imageData && mapContainerRef.current) {
+      // If Street View isn't available, try using the satellite image
+      if (!primaryImage && imageData.satellite) {
+        primaryImage = imageData.satellite;
+      }
+      
+      // If both failed, try to capture the map view as a last resort
+      if (!primaryImage && mapContainerRef.current) {
         console.log("Falling back to map screenshot");
-        imageData = await captureMapImage(mapContainerRef);
+        primaryImage = await captureMapImage(mapContainerRef);
       }
 
-      if (!imageData) {
+      if (!primaryImage) {
         throw new Error("Failed to capture property image");
       }
 
       try {
-        const jobId = await generateModelFromImage(imageData);
+        const jobId = await generateModelFromImage(primaryImage);
         console.log("3D model generation job created:", jobId);
         
         const modelEvent = new CustomEvent('modelJobCreated', {
-          detail: { jobId }
+          detail: { 
+            jobId,
+            hasSatelliteImage: !!imageData.satellite
+          }
         });
         document.dispatchEvent(modelEvent);
         
@@ -74,7 +85,10 @@ export const usePropertyMap = (address: string) => {
         const demoJobId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
         
         const modelEvent = new CustomEvent('modelJobCreated', {
-          detail: { jobId: demoJobId }
+          detail: { 
+            jobId: demoJobId,
+            hasSatelliteImage: !!imageData.satellite 
+          }
         });
         document.dispatchEvent(modelEvent);
         
@@ -101,7 +115,10 @@ export const usePropertyMap = (address: string) => {
       
       const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
       const modelEvent = new CustomEvent('modelJobCreated', {
-        detail: { jobId: fallbackId }
+        detail: { 
+          jobId: fallbackId,
+          hasSatelliteImage: false 
+        }
       });
       document.dispatchEvent(modelEvent);
     } finally {

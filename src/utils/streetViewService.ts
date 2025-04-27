@@ -96,14 +96,16 @@ export const captureStreetViewForModel = async (address: string): Promise<{stree
   try {
     console.log("Capturing property views for:", address);
     
-    // Try to get both Street View and Satellite images
-    const streetViewImage = await getStreetViewImageAsBase64(address);
-    const satelliteImage = await getSatelliteImageAsBase64(address);
+    // Try to get both Street View and Satellite images in parallel
+    const [streetViewImage, satelliteImage] = await Promise.allSettled([
+      getStreetViewImageAsBase64(address),
+      getSatelliteImageAsBase64(address)
+    ]);
     
     // Return both images
     return {
-      streetView: streetViewImage,
-      satellite: satelliteImage
+      streetView: streetViewImage.status === 'fulfilled' ? streetViewImage.value : null,
+      satellite: satelliteImage.status === 'fulfilled' ? satelliteImage.value : null
     };
   } catch (error) {
     console.error("Error capturing views for model:", error);

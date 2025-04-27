@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Building, AlertCircle } from "lucide-react";
+import { Building, AlertCircle, Loader2 } from "lucide-react";
 import Property3DModelFailed from "./3d/Property3DModelFailed";
 import Property3DModelViewer from "./3d/Property3DModelViewer";
 import Property3DModelLoading from "./Property3DModelLoading";
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Progress } from "@/components/ui/progress";
 
 interface Property3DModelDisplayProps {
   jobId: string;
@@ -40,7 +41,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   const [errorDismissed, setErrorDismissed] = useState(false);
   const isMobile = useIsMobile();
 
-  const { modelStatus, modelUrl, isLoading, error, handleRefresh } = use3DModel(jobId);
+  const { modelStatus, modelUrl, isLoading, error, statusMessage, handleRefresh } = use3DModel(jobId);
 
   React.useEffect(() => {
     if (!rotateModel) return;
@@ -63,10 +64,25 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   }, []);
 
   if (isLoading) {
-    return <Property3DModelLoading />;
+    return (
+      <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Building className="h-4 w-4 sm:h-5 sm:w-5 text-tiptop-accent" />
+            Property 3D Model
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm">{address}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center space-y-4 py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-tiptop-accent" />
+          <p className="text-sm text-center text-muted-foreground">{statusMessage}</p>
+          <Progress value={modelStatus === 'processing' ? 75 : 100} className="w-3/4 max-w-xs" />
+        </CardContent>
+      </Card>
+    );
   }
 
-  if (modelStatus === "failed") {
+  if (modelStatus === "failed" && !modelUrl) {
     return <Property3DModelFailed onRetry={handleRefresh} />;
   }
 
@@ -79,8 +95,8 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           <Building className="h-4 w-4 sm:h-5 sm:w-5 text-tiptop-accent" />
           Property 3D Model
         </CardTitle>
-        <CardDescription className="text-xs sm:text-sm">
-          {address}
+        <CardDescription className="text-xs sm:text-sm flex justify-between items-center">
+          <span className="truncate">{address}</span>
           <Button 
             variant="link" 
             className="p-0 h-auto text-[10px] sm:text-xs text-tiptop-accent" 
@@ -101,6 +117,13 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
               </Button>
             </AlertDescription>
           </Alert>
+        )}
+        
+        {modelStatus === 'processing' && (
+          <div className="mb-4 flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>{statusMessage}</span>
+          </div>
         )}
         
         {showControls && (
@@ -148,6 +171,13 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           backgroundColor={backgroundColor}
           hasSatelliteImage={hasSatelliteImage}
         />
+        
+        {hasSatelliteImage && (
+          <div className="mt-2 text-xs text-center text-tiptop-accent font-medium">
+            Enhanced 3D model using satellite imagery for better accuracy
+          </div>
+        )}
+        
         <ModelStatusDisplay jobId={jobId} modelStatus={modelStatus} />
       </CardContent>
     </Card>

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ModelViewerDisplayProps {
@@ -22,21 +22,45 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
   showHotspots = true
 }) => {
   const isMobile = useIsMobile();
+  const modelViewerRef = useRef<HTMLElement | null>(null);
   
   useEffect(() => {
     // This is needed to reinitialize model-viewer hotspots after the model loads
     if (isModelViewerLoaded && modelUrl && showHotspots) {
       const timer = setTimeout(() => {
-        const modelViewer = document.querySelector('model-viewer');
-        if (modelViewer) {
+        if (modelViewerRef.current) {
           // Force a redraw of the model viewer
-          modelViewer.dispatchEvent(new CustomEvent('load'));
+          modelViewerRef.current.dispatchEvent(new CustomEvent('load'));
         }
       }, 2000);
       
       return () => clearTimeout(timer);
     }
   }, [isModelViewerLoaded, modelUrl, showHotspots]);
+  
+  useEffect(() => {
+    // Initialize hotspots with animated data when model loads
+    const handleModelLoad = () => {
+      if (modelViewerRef.current) {
+        // Add pulse animation to hotspots
+        const hotspots = modelViewerRef.current.querySelectorAll('.hotspot');
+        hotspots.forEach(hotspot => {
+          hotspot.classList.add('pulse');
+        });
+      }
+    };
+    
+    const modelViewer = modelViewerRef.current;
+    if (modelViewer) {
+      modelViewer.addEventListener('load', handleModelLoad);
+    }
+    
+    return () => {
+      if (modelViewer) {
+        modelViewer.removeEventListener('load', handleModelLoad);
+      }
+    };
+  }, [modelUrl, isModelViewerLoaded]);
   
   if (!modelUrl) {
     return (
@@ -65,9 +89,14 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
       border: none;
       background-color: blue;
       box-sizing: border-box;
-      pointer-events: none;
+      pointer-events: all;
       position: absolute;
       transform: translate3d(-50%, -50%, 0);
+      transition: transform 0.3s ease;
+    }
+    
+    .hotspot:hover {
+      transform: translate3d(-50%, -50%, 0) scale(1.2);
     }
     
     .hotspot[data-type="solar"] {
@@ -102,6 +131,32 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
       top: 50%;
       width: max-content;
       transform: translateY(-50%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    
+    .hotspot:hover + .hotspot-annotation {
+      opacity: 1;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: translate3d(-50%, -50%, 0) scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: translate3d(-50%, -50%, 0) scale(1.2);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate3d(-50%, -50%, 0) scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .hotspot.pulse {
+      animation: pulse 2s infinite;
     }
   `;
 
@@ -111,6 +166,7 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
       <style>{hotspotStyle}</style>
       {/* @ts-ignore - model-viewer element is added by the script */}
       <model-viewer
+        ref={modelViewerRef as any}
         src={modelUrl}
         alt="3D property model"
         camera-controls={true}
@@ -134,17 +190,21 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = ({
       >
         {showHotspots && (
           <>
-            {/* Solar panel hotspot */}
+            {/* Solar panel hotspot on roof */}
             <button className="hotspot" slot="hotspot-roof" data-type="solar" data-position="0 3 0"></button>
             <div className="hotspot-annotation" slot="hotspot-roof">Solar Panel Opportunity: <br/>$400/month</div>
             
-            {/* EV charging hotspot */}
+            {/* EV charging hotspot on driveway */}
             <button className="hotspot" slot="hotspot-driveway" data-type="ev" data-position="-3 0 3"></button>
             <div className="hotspot-annotation" slot="hotspot-driveway">EV Charging: <br/>$250/month</div>
             
-            {/* Internet sharing hotspot */}
+            {/* Internet sharing hotspot on side of house */}
             <button className="hotspot" slot="hotspot-attic" data-type="internet" data-position="3 2 0"></button>
             <div className="hotspot-annotation" slot="hotspot-attic">Internet Sharing: <br/>$180/month</div>
+            
+            {/* Additional hotspot for roof edge */}
+            <button className="hotspot" slot="hotspot-roof-edge" data-type="solar" data-position="2 3 -2"></button>
+            <div className="hotspot-annotation" slot="hotspot-roof-edge">Additional Solar Potential: <br/>$150/month</div>
           </>
         )}
       </model-viewer>

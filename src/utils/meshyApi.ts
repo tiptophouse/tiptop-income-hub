@@ -37,7 +37,7 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
         mode: "geometry",
         background_removal: true,
         generate_material: true,
-        prompt: "Create a photorealistic 3D model of this residential property, focusing on architectural accuracy and details of the entire property including rooftop features. Highlight potential monetizable areas such as the roof (for solar panels), driveway (for EV charging) and exterior spaces. Maintain precise scale and proportions, including windows, doors, and distinctive architectural features.", 
+        prompt: "Create a photorealistic 3D model of this residential property, focusing on architectural accuracy and details of the entire property including rooftop features. Highlight potential monetizable areas such as the roof (for solar panels), driveway (for EV charging), exterior walls (for internet antennas) and exterior spaces. Maintain precise scale and proportions, including windows, doors, and distinctive architectural features.", 
         reference_model_id: "house",
         preserve_topology: true,
         mesh_quality: "high"

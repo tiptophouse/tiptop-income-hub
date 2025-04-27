@@ -9,6 +9,7 @@ export const use3DModel = (jobId: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [checkCount, setCheckCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string>("Initializing 3D model...");
 
   useEffect(() => {
     if (!jobId) return;
@@ -30,13 +31,19 @@ export const use3DModel = (jobId: string) => {
         
         // For real jobs, check status with the API
         console.log("Checking model status for job:", jobId);
+        setStatusMessage(`Checking model generation status (Attempt ${checkCount + 1})...`);
         const status = await checkModelStatus(jobId);
         
         if (status.state === 'completed') {
           console.log("Model generation completed. Getting download URL...");
+          setStatusMessage("Model completed! Loading 3D view...");
           const url = await getModelDownloadUrl(jobId);
           setModelUrl(url);
           setModelStatus("completed");
+          toast({
+            title: "3D Model Ready",
+            description: "Your property's 3D model is now ready to view.",
+          });
         } else if (status.state === 'failed') {
           console.error("Model generation failed");
           setModelStatus("failed");
@@ -50,27 +57,15 @@ export const use3DModel = (jobId: string) => {
           // Use demo model as fallback
           setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
           setModelStatus("completed");
-        } else if (checkCount < 10) {
-          // Still processing, schedule another check
+        } else {
+          // Still processing, schedule another check with exponential backoff
           console.log("Model still processing. Scheduling another check...");
+          const backoffTime = Math.min(5000 * Math.pow(1.5, checkCount), 30000); // Max 30 seconds
+          setStatusMessage(`Model generation in progress... (${Math.round(backoffTime/1000)}s until next update)`);
+          
           setTimeout(() => {
             setCheckCount(prevCount => prevCount + 1);
-          }, 5000);
-        } else {
-          console.error("Model processing timeout");
-          setModelStatus("failed");
-          setError("Model processing timeout");
-          
-          // Use demo model as fallback after timeout
-          console.log("Using demo model as fallback after timeout");
-          setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
-          setModelStatus("completed");
-          
-          toast({
-            title: "Processing Timeout",
-            description: "3D model processing took too long. Using demo model instead.",
-            variant: "destructive",
-          });
+          }, backoffTime);
         }
       } catch (error) {
         console.error("Error checking 3D model status:", error);
@@ -100,6 +95,7 @@ export const use3DModel = (jobId: string) => {
     setModelStatus("processing");
     setCheckCount(0);
     setError(null);
+    setStatusMessage("Refreshing 3D model...");
   };
 
   return {
@@ -107,6 +103,7 @@ export const use3DModel = (jobId: string) => {
     modelUrl,
     isLoading,
     error,
+    statusMessage,
     handleRefresh
   };
 };

@@ -46,6 +46,7 @@ export const generatePropertyModels = async (address: string) => {
     const capturedImages = await captureStreetViewForModel(address);
     let streetViewImage = capturedImages.streetView;
     let satelliteImage = capturedImages.satellite;
+    const hasSatelliteImage = !!satelliteImage;
     
     // If no street view is available, try to use stored images
     if (!streetViewImage) {
@@ -81,7 +82,6 @@ export const generatePropertyModels = async (address: string) => {
     // Determine which image to use for model generation
     // Prefer street view for facade, satellite for rooftop
     const primaryImage = streetViewImage || satelliteImage;
-    const secondaryImage = satelliteImage;
     
     if (!primaryImage) {
       console.error("Failed to capture any property image");
@@ -101,7 +101,7 @@ export const generatePropertyModels = async (address: string) => {
       const { error: updateError } = await supabase.auth.updateUser({
         data: { 
           propertyModelJobId: modelJobId,
-          hasSatelliteImage: !!satelliteImage
+          hasSatelliteImage: hasSatelliteImage
         }
       });
 
@@ -112,11 +112,11 @@ export const generatePropertyModels = async (address: string) => {
       }
 
       // Dispatch event for the dashboard to pick up
-      console.log("Dispatching modelJobCreated event");
+      console.log("Dispatching modelJobCreated event with satellite flag:", hasSatelliteImage);
       const modelEvent = new CustomEvent('modelJobCreated', {
         detail: { 
           jobId: modelJobId,
-          hasSatelliteImage: !!satelliteImage
+          hasSatelliteImage: hasSatelliteImage
         }
       });
       document.dispatchEvent(modelEvent);
