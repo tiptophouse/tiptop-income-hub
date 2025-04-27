@@ -8,6 +8,7 @@ export const use3DModel = (jobId: string) => {
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [checkCount, setCheckCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!jobId) return;
@@ -39,11 +40,16 @@ export const use3DModel = (jobId: string) => {
         } else if (status.state === 'failed') {
           console.error("Model generation failed");
           setModelStatus("failed");
+          setError("Model generation failed");
           toast({
             title: "3D Model Failed",
-            description: "Could not generate the 3D model. Please try again.",
+            description: "Could not generate the 3D model. Using demo model instead.",
             variant: "destructive",
           });
+          
+          // Use demo model as fallback
+          setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
+          setModelStatus("completed");
         } else if (checkCount < 10) {
           // Still processing, schedule another check
           console.log("Model still processing. Scheduling another check...");
@@ -68,6 +74,7 @@ export const use3DModel = (jobId: string) => {
       } catch (error) {
         console.error("Error checking 3D model status:", error);
         setModelStatus("failed");
+        setError(error instanceof Error ? error.message : "Unknown error");
         
         // Use demo model as fallback
         console.log("Using demo model as fallback due to error");
@@ -91,12 +98,14 @@ export const use3DModel = (jobId: string) => {
     setIsLoading(true);
     setModelStatus("processing");
     setCheckCount(0);
+    setError(null);
   };
 
   return {
     modelStatus,
     modelUrl,
     isLoading,
+    error,
     handleRefresh
   };
 };

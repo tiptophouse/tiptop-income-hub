@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for interacting with the Meshy API
  */
@@ -18,7 +19,12 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
       ? imageData.split('base64,')[1] 
       : imageData;
     
-    console.log("Calling Meshy API...");
+    if (!base64Image || base64Image.length < 100) {
+      console.error("Invalid or empty image data");
+      throw new Error("Invalid image data for model generation");
+    }
+    
+    console.log(`Calling Meshy API with ${base64Image.substring(0, 50)}... (${base64Image.length} chars)`);
     
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
       method: 'POST',
@@ -39,8 +45,14 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Meshy API error:", errorData);
+      const errorText = await response.text();
+      console.error("Meshy API error response:", errorText);
+      try {
+        const errorData = JSON.parse(errorText);
+        console.error("Parsed Meshy API error:", errorData);
+      } catch (e) {
+        // If the error text isn't valid JSON, just log it as is
+      }
       throw new Error(`Meshy API error: ${response.status}`);
     }
 

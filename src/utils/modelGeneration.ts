@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { getStreetViewImageAsBase64, captureStreetViewForModel } from './streetViewService';
+import { getStreetViewImageAsBase64, captureStreetViewForModel, captureMapScreenshot } from './streetViewService';
 import { generateModelFromImage } from './meshyApi';
 import { toast } from '@/components/ui/use-toast';
 
@@ -14,45 +14,65 @@ export const generatePropertyModels = async (address: string) => {
     });
 
     // Get street view image
-    const streetViewImage = await captureStreetViewForModel(address);
-    if (!streetViewImage) {
-      console.error("Failed to capture street view image");
-      throw new Error("Failed to capture street view");
+    let imageData = await captureStreetViewForModel(address);
+    
+    // If no Street View image is available, try to find a map element to screenshot
+    if (!imageData) {
+      console.log("No Street View available, looking for map container to capture");
+      
+      // Find a map container
+      const mapElement = document.querySelector('[id^="map-"], [class*="map-container"]') ||
+        document.querySelector('[class*="property-map"]');
+      
+      if (mapElement) {
+        console.log("Found map element, capturing screenshot");
+        imageData = await captureMapScreenshot({ current: mapElement as HTMLElement });
+      }
+    }
+    
+    if (!imageData) {
+      console.error("Failed to capture any property image");
+      throw new Error("Failed to capture property image");
     }
 
-    console.log("Successfully captured street view image");
+    console.log(`Successfully captured property image: ${imageData.substring(0, 50)}... (${imageData.length} chars)`);
 
     // Generate 3D model using Meshy
     console.log("Calling Meshy API to generate 3D model...");
-    const modelJobId = await generateModelFromImage(streetViewImage);
-    console.log("Started 3D model generation with job ID:", modelJobId);
+    try {
+      const modelJobId = await generateModelFromImage(imageData);
+      console.log("Started 3D model generation with job ID:", modelJobId);
+      
+      // Store model ID in user metadata
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        console.log("Updating user metadata with model job ID:", modelJobId);
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: { 
+            propertyModelJobId: modelJobId,
+            propertyAddress: address
+          }
+        });
 
-    // Store model ID in user metadata
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      console.log("Updating user metadata with model job ID:", modelJobId);
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: { 
-          propertyModelJobId: modelJobId,
-          propertyAddress: address
+        if (updateError) {
+          console.error("Error updating user metadata:", updateError);
+        } else {
+          console.log("Successfully updated user metadata");
         }
-      });
-
-      if (updateError) {
-        console.error("Error updating user metadata:", updateError);
-      } else {
-        console.log("Successfully updated user metadata");
       }
+
+      // Dispatch event for the dashboard to pick up
+      console.log("Dispatching modelJobCreated event");
+      const modelEvent = new CustomEvent('modelJobCreated', {
+        detail: { jobId: modelJobId }
+      });
+      document.dispatchEvent(modelEvent);
+
+      return modelJobId;
+    } catch (meshyError) {
+      console.error("Error in Meshy API call:", meshyError);
+      throw meshyError; // Let the outer catch handle this
     }
-
-    // Dispatch event for the dashboard to pick up
-    console.log("Dispatching modelJobCreated event");
-    const modelEvent = new CustomEvent('modelJobCreated', {
-      detail: { jobId: modelJobId }
-    });
-    document.dispatchEvent(modelEvent);
-
-    return modelJobId;
   } catch (error) {
     console.error("Error in generatePropertyModels:", error);
     toast({

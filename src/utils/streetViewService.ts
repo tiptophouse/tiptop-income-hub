@@ -1,101 +1,89 @@
 
-// Use a type assertion for the Google Maps API
-type GoogleMapsType = any;
+import html2canvas from 'html2canvas';
 
-// Declare window.google without modifiers to avoid conflicts
-interface Window {
-  google: GoogleMapsType;
-}
-
-export const getStreetViewImageUrl = (
-  address: string,
-  size: { width: number; height: number } = { width: 600, height: 400 }
-): string => {
-  const encodedAddress = encodeURIComponent(address);
-  const API_KEY = "AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE";
-  
-  return `https://maps.googleapis.com/maps/api/streetview?size=${size.width}x${size.height}&location=${encodedAddress}&key=${API_KEY}`;
-};
-
-export const checkStreetViewAvailability = async (
-  location: { lat: number; lng: number }
-): Promise<boolean> => {
-  return new Promise((resolve) => {
-    if (!window.google?.maps?.StreetViewService) {
-      resolve(false);
-      return;
-    }
-
-    const streetViewService = new window.google.maps.StreetViewService();
-    streetViewService.getPanorama(
-      {
-        location: location,
-        radius: 50,
-        source: 'outdoor'
-      },
-      (data: any, status: string) => {
-        resolve(status === 'OK');
-      }
-    );
-  });
-};
-
-export const getStreetViewImageAsBase64 = async (address: string): Promise<string> => {
+/**
+ * Gets Street View image for an address as base64
+ */
+export const getStreetViewImageAsBase64 = async (address: string): Promise<string | null> => {
   try {
-    const streetViewUrl = getStreetViewImageUrl(address);
-    console.log("Fetching Street View image from:", streetViewUrl);
+    console.log("Fetching Street View image from:", `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${encodeURIComponent(address)}&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`);
     
-    const response = await fetch(streetViewUrl);
-    const blob = await response.blob();
-    
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
+    // Create an image element to load the Street View image
+    const img = new Image();
+    const imagePromise = new Promise<string>((resolve, reject) => {
+      img.crossOrigin = "Anonymous"; // Allow cross-origin image loading
+      img.onload = () => {
+        // Create a canvas and draw the image on it
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          // Convert the canvas to base64 data URL
+          resolve(canvas.toDataURL("image/jpeg", 0.9));
+        } else {
+          reject(new Error("Failed to get canvas context"));
+        }
+      };
+      img.onerror = () => reject(new Error("Failed to load Street View image"));
+      
+      // Set the image source after defining the onload handler
+      img.src = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${encodeURIComponent(address)}&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`;
     });
+    
+    // Set a timeout to avoid hanging if the image load takes too long
+    const timeoutPromise = new Promise<string>((_, reject) => {
+      setTimeout(() => reject(new Error("Street View image load timeout")), 10000);
+    });
+    
+    const imageData = await Promise.race([imagePromise, timeoutPromise]);
+    return imageData;
   } catch (error) {
-    console.error("Error getting Street View image:", error);
-    throw error;
+    console.error("Error fetching Street View image:", error);
+    return null;
   }
 };
 
+/**
+ * Captures a Street View image for 3D model generation
+ */
 export const captureStreetViewForModel = async (address: string): Promise<string | null> => {
   try {
     console.log("Capturing Street View image for:", address);
     
-    if (!window.google?.maps?.Geocoder) {
-      throw new Error("Google Maps API not loaded");
-    }
-
-    const geocoder = new window.google.maps.Geocoder();
+    // Try to get the Street View image
+    const imageData = await getStreetViewImageAsBase64(address);
     
-    // Use any type for the geocoder results to avoid TypeScript errors
-    const geocodeResult: any = await new Promise((resolve, reject) => {
-      geocoder.geocode({ address }, (results: any, status: string) => {
-        if (status === 'OK' && results) {
-          resolve(results);
-        } else {
-          reject(new Error(`Geocoding failed: ${status}`));
-        }
-      });
-    });
-    
-    const location = {
-      lat: geocodeResult[0].geometry.location.lat(),
-      lng: geocodeResult[0].geometry.location.lng()
-    };
-    
-    const hasStreetView = await checkStreetViewAvailability(location);
-    
-    if (!hasStreetView) {
-      console.log("No Street View available for this location");
+    if (!imageData) {
+      console.error("No Street View image available for this address");
       return null;
     }
     
-    return await getStreetViewImageAsBase64(address);
+    console.log("Successfully captured Street View image");
+    return imageData;
   } catch (error) {
-    console.error("Error capturing Street View:", error);
+    console.error("Error capturing Street View for model:", error);
+    return null;
+  }
+};
+
+/**
+ * Captures a map screenshot from a map container element
+ */
+export const captureMapScreenshot = async (mapContainerRef: React.RefObject<HTMLElement>): Promise<string | null> => {
+  try {
+    console.log("Capturing map screenshot...");
+    if (!mapContainerRef.current) {
+      throw new Error("Map container not found");
+    }
+    
+    const canvas = await html2canvas(mapContainerRef.current);
+    const imageData = canvas.toDataURL('image/jpeg', 0.9);
+    console.log("Map screenshot captured successfully");
+    return imageData;
+  } catch (error) {
+    console.error("Error capturing map screenshot:", error);
     return null;
   }
 };
