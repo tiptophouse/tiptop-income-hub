@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for interacting with the Meshy API
  */
@@ -19,7 +18,7 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
       ? imageData.split('base64,')[1] 
       : imageData;
     
-    console.log("Calling Meshy API with token:", MESHY_API_TOKEN.substring(0, 5) + "...");
+    console.log("Calling Meshy API...");
     
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
       method: 'POST',

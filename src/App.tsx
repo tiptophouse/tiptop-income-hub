@@ -15,7 +15,14 @@ import InternetSpeedDisplay from "./components/InternetSpeedDisplay";
 import ModelViewerScript from "./components/ModelViewerScript";
 import ModelsGallery from "./pages/ModelsGallery";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
