@@ -8,4 +8,5 @@ verify_jwt = false
 enabled = true
 client_id = "${GOOGLE_CLIENT_ID}"
 secret = "${GOOGLE_CLIENT_SECRET}"
-
+# Add the required configuration for Google auth redirect
+additional_redirect_urls = ["https://eihzjfanyqdzeiitslyd.supabase.co/auth/v1/callback"]
