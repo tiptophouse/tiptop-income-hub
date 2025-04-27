@@ -1,4 +1,3 @@
-
 import { useEffect, useState, RefObject, useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -14,7 +13,7 @@ export function useGoogleMapInstance({
   mapContainerRef,
   address,
   view,
-  initialZoom = 18,
+  initialZoom = 12,
   onZoomComplete
 }: UseGoogleMapInstanceProps) {
   const [mapInstance, setMapInstance] = useState<any>(null);
@@ -55,28 +54,22 @@ export function useGoogleMapInstance({
           setMarker(newMarker);
           setIsLoaded(true);
           setHasInitialized(true);
-          console.log(`Map initialized with zoom level: ${initialZoom}`);
-          
-          // Listen for zoom changes
-          map.addListener('zoom_changed', () => {
-            console.log(`Map zoom changed to: ${map.getZoom()}`);
-          });
-          
-          // Only trigger onZoomComplete when tiles are loaded
-          const tileListener = map.addListener('tilesloaded', () => {
-            console.log("Map tiles loaded");
+
+          // Set up the delayed zoom animation
+          setTimeout(() => {
+            console.log('Starting zoom animation to level 18');
+            map.setZoom(18);
             
-            if (!hasCompletedZoom && onZoomComplete && !isZooming) {
-              console.log("Executing onZoomComplete callback");
-              setHasCompletedZoom(true);
-              onZoomComplete();
-              
-              // Clean up listener after first trigger
-              if (window.google && window.google.maps) {
-                window.google.maps.event.removeListener(tileListener);
+            // Listen for the zoom animation to complete
+            const zoomListener = map.addListener('idle', () => {
+              console.log('Zoom animation completed');
+              if (onZoomComplete) {
+                onZoomComplete();
               }
-            }
-          });
+              // Remove the listener after it fires
+              window.google.maps.event.removeListener(zoomListener);
+            });
+          }, 3000);
         } else {
           console.error("Geocoding error:", status);
           toast({
@@ -89,16 +82,14 @@ export function useGoogleMapInstance({
     } catch (error) {
       console.error("Map initialization error:", error);
     }
-  }, [address, view, initialZoom, onZoomComplete, hasInitialized, hasCompletedZoom, isZooming]);
+  }, [address, view, initialZoom, onZoomComplete, hasInitialized]);
 
-  // Update map type if view changes
   useEffect(() => {
     if (mapInstance && view) {
       mapInstance.setMapTypeId(view === 'satellite' ? 'satellite' : 'roadmap');
     }
   }, [view, mapInstance]);
 
-  // Function to handle zooming the map to a specific level
   const zoomMap = useCallback((zoomLevel: number) => {
     if (!mapInstance) return false;
     

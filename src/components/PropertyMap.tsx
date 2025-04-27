@@ -30,7 +30,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     mapContainerRef,
     address,
     view,
-    initialZoom: 18,
+    initialZoom: 12,
     onZoomComplete,
   });
 
