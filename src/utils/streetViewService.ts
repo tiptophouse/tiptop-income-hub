@@ -1,3 +1,4 @@
+
 export const getStreetViewImageUrl = (
   address: string,
   size: { width: number; height: number } = { width: 600, height: 400 }
@@ -24,10 +25,10 @@ export const checkStreetViewAvailability = async (
     streetViewService.getPanorama(
       {
         location: location,
-        radius: 50, // Look for Street View panoramas within 50 meters
+        radius: 50,
         source: 'outdoor'
       },
-      (data, status) => {
+      (data: any, status: string) => {
         resolve(status === 'OK');
       }
     );
@@ -58,6 +59,10 @@ export const captureStreetViewForModel = async (address: string): Promise<string
   try {
     console.log("Capturing Street View image for:", address);
     
+    if (!window.google?.maps?.Geocoder) {
+      throw new Error("Google Maps API not loaded");
+    }
+
     // First check if Street View is available at this location by geocoding the address
     const geocoder = new window.google.maps.Geocoder();
     const geocodeResult = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {

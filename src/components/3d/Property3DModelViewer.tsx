@@ -56,4 +56,3 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
 );
 
 export default Property3DModelViewer;
-
