@@ -1,28 +1,16 @@
 
-import { Home } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 
-export const DashboardHeader = () => {
-  const navigate = useNavigate();
+interface DashboardHeaderProps {
+  userName: string;
+}
 
-  const navigateHome = () => {
-    navigate('/');
-  };
+const DashboardHeader = ({ userName }: DashboardHeaderProps) => (
+  <div>
+    <h1 className="text-xl md:text-2xl">Dashboard</h1>
+    <p className="text-muted-foreground mt-1">Hello, {userName}! Here's your property summary.</p>
+  </div>
+);
 
-  return (
-    <div className="flex justify-between items-center mb-4">
-      <div className="md:hidden">
-        {/* Mobile header content is handled by parent */}
-      </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="ml-auto"
-        onClick={navigateHome}
-      >
-        <Home className="h-5 w-5" />
-      </Button>
-    </div>
-  );
-};
+export default DashboardHeader;
+

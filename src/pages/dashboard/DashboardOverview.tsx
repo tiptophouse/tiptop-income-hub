@@ -1,10 +1,12 @@
+
 import React from 'react';
-import { DollarSign, Check, AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import Property3DModel from '@/components/Property3DModel';
+import DashboardHeader from './components/DashboardHeader';
+import PropertyOverviewCard from './components/PropertyOverviewCard';
+import StatisticsCards from './components/StatisticsCards';
+import { DashboardCharts } from './components/DashboardCharts';
 import { AssetTable } from './components/AssetTable';
 import { EarningsSection } from './components/EarningsSection';
-import { DashboardCharts } from './components/DashboardCharts';
-import Property3DModel from '@/components/Property3DModel';
 
 interface DashboardOverviewProps {
   userName: string;
@@ -19,87 +21,28 @@ interface DashboardOverviewProps {
   aiRevenueDescription: string;
 }
 
-const DashboardOverview = ({ userName, earnings, activeAssets, totalPotentialAssets, pendingActions, aiRevenueDescription }: DashboardOverviewProps) => (
+const DashboardOverview = ({ 
+  userName, 
+  earnings, 
+  activeAssets, 
+  totalPotentialAssets, 
+  pendingActions, 
+  aiRevenueDescription 
+}: DashboardOverviewProps) => (
   <div className="space-y-6">
-    <div>
-      <h1 className="text-xl md:text-2xl">Dashboard</h1>
-      <p className="text-muted-foreground mt-1">Hello, {userName}! Here's your property summary.</p>
-    </div>
+    <DashboardHeader userName={userName} />
     
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
       <Property3DModel jobId="demo-3d-model-1" address="123 Main St" />
-      <Card>
-        <CardHeader>
-          <CardTitle>Property Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            This beautiful property features a spacious rooftop perfect for solar panel installation. 
-            The building's orientation and roof angle provide optimal conditions for solar energy generation. 
-            Current estimates suggest potential for significant energy production and cost savings.
-          </p>
-          <div className="mt-4">
-            <h4 className="font-medium">Key Features:</h4>
-            <ul className="list-disc list-inside text-muted-foreground mt-2">
-              <li>1,200 sq ft rooftop area</li>
-              <li>Southern exposure</li>
-              <li>30° roof pitch - optimal for solar panels</li>
-              <li>No surrounding tall buildings causing shade</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+      <PropertyOverviewCard />
     </div>
     
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base md:text-lg font-medium">Total Earnings</CardTitle>
-          <CardDescription>Monthly passive income</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center">
-            <DollarSign className="h-5 w-5 text-primary mr-2" />
-            <div>
-              <div className="text-2xl font-bold">${earnings.monthly}</div>
-              <p className="text-xs text-muted-foreground">${earnings.yearly} annually</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">Active Assets</CardTitle>
-          <CardDescription>Currently monetized</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center">
-            <Check className="h-5 w-5 text-green-500 mr-2" />
-            <div>
-              <div className="text-2xl font-bold">{activeAssets}/{totalPotentialAssets}</div>
-              <p className="text-xs text-muted-foreground">Potential assets</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">Pending Actions</CardTitle>
-          <CardDescription>Tasks requiring attention</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center">
-            <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
-            <div>
-              <div className="text-2xl font-bold">{pendingActions}</div>
-              <p className="text-xs text-muted-foreground">Actions to complete</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <StatisticsCards
+      earnings={earnings}
+      activeAssets={activeAssets}
+      totalPotentialAssets={totalPotentialAssets}
+      pendingActions={pendingActions}
+    />
     
     <DashboardCharts earnings={earnings} aiRevenueDescription={aiRevenueDescription} />
     
@@ -113,3 +56,4 @@ const DashboardOverview = ({ userName, earnings, activeAssets, totalPotentialAss
 );
 
 export default DashboardOverview;
+
