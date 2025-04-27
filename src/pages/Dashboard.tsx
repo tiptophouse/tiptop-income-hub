@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import DashboardLayout from '@/pages/dashboard/DashboardLayout';
+import { DashboardLayout } from '@/pages/dashboard/DashboardLayout';
 import StatisticsCards from '@/pages/dashboard/components/StatisticsCards';
 import DashboardOverview from '@/pages/dashboard/DashboardOverview';
 import DashboardHeader from '@/pages/dashboard/components/DashboardHeader';
@@ -38,7 +39,7 @@ const Dashboard: React.FC = () => {
   }, []);
 
   return (
-    <DashboardLayout>
+    <DashboardLayout onSignOut={() => {}}>
       <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
         <DashboardOverview 
           userName={userName} 

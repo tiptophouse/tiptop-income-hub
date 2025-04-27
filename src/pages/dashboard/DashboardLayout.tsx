@@ -44,3 +44,6 @@ export const DashboardLayout = ({ children, onSignOut }: DashboardLayoutProps) =
     </SidebarProvider>
   );
 };
+
+// Also export as default for backward compatibility
+export default DashboardLayout;

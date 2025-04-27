@@ -48,7 +48,7 @@ const PropertyMapDisplay: React.FC<PropertyMapDisplayProps> = ({
           
           {showError && (
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-[90%] max-w-md z-10">
-              <Alert variant="warning" className="bg-amber-50 border-amber-200 text-amber-800">
+              <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-800">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                   Failed to generate 3D model. Using demo model instead.
