@@ -9,6 +9,7 @@ import { EarningsSection } from './components/EarningsSection';
 import { Building } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardOverviewProps {
   userName: string;
@@ -31,9 +32,20 @@ const DashboardOverview = ({
   pendingActions, 
   aiRevenueDescription 
 }: DashboardOverviewProps) => {
-  const [propertyAddress, setPropertyAddress] = useState<string>("Enter an address...");
+  const [propertyAddress, setPropertyAddress] = useState<string>("123 Heritage Manor, Cityville");
   
   useEffect(() => {
+    // Fetch address from user metadata
+    const fetchAddress = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.user_metadata?.propertyAddress) {
+        setPropertyAddress(user.user_metadata.propertyAddress);
+      }
+    };
+    
+    fetchAddress();
+    
+    // Listen for any address updates during the session
     const handleAddressFound = (event: CustomEvent) => {
       if (event.detail?.address) {
         setPropertyAddress(event.detail.address);
