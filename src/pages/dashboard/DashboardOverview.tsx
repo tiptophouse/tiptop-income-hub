@@ -33,7 +33,11 @@ const DashboardOverview = ({
     <DashboardHeader userName={userName} />
     
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-      <Property3DModel jobId="demo-3d-model-1" address="123 Main St" />
+      <Property3DModel 
+        jobId="demo-pink-mansion-1"
+        address="123 Victorian Place"
+        className="aspect-[4/3] w-full rounded-lg overflow-hidden shadow-lg"
+      />
       <PropertyOverviewCard />
     </div>
     

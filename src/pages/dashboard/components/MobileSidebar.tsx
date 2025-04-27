@@ -3,7 +3,7 @@ import React from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import DashboardMenu from './DashboardMenu';
+import { DashboardMenu } from './DashboardMenu';
 
 interface MobileSidebarProps {
   onSignOut: () => void;
