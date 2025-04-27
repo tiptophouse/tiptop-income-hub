@@ -46,25 +46,71 @@ export const getStreetViewImageAsBase64 = async (address: string): Promise<strin
 };
 
 /**
- * Captures a Street View image for 3D model generation
+ * Gets Satellite image for an address as base64
  */
-export const captureStreetViewForModel = async (address: string): Promise<string | null> => {
+export const getSatelliteImageAsBase64 = async (address: string): Promise<string | null> => {
   try {
-    console.log("Capturing Street View image for:", address);
+    console.log("Fetching Satellite image for:", address);
     
-    // Try to get the Street View image
-    const imageData = await getStreetViewImageAsBase64(address);
+    // Create an image element to load the Satellite image
+    const img = new Image();
+    const imagePromise = new Promise<string>((resolve, reject) => {
+      img.crossOrigin = "Anonymous"; // Allow cross-origin image loading
+      img.onload = () => {
+        // Create a canvas and draw the image on it
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          // Convert the canvas to base64 data URL
+          resolve(canvas.toDataURL("image/jpeg", 0.9));
+        } else {
+          reject(new Error("Failed to get canvas context"));
+        }
+      };
+      img.onerror = () => reject(new Error("Failed to load Satellite image"));
+      
+      // Static map with satellite imagery
+      img.src = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(address)}&zoom=19&size=600x400&maptype=satellite&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`;
+    });
     
-    if (!imageData) {
-      console.error("No Street View image available for this address");
-      return null;
-    }
+    // Set a timeout to avoid hanging if the image load takes too long
+    const timeoutPromise = new Promise<string>((_, reject) => {
+      setTimeout(() => reject(new Error("Satellite image load timeout")), 10000);
+    });
     
-    console.log("Successfully captured Street View image");
+    const imageData = await Promise.race([imagePromise, timeoutPromise]);
     return imageData;
   } catch (error) {
-    console.error("Error capturing Street View for model:", error);
+    console.error("Error fetching Satellite image:", error);
     return null;
+  }
+};
+
+/**
+ * Captures a Street View image for 3D model generation
+ */
+export const captureStreetViewForModel = async (address: string): Promise<{streetView: string | null, satellite: string | null}> => {
+  try {
+    console.log("Capturing property views for:", address);
+    
+    // Try to get both Street View and Satellite images
+    const streetViewImage = await getStreetViewImageAsBase64(address);
+    const satelliteImage = await getSatelliteImageAsBase64(address);
+    
+    // Return both images
+    return {
+      streetView: streetViewImage,
+      satellite: satelliteImage
+    };
+  } catch (error) {
+    console.error("Error capturing views for model:", error);
+    return {
+      streetView: null,
+      satellite: null
+    };
   }
 };
 

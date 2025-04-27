@@ -22,12 +22,14 @@ interface Property3DModelDisplayProps {
   jobId: string;
   address: string;
   className?: string;
+  hasSatelliteImage?: boolean;
 }
 
 const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   jobId,
   address,
   className,
+  hasSatelliteImage = false
 }) => {
   const [rotateModel, setRotateModel] = useState(true);
   const [modelRotation, setModelRotation] = useState(0);
@@ -144,6 +146,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           jobId={jobId}
           zoomLevel={zoomLevel}
           backgroundColor={backgroundColor}
+          hasSatelliteImage={hasSatelliteImage}
         />
         <ModelStatusDisplay jobId={jobId} modelStatus={modelStatus} />
       </CardContent>

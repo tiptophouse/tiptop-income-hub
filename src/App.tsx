@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +17,7 @@ import EVAssetDetail from "./pages/dashboard/assetDetails/EVAssetDetail";
 import SolarAssetDetail from "./pages/dashboard/assetDetails/SolarAssetDetail";
 import AddAssetPage from "./pages/dashboard/AddAssetPage";
 import AccountPage from "./pages/dashboard/AccountPage";
+import ModelViewerScript from "./components/ModelViewerScript";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +33,7 @@ const App = () => (
     <BrowserRouter>
       <TooltipProvider>
         <GoogleMapsInit>
+          <ModelViewerScript />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<SignUp />} />

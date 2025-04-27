@@ -10,6 +10,8 @@ import { Building } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
+import { generatePropertyModels } from '@/utils/modelGeneration';
+import { toast } from '@/components/ui/use-toast';
 
 interface DashboardOverviewProps {
   userName: string;
@@ -32,7 +34,8 @@ const DashboardOverview = ({
   pendingActions, 
   aiRevenueDescription 
 }: DashboardOverviewProps) => {
-  const [propertyAddress, setPropertyAddress] = useState<string>("123 Heritage Manor, Cityville");
+  const [propertyAddress, setPropertyAddress] = useState<string>("");
+  const [isGenerating3DModel, setIsGenerating3DModel] = useState<boolean>(false);
   
   useEffect(() => {
     // Fetch address from user metadata
@@ -40,6 +43,24 @@ const DashboardOverview = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.user_metadata?.propertyAddress) {
         setPropertyAddress(user.user_metadata.propertyAddress);
+        
+        // Check if we need to generate a 3D model (if not already generated)
+        if (user && !user.user_metadata.propertyModelJobId && !isGenerating3DModel) {
+          setIsGenerating3DModel(true);
+          try {
+            toast({
+              title: "Generating 3D Model",
+              description: "Creating a 3D model of your property for monetization analysis...",
+            });
+            await generatePropertyModels(user.user_metadata.propertyAddress);
+          } catch (error) {
+            console.error("Error generating property model:", error);
+          } finally {
+            setIsGenerating3DModel(false);
+          }
+        }
+      } else {
+        setPropertyAddress("Enter your property address to analyze monetization options");
       }
     };
     
@@ -49,6 +70,18 @@ const DashboardOverview = ({
     const handleAddressFound = (event: CustomEvent) => {
       if (event.detail?.address) {
         setPropertyAddress(event.detail.address);
+        
+        // When a new address is found, try to generate a 3D model
+        if (!isGenerating3DModel) {
+          setIsGenerating3DModel(true);
+          toast({
+            title: "Generating 3D Model",
+            description: "Creating a 3D model of your property for monetization analysis...",
+          });
+          
+          generatePropertyModels(event.detail.address)
+            .finally(() => setIsGenerating3DModel(false));
+        }
       }
     };
     
@@ -56,7 +89,7 @@ const DashboardOverview = ({
     return () => {
       document.removeEventListener('addressFound', handleAddressFound as EventListener);
     };
-  }, []);
+  }, [isGenerating3DModel]);
 
   const isMobile = useIsMobile();
   

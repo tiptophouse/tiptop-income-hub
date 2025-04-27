@@ -3,8 +3,10 @@ import React from "react";
 import ModelViewerDisplay from "./ModelViewerDisplay";
 import ModelViewerControls from "./ModelViewerControls";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, Eye, EyeOff } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface Property3DModelViewerProps {
   modelUrl: string | null;
@@ -17,6 +19,7 @@ interface Property3DModelViewerProps {
   jobId: string;
   zoomLevel?: number;
   backgroundColor?: string;
+  hasSatelliteImage?: boolean;
 }
 
 const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
@@ -29,9 +32,11 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
   handleDownload,
   jobId,
   zoomLevel = 105,
-  backgroundColor = "#f5f5f5"
+  backgroundColor = "#f5f5f5",
+  hasSatelliteImage = false
 }) => {
   const isMobile = useIsMobile();
+  const [showHotspots, setShowHotspots] = React.useState(true);
   
   return (
     <div className="space-y-2 sm:space-y-4 relative">
@@ -42,26 +47,49 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
         modelRotation={modelRotation}
         zoomLevel={zoomLevel}
         backgroundColor={backgroundColor}
+        showHotspots={showHotspots}
       />
       <ModelViewerControls
         onRotate={toggleRotate}
         onRefresh={handleRefresh}
         onDownload={handleDownload}
       />
-      <div className="text-center">
-        <p className="text-xs text-muted-foreground mb-1 sm:mb-2">
+      
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Switch 
+            id="hotspots-toggle"
+            checked={showHotspots}
+            onCheckedChange={setShowHotspots}
+          />
+          <Label htmlFor="hotspots-toggle" className="text-xs sm:text-sm cursor-pointer">
+            {showHotspots ? 
+              <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> Show monetizable areas</span> : 
+              <span className="flex items-center gap-1"><EyeOff className="h-3 w-3" /> Hide monetizable areas</span>
+            }
+          </Label>
+        </div>
+        
+        <p className="text-xs text-muted-foreground">
           3D Model ID: #{jobId.substring(0, 6)}
         </p>
-        <Button
-          variant="outline"
-          size={isMobile ? "sm" : "default"}
-          onClick={handleDownload}
-          className="w-full text-xs sm:text-sm"
-        >
-          <FileDown className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
-          Download 3D Model
-        </Button>
       </div>
+      
+      <Button
+        variant="outline"
+        size={isMobile ? "sm" : "default"}
+        onClick={handleDownload}
+        className="w-full text-xs sm:text-sm"
+      >
+        <FileDown className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+        Download 3D Model
+      </Button>
+      
+      {hasSatelliteImage && (
+        <div className="text-xs text-center text-muted-foreground">
+          Satellite imagery was captured to enhance the model accuracy
+        </div>
+      )}
     </div>
   );
 };
