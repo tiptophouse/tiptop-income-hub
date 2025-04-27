@@ -9,7 +9,16 @@ declare namespace JSX {
       'auto-rotate'?: boolean;
       'camera-controls'?: boolean;
       'shadow-intensity'?: string;
+      'shadow-softness'?: string;
+      'environment-image'?: string;
+      exposure?: string;
       poster?: string;
+      'rotation-per-second'?: string;
+      'camera-orbit'?: string;
+      'interaction-prompt'?: string;
+      ar?: boolean;
+      'ar-modes'?: string;
+      'touch-action'?: string;
       style?: React.CSSProperties;
     };
   }

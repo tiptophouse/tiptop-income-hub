@@ -33,13 +33,13 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     onZoomComplete,
   });
 
-  // Sample asset markers for the map
+  // Sample asset markers for the map with explicit types
   const assetMarkers = [
-    { type: 'solar', position: { top: '30%', left: '50%' }, label: 'Solar Panel Location' },
-    { type: 'internet', position: { top: '45%', left: '60%' }, label: 'Internet Sharing Point' },
-    { type: 'ev', position: { top: '60%', left: '40%' }, label: 'EV Charging Station' },
-    { type: 'garden', position: { top: '35%', left: '70%' }, label: 'Garden Space' },
-    { type: 'storage', position: { top: '55%', left: '30%' }, label: 'Storage Area' }
+    { type: 'solar' as 'solar', position: { top: '30%', left: '50%' }, label: 'Solar Panel Location' },
+    { type: 'internet' as 'internet', position: { top: '45%', left: '60%' }, label: 'Internet Sharing Point' },
+    { type: 'ev' as 'ev', position: { top: '60%', left: '40%' }, label: 'EV Charging Station' },
+    { type: 'garden' as 'garden', position: { top: '35%', left: '70%' }, label: 'Garden Space' },
+    { type: 'storage' as 'storage', position: { top: '55%', left: '30%' }, label: 'Storage Area' }
   ];
 
   const toggleMapType = () => {

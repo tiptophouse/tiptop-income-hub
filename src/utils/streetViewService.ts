@@ -1,9 +1,10 @@
 
-// Declare the google namespace to avoid TypeScript errors
-declare global {
-  interface Window {
-    google: any;
-  }
+// Use a type assertion for the Google Maps API
+type GoogleMapsType = any;
+
+// Declare window.google without modifiers to avoid conflicts
+interface Window {
+  google: GoogleMapsType;
 }
 
 export const getStreetViewImageUrl = (
@@ -70,7 +71,7 @@ export const captureStreetViewForModel = async (address: string): Promise<string
     const geocoder = new window.google.maps.Geocoder();
     
     // Use any type for the geocoder results to avoid TypeScript errors
-    const geocodeResult = await new Promise<any>((resolve, reject) => {
+    const geocodeResult: any = await new Promise((resolve, reject) => {
       geocoder.geocode({ address }, (results: any, status: string) => {
         if (status === 'OK' && results) {
           resolve(results);
