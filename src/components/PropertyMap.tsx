@@ -7,7 +7,7 @@ import ModelJobInfo from './map/ModelJobInfo';
 import { useGoogleMapInstance } from '@/hooks/useGoogleMapInstance';
 import html2canvas from 'html2canvas';
 import { getWebhookUrl } from '@/utils/webhookConfig';
-import { getStreetViewImageUrl, checkStreetViewAvailability } from '@/utils/streetViewService';
+import { getStreetViewImageUrl, checkStreetViewAvailability, getStreetViewImageAsBase64 } from '@/utils/streetViewService';
 
 interface PropertyMapProps {
   address: string;
@@ -169,69 +169,63 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
         return;
       }
 
-      let imageData = null;
-      if (mapInstance) {
-        const center = mapInstance.getCenter();
-        const location = {
-          lat: center.lat(),
-          lng: center.lng()
-        };
-
-        const hasStreetView = await checkStreetViewAvailability(location);
-        
-        if (hasStreetView) {
-          const streetViewUrl = getStreetViewImageUrl(address);
-          console.log("Using Street View image:", streetViewUrl);
-          
-          try {
-            const response = await fetch(streetViewUrl);
-            const blob = await response.blob();
-            const reader = new FileReader();
-            
-            imageData = await new Promise((resolve) => {
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(blob);
-            });
-          } catch (error) {
-            console.error("Error fetching Street View image:", error);
-          }
-        }
-      }
-
-      if (!imageData) {
+      // Try to get Street View image first
+      let imageData = await captureStreetViewForModel(address);
+      
+      // If no Street View image available, fall back to map screenshot
+      if (!imageData && mapContainerRef.current) {
         console.log("Falling back to map screenshot");
         imageData = await captureMapImage();
       }
-      
-      console.log("Sending property image to webhook:", webhookUrl);
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          address: address,
-          image: imageData,
-          timestamp: new Date().toISOString(),
-          source: "TipTop Property Analysis"
-        }),
-        mode: "no-cors"
-      });
-      
-      console.log("Property image sent to webhook successfully");
-      
-      toast({
-        title: "Property Captured",
-        description: "Property image has been sent for 3D model generation",
-      });
+
+      if (!imageData) {
+        throw new Error("Failed to capture property image");
+      }
+
+      // Generate 3D model using Meshy API
+      try {
+        const jobId = await generateModelFromImage(imageData);
+        console.log("3D model generation job created:", jobId);
+        
+        const modelEvent = new CustomEvent('modelJobCreated', {
+          detail: { jobId }
+        });
+        document.dispatchEvent(modelEvent);
+        
+        toast({
+          title: "3D Model Generation Started",
+          description: "The 3D model will be ready in a few minutes.",
+        });
+      } catch (error) {
+        console.error("Error generating 3D model:", error);
+        
+        const demoJobId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
+        const modelEvent = new CustomEvent('modelJobCreated', {
+          detail: { jobId: demoJobId }
+        });
+        document.dispatchEvent(modelEvent);
+        
+        toast({
+          title: "Using Demo Model",
+          description: "We encountered an issue. Showing a demo model instead.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
-      console.error("Error sending property image to webhook:", error);
+      console.error("Error in property capture process:", error);
       
       toast({
-        title: "Screenshot Error",
-        description: "Failed to capture or send property image",
+        title: "Error",
+        description: "Failed to capture property view. Please try again.",
         variant: "destructive"
       });
+      
+      // Use demo model as fallback
+      const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
+      const modelEvent = new CustomEvent('modelJobCreated', {
+        detail: { jobId: fallbackId }
+      });
+      document.dispatchEvent(modelEvent);
     }
   };
 

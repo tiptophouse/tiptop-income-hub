@@ -33,7 +33,6 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
       rotateModel={rotateModel}
       modelRotation={modelRotation}
     />
-    {/* Controls overlaid on the model/image */}
     <ModelViewerControls
       onRotate={toggleRotate}
       onRefresh={handleRefresh}
@@ -57,3 +56,4 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
 );
 
 export default Property3DModelViewer;
+

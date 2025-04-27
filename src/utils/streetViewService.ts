@@ -53,3 +53,40 @@ export const getStreetViewImageAsBase64 = async (address: string): Promise<strin
     throw error;
   }
 };
+
+export const captureStreetViewForModel = async (address: string): Promise<string | null> => {
+  try {
+    console.log("Capturing Street View image for:", address);
+    
+    // First check if Street View is available at this location by geocoding the address
+    const geocoder = new window.google.maps.Geocoder();
+    const geocodeResult = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === 'OK' && results) {
+          resolve(results);
+        } else {
+          reject(new Error(`Geocoding failed: ${status}`));
+        }
+      });
+    });
+    
+    const location = {
+      lat: geocodeResult[0].geometry.location.lat(),
+      lng: geocodeResult[0].geometry.location.lng()
+    };
+    
+    // Check if Street View is available
+    const hasStreetView = await checkStreetViewAvailability(location);
+    
+    if (!hasStreetView) {
+      console.log("No Street View available for this location");
+      return null;
+    }
+    
+    // Get the Street View image as base64
+    return await getStreetViewImageAsBase64(address);
+  } catch (error) {
+    console.error("Error capturing Street View:", error);
+    return null;
+  }
+};

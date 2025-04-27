@@ -28,13 +28,13 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
       },
       body: JSON.stringify({
         image: base64Image,
-        mode: "geometry",         // Focus on accurate geometry
-        background_removal: true, // Remove background for cleaner model
-        generate_material: true,  // Generate realistic materials
-        prompt: "Create a detailed 3D model of this residential property, focusing on the front facade and architectural details. Preserve scale and proportions.", 
+        mode: "geometry",
+        background_removal: true,
+        generate_material: true,
+        prompt: "Create a photorealistic 3D model of this residential property, focusing on architectural accuracy and details of the front facade. Maintain precise scale and proportions, including windows, doors, and distinctive architectural features.", 
         reference_model_id: "house",
-        preserve_topology: true,  // Better for architectural models
-        mesh_quality: "high"     // Higher quality for detailed structures
+        preserve_topology: true,
+        mesh_quality: "high"
       })
     });
 
