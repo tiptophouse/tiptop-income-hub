@@ -1,12 +1,13 @@
 
 import React from 'react';
-import Property3DModel from '@/components/Property3DModel';
 import DashboardHeader from './components/DashboardHeader';
 import PropertyOverviewCard from './components/PropertyOverviewCard';
 import StatisticsCards from './components/StatisticsCards';
 import { DashboardCharts } from './components/DashboardCharts';
 import { AssetTable } from './components/AssetTable';
 import { EarningsSection } from './components/EarningsSection';
+import { Building } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface DashboardOverviewProps {
   userName: string;
@@ -33,11 +34,22 @@ const DashboardOverview = ({
     <DashboardHeader userName={userName} />
     
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-      <Property3DModel 
-        jobId="demo-pink-mansion-2"
-        address="456 Heritage Manor"
-        className="aspect-[4/3] w-full rounded-lg overflow-hidden shadow-lg bg-black"
-      />
+      <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5 text-tiptop-accent" />
+            Property 3D Model
+          </CardTitle>
+          <CardDescription>456 Heritage Manor</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <img 
+            src="public/lovable-uploads/bc1d5ec4-4a58-4238-85d9-66e0d999e65a.png"
+            alt="Heritage Manor Property"
+            className="aspect-[4/3] w-full h-full object-cover rounded-lg"
+          />
+        </CardContent>
+      </Card>
       <PropertyOverviewCard />
     </div>
     
@@ -60,3 +72,4 @@ const DashboardOverview = ({
 );
 
 export default DashboardOverview;
+
