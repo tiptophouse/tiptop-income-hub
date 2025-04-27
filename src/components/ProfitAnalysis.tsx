@@ -1,14 +1,17 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, TrendingUp, Sun, Wifi, Car } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
+import { PropertyAnalysisResult } from '@/utils/api/propertyAnalysis';
+import { SolarAnalyticsService } from '@/utils/services/SolarAnalyticsService';
 
 interface ProfitAnalysisProps {
   propertyDetails: any | null;
   weatherData: any | null;
   isLoading: boolean;
+  propertyAnalysis?: PropertyAnalysisResult;
   className?: string;
 }
 
@@ -16,6 +19,7 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
   propertyDetails,
   weatherData,
   isLoading,
+  propertyAnalysis,
   className
 }) => {
   // Calculate potential earnings based on property and weather data
@@ -47,12 +51,28 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
       totalPotential
     };
   };
-  
+
   const earningsData = propertyDetails && weatherData ? calculateEarnings() : null;
   
-  // Calculate maximizer scores (0-100) for each category
+  // Get enhanced analytics if we have property analysis data
+  const solarAnalytics = useMemo(() => {
+    if (propertyAnalysis) {
+      return SolarAnalyticsService.generateAnalytics(propertyAnalysis);
+    }
+    return null;
+  }, [propertyAnalysis]);
+  
+  // Calculate maximizer scores (0-100) for each category based on improved data
   const getMaximizerScores = () => {
     if (!weatherData) return null;
+    
+    if (solarAnalytics) {
+      return {
+        solar: propertyAnalysis?.solarPerformance.efficiencyRating || Math.min(100, Math.floor((weatherData.annualSunshine / 365) * 100)),
+        bandwidth: Math.floor(60 + Math.random() * 40), // Simulated score based on location
+        parking: Math.floor(50 + Math.random() * 50), // Simulated score based on location
+      };
+    }
     
     return {
       solar: Math.min(100, Math.floor((weatherData.annualSunshine / 365) * 100)),
@@ -62,6 +82,16 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
   };
   
   const scores = weatherData ? getMaximizerScores() : null;
+
+  // Format currency values
+  const formatCurrency = (value?: number) => {
+    if (value === undefined) return "$0";
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(value);
+  };
 
   return (
     <Card className={`${className} shadow-lg transition-shadow duration-300 hover:shadow-xl rounded-2xl backdrop-blur-sm bg-white/90 border border-gray-100`}>
@@ -73,7 +103,7 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
         <CardDescription className="text-gray-600">Weather-based earning potential</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {isLoading || !earningsData ? (
+        {isLoading || (!earningsData && !propertyAnalysis) ? (
           <div className="space-y-2">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-[80%]" />
@@ -84,7 +114,9 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
           <>
             <div className="text-center py-4">
               <div className="text-3xl font-bold text-[#8B5CF6]">
-                ${earningsData.totalPotential}
+                {propertyAnalysis 
+                  ? formatCurrency(solarAnalytics?.financialMetrics.yearlyRevenue || 0)
+                  : earningsData ? `$${earningsData.totalPotential}` : "$0"}
               </div>
               <div className="text-sm text-gray-500">Estimated Annual Potential</div>
             </div>
@@ -96,11 +128,17 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
                     <Sun className="h-3.5 w-3.5 text-amber-500" />
                     <span className="text-sm font-medium truncate max-w-[120px]">Solar Potential</span>
                   </div>
-                  <span className="text-sm font-semibold">${earningsData.solarPotential}/yr</span>
+                  <span className="text-sm font-semibold">
+                    {propertyAnalysis 
+                      ? formatCurrency(solarAnalytics?.financialMetrics.monthlyRevenue * 12)
+                      : earningsData ? `$${earningsData.solarPotential}/yr` : "$0/yr"}
+                  </span>
                 </div>
                 <Progress value={scores?.solar} className="h-2" />
                 <div className="text-xs text-right mt-0.5 text-gray-500 truncate">
-                  {weatherData.annualSunshine} sunshine days per year
+                  {propertyAnalysis 
+                    ? `${propertyAnalysis.solarPerformance.avgDailySunshine.toFixed(1)} avg. sunshine hours per day`
+                    : weatherData ? `${weatherData.annualSunshine} sunshine days per year` : "Loading weather data..."}
                 </div>
               </div>
               
@@ -110,7 +148,9 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
                     <Wifi className="h-3.5 w-3.5 text-blue-500" />
                     <span className="text-sm font-medium truncate max-w-[120px]">Bandwidth Sharing</span>
                   </div>
-                  <span className="text-sm font-semibold">${earningsData.bandwidthPotential}/yr</span>
+                  <span className="text-sm font-semibold">
+                    {earningsData ? `$${earningsData.bandwidthPotential}/yr` : "$0/yr"}
+                  </span>
                 </div>
                 <Progress value={scores?.bandwidth} className="h-2" />
               </div>
@@ -121,7 +161,9 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
                     <Car className="h-3.5 w-3.5 text-green-500" />
                     <span className="text-sm font-medium truncate max-w-[120px]">Parking Space</span>
                   </div>
-                  <span className="text-sm font-semibold">${earningsData.parkingPotential}/yr</span>
+                  <span className="text-sm font-semibold">
+                    {earningsData ? `$${earningsData.parkingPotential}/yr` : "$0/yr"}
+                  </span>
                 </div>
                 <Progress value={scores?.parking} className="h-2" />
               </div>
@@ -133,11 +175,38 @@ const ProfitAnalysis: React.FC<ProfitAnalysisProps> = ({
                 <span className="truncate">AI Weather Analysis</span>
               </div>
               <p className="text-xs text-gray-600 line-clamp-3">
-                Based on the {weatherData.annualSunshine} days of annual sunshine and average temperature of {weatherData.temperature}°F, 
-                your property has {scores?.solar === 100 ? "excellent" : scores?.solar! > 70 ? "very good" : "good"} solar earning potential. 
-                The {weatherData.conditions.toLowerCase()} conditions in your area are optimal for maximizing your property's passive income.
+                {propertyAnalysis ? (
+                  <>
+                    Based on {propertyAnalysis.solarPerformance.avgDailySunshine.toFixed(1)} hours of daily sunshine 
+                    and a solar efficiency rating of {propertyAnalysis.solarPerformance.efficiencyRating}%, 
+                    your property has {propertyAnalysis.solarPerformance.efficiencyRating > 80 ? "excellent" : 
+                    propertyAnalysis.solarPerformance.efficiencyRating > 70 ? "very good" : "good"} solar earning potential. 
+                    You could save approximately {formatCurrency(propertyAnalysis.solarFinancials.billBeforeSolar - propertyAnalysis.solarFinancials.billAfterSolar)} 
+                    annually on electricity bills.
+                  </>
+                ) : weatherData ? (
+                  <>
+                    Based on the {weatherData.annualSunshine} days of annual sunshine and average temperature of {weatherData.temperature}°F, 
+                    your property has {scores?.solar === 100 ? "excellent" : scores?.solar! > 70 ? "very good" : "good"} solar earning potential. 
+                    The {weatherData.conditions.toLowerCase()} conditions in your area are optimal for maximizing your property's passive income.
+                  </>
+                ) : "Loading weather analysis..."}
               </p>
             </div>
+
+            {propertyAnalysis && solarAnalytics && (
+              <div className="bg-amber-50 p-3 rounded-lg text-sm">
+                <div className="font-medium flex items-center gap-1 mb-1">
+                  <Sun className="h-3.5 w-3.5 text-amber-500" />
+                  <span className="truncate">Solar ROI Analysis</span>
+                </div>
+                <p className="text-xs text-gray-700 line-clamp-3">
+                  Investment of {formatCurrency(propertyAnalysis.solarFinancials.installationCost)} breaks even in {propertyAnalysis.solarFinancials.breakEvenYears.toFixed(1)} years. 
+                  System produces {(propertyAnalysis.solarPerformance.yearlyEnergyKwh / 12).toFixed(0)} kWh monthly on average, 
+                  with {formatCurrency(solarAnalytics.financialMetrics.lifetimeRevenue)} estimated lifetime revenue.
+                </p>
+              </div>
+            )}
           </>
         )}
       </CardContent>

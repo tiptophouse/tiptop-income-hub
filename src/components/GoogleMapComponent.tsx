@@ -4,9 +4,11 @@ import { toast } from '@/components/ui/use-toast';
 import { useGoogleMap } from '@/hooks/useGoogleMap';
 import { geocodeAddress, reverseGeocode, getCurrentLocation } from '@/utils/geocodingService';
 import { fetchWeatherData } from '@/utils/weatherService';
+import { analyzePropertyImage, PropertyAnalysisResult } from '@/utils/api/propertyAnalysis';
 import LocationButton from '@/components/LocationButton';
 import PropertyDetails from '@/components/PropertyDetails';
 import ProfitAnalysis from '@/components/ProfitAnalysis';
+import SolarInsightsCard from '@/components/SolarInsightsCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GoogleMapComponentProps {
@@ -19,6 +21,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [weatherData, setWeatherData] = useState<any | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [propertyAnalysis, setPropertyAnalysis] = useState<PropertyAnalysisResult | null>(null);
   const isMobile = useIsMobile();
   
   // Use our custom hook for Google Maps
@@ -52,13 +55,28 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
           location,
           onSuccess: (data) => {
             setWeatherData(data);
-            setIsLoadingData(false);
+            
+            // Get property analysis data
+            getPropertyAnalysis();
           },
           onError: () => setIsLoadingData(false)
         });
       }
     });
   }, [address, isLoaded, setMapCenter, addRoofOverlay]);
+
+  // Get property analysis data
+  const getPropertyAnalysis = async () => {
+    try {
+      // In a real app, you'd use actual image data
+      const result = await analyzePropertyImage('dummy-image-data');
+      setPropertyAnalysis(result);
+      setIsLoadingData(false);
+    } catch (error) {
+      console.error("Error analyzing property:", error);
+      setIsLoadingData(false);
+    }
+  };
 
   // Handle getting user's current location
   const handleGetCurrentLocation = () => {
@@ -76,7 +94,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
           location: userLocation,
           onSuccess: (data) => {
             setWeatherData(data);
-            setIsLoadingData(false);
+            
+            // Get property analysis
+            getPropertyAnalysis();
           },
           onError: () => setIsLoadingData(false)
         });
@@ -145,9 +165,19 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
             propertyDetails={propertyDetails}
             weatherData={weatherData}
             isLoading={isLoadingData}
+            propertyAnalysis={propertyAnalysis || undefined}
           />
         </div>
       </div>
+      
+      {propertyAnalysis && (
+        <div className="mt-6">
+          <SolarInsightsCard 
+            propertyAnalysis={propertyAnalysis}
+            isLoading={isLoadingData}
+          />
+        </div>
+      )}
     </div>
   );
 };

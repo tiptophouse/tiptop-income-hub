@@ -7,6 +7,9 @@ import AssetAdditionalInfo from './assets/AssetAdditionalInfo';
 import AssetOpportunitiesList from './assets/AssetOpportunitiesList';
 import PropertyAnalysisCard from './PropertyAnalysisCard';
 import { getPropertyInsightsFromAI } from '@/utils/openaiApi';
+import { analyzePropertyImage, PropertyAnalysisResult } from '@/utils/api/propertyAnalysis';
+import { SolarAnalyticsService } from '@/utils/services/SolarAnalyticsService';
+import SolarInsightsCard from './SolarInsightsCard';
 
 interface AssetOpportunitiesProps {
   address: string;
@@ -17,6 +20,7 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
   const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [insights, setInsights] = useState<any | null>(null);
+  const [propertyAnalysis, setPropertyAnalysis] = useState<PropertyAnalysisResult | null>(null);
   
   // Calculate a consistent estimated total based on the address
   const calculateEstimatedTotal = (address: string): string => {
@@ -94,11 +98,26 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
     setIsLoading(true);
     console.log("Fetching insights for address:", address);
     
+    // Get solar data using property analysis
+    const getSolarData = async () => {
+      try {
+        // In a real app, you would use actual image data
+        const analysis = await analyzePropertyImage('dummy-image-data');
+        setPropertyAnalysis(analysis);
+        console.log("Property analysis completed:", analysis);
+      } catch (error) {
+        console.error("Error analyzing property:", error);
+      }
+    };
+    
     // Get property insights using the AI API
     getPropertyInsightsFromAI(address)
       .then(data => {
         console.log("Received insights data:", data);
         setInsights(data);
+        
+        // Get solar data after insights
+        return getSolarData();
       })
       .catch(error => {
         console.error("Error fetching property insights:", error);
@@ -107,6 +126,9 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
           description: "Failed to analyze property. Please try again later.",
           variant: "destructive"
         });
+        
+        // Still try to get solar data even if insights fail
+        getSolarData();
       })
       .finally(() => {
         setIsLoading(false);
@@ -121,11 +143,22 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
         isLoading={isLoading}
       />
 
+      {propertyAnalysis && (
+        <div className="mb-8">
+          <SolarInsightsCard 
+            propertyAnalysis={propertyAnalysis}
+            isLoading={isLoading}
+            className="w-full max-w-5xl mx-auto"
+          />
+        </div>
+      )}
+
       <AssetOpportunitiesList
         selectedAssets={selectedAssets}
         onAssetToggle={handleAssetToggle}
         address={address}
         insights={insights}
+        propertyAnalysis={propertyAnalysis}
         isLoading={isLoading}
       />
 
@@ -145,6 +178,7 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
           selectedAssets={selectedAssets}
           onComplete={handleAuthWithGoogle}
           insights={insights}
+          propertyAnalysis={propertyAnalysis}
         />
       )}
     </div>
