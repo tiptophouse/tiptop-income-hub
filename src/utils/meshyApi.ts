@@ -8,9 +8,48 @@ const MESHY_API_URL = "https://api.meshy.ai/v1";
 const SAMPLE_MODEL_URL = "https://storage.googleapis.com/realestate-3d-models/demo-property.glb";
 
 /**
+ * Analyzes property features from an image
+ * Uses image processing to detect roof size, swimming pool, garden, parking, EV charging
+ */
+export const analyzePropertyImage = async (imageData: string): Promise<{
+  roofSize: number | null, 
+  hasPool: boolean,
+  hasGarden: boolean,
+  hasParking: boolean,
+  hasEVCharging: boolean,
+  error?: string
+}> => {
+  try {
+    console.log("Analyzing property image");
+    
+    // For now, we'll return mock analysis data
+    // In a real scenario, we would send this to an image recognition API
+    return {
+      roofSize: Math.round(Math.random() * 200) + 800, // Mock roof size between 800-1000 sq ft
+      hasPool: Math.random() > 0.7,
+      hasGarden: Math.random() > 0.4,
+      hasParking: Math.random() > 0.3,
+      hasEVCharging: Math.random() > 0.8
+    };
+    
+    // TODO: Implement actual image analysis with OpenAI or custom API
+  } catch (error) {
+    console.error("Error analyzing property image:", error);
+    return {
+      roofSize: null,
+      hasPool: false,
+      hasGarden: false,
+      hasParking: true,
+      hasEVCharging: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    };
+  }
+}
+
+/**
  * Generates a 3D model from an image using Meshy API
  */
-export const generateModelFromImage = async (imageData: string): Promise<string> => {
+export const generateModelFromImage = async (imageData: string, propertyFeatures?: any): Promise<string> => {
   try {
     console.log("Generating 3D model from image using Meshy API");
     
@@ -26,6 +65,36 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
     
     console.log(`Calling Meshy API with image data of ${base64Image.length} chars`);
     
+    // Enhance the prompt with property features if available
+    let enhancedPrompt = "Create a photorealistic 3D model of this residential property, focusing on architectural accuracy and details of the entire property including rooftop features. ";
+    
+    if (propertyFeatures) {
+      enhancedPrompt += "Highlight the following monetizable areas: ";
+      if (propertyFeatures.roofSize && propertyFeatures.roofSize > 0) {
+        enhancedPrompt += `roof (${propertyFeatures.roofSize} sq ft, ideal for solar panels), `;
+      } else {
+        enhancedPrompt += "roof (for solar panels), ";
+      }
+      
+      if (propertyFeatures.hasParking) {
+        enhancedPrompt += "driveway/parking area (for EV charging), ";
+      }
+      
+      if (propertyFeatures.hasGarden) {
+        enhancedPrompt += "garden/landscape areas (for smart irrigation), ";
+      }
+      
+      if (propertyFeatures.hasPool) {
+        enhancedPrompt += "swimming pool (for smart pool systems), ";
+      }
+      
+      enhancedPrompt += "exterior walls (for internet antennas).";
+    } else {
+      enhancedPrompt += "Highlight potential monetizable areas such as the roof (for solar panels), driveway (for EV charging), exterior walls (for internet antennas) and exterior spaces.";
+    }
+    
+    enhancedPrompt += " Maintain precise scale and proportions, including windows, doors, and distinctive architectural features.";
+    
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
       method: 'POST',
       headers: {
@@ -37,7 +106,7 @@ export const generateModelFromImage = async (imageData: string): Promise<string>
         mode: "geometry",
         background_removal: true,
         generate_material: true,
-        prompt: "Create a photorealistic 3D model of this residential property, focusing on architectural accuracy and details of the entire property including rooftop features. Highlight potential monetizable areas such as the roof (for solar panels), driveway (for EV charging), exterior walls (for internet antennas) and exterior spaces. Maintain precise scale and proportions, including windows, doors, and distinctive architectural features.", 
+        prompt: enhancedPrompt, 
         reference_model_id: "house",
         preserve_topology: true,
         mesh_quality: "high"

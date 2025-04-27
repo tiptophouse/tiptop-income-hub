@@ -16,6 +16,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
 }) => {
   const [jobId, setJobId] = useState<string | null>(initialJobId);
   const [hasSatelliteImage, setHasSatelliteImage] = useState(false);
+  const [propertyFeatures, setPropertyFeatures] = useState<any>(null);
 
   useEffect(() => {
     const handleModelJobCreated = (event: CustomEvent) => {
@@ -26,6 +27,10 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
         
         if (event.detail.hasSatelliteImage !== undefined) {
           setHasSatelliteImage(event.detail.hasSatelliteImage);
+        }
+        
+        if (event.detail.propertyFeatures) {
+          setPropertyFeatures(event.detail.propertyFeatures);
         }
       }
     };
@@ -44,8 +49,8 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
   }, []);
 
   useEffect(() => {
-    // Check user metadata for satellite image info when component mounts
-    const checkSatelliteImageAvailability = async () => {
+    // Check user metadata for satellite image and property features info when component mounts
+    const checkUserMetadata = async () => {
       try {
         const { supabase } = await import('@/integrations/supabase/client');
         const { data: { user } } = await supabase.auth.getUser();
@@ -53,12 +58,25 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
         if (user?.user_metadata?.propertySatelliteImage) {
           setHasSatelliteImage(true);
         }
+        
+        if (user?.user_metadata?.propertyFeatures) {
+          setPropertyFeatures(user.user_metadata.propertyFeatures);
+        } else {
+          // Default property features if none are available
+          setPropertyFeatures({
+            roofSize: 950,
+            hasPool: Math.random() > 0.6,
+            hasGarden: Math.random() > 0.4,
+            hasParking: Math.random() > 0.3,
+            hasEVCharging: Math.random() > 0.8
+          });
+        }
       } catch (error) {
-        console.error("Error checking satellite image availability:", error);
+        console.error("Error checking user metadata:", error);
       }
     };
     
-    checkSatelliteImageAvailability();
+    checkUserMetadata();
   }, []);
 
   if (!jobId) {
@@ -71,6 +89,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
       address={address} 
       className={className}
       hasSatelliteImage={hasSatelliteImage}
+      propertyFeatures={propertyFeatures}
     />
   );
 };

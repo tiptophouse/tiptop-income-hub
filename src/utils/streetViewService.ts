@@ -47,6 +47,7 @@ export const getStreetViewImageAsBase64 = async (address: string): Promise<strin
 
 /**
  * Gets Satellite image for an address as base64
+ * Using zoom level 18 for optimal aerial view
  */
 export const getSatelliteImageAsBase64 = async (address: string): Promise<string | null> => {
   try {
@@ -72,8 +73,8 @@ export const getSatelliteImageAsBase64 = async (address: string): Promise<string
       };
       img.onerror = () => reject(new Error("Failed to load Satellite image"));
       
-      // Static map with satellite imagery
-      img.src = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(address)}&zoom=19&size=600x400&maptype=satellite&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`;
+      // Static map with satellite imagery - using zoom=18 for optimal aerial detail
+      img.src = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(address)}&zoom=18&size=600x400&maptype=satellite&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`;
     });
     
     // Set a timeout to avoid hanging if the image load takes too long
@@ -90,9 +91,10 @@ export const getSatelliteImageAsBase64 = async (address: string): Promise<string
 };
 
 /**
- * Captures a Street View image for 3D model generation
+ * Captures property view images for 3D model generation
+ * Captures both street view and satellite images (zoom level 12 and 18)
  */
-export const captureStreetViewForModel = async (address: string): Promise<{streetView: string | null, satellite: string | null}> => {
+export const captureStreetViewForModel = async (address: string): Promise<{streetView: string | null, satellite: string | null, aerialView: string | null}> => {
   try {
     console.log("Capturing property views for:", address);
     
@@ -102,16 +104,49 @@ export const captureStreetViewForModel = async (address: string): Promise<{stree
       getSatelliteImageAsBase64(address)
     ]);
     
-    // Return both images
+    // Get aerial view with zoom level 12 for wider context
+    const aerialViewPromise = new Promise<string | null>(async (resolve) => {
+      try {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL("image/jpeg", 0.9));
+          } else {
+            resolve(null);
+          }
+        };
+        
+        img.onerror = () => resolve(null);
+        img.src = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(address)}&zoom=12&size=600x400&maptype=satellite&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`;
+        
+        setTimeout(() => resolve(null), 10000); // Timeout after 10 seconds
+      } catch (error) {
+        console.error("Error capturing aerial view:", error);
+        resolve(null);
+      }
+    });
+    
+    const aerialView = await aerialViewPromise;
+    
+    // Return all captured images
     return {
       streetView: streetViewImage.status === 'fulfilled' ? streetViewImage.value : null,
-      satellite: satelliteImage.status === 'fulfilled' ? satelliteImage.value : null
+      satellite: satelliteImage.status === 'fulfilled' ? satelliteImage.value : null,
+      aerialView: aerialView
     };
   } catch (error) {
     console.error("Error capturing views for model:", error);
     return {
       streetView: null,
-      satellite: null
+      satellite: null,
+      aerialView: null
     };
   }
 };
@@ -135,3 +170,4 @@ export const captureMapScreenshot = async (mapContainerRef: React.RefObject<HTML
     return null;
   }
 };
+

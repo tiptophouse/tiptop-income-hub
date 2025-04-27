@@ -24,13 +24,21 @@ interface Property3DModelDisplayProps {
   address: string;
   className?: string;
   hasSatelliteImage?: boolean;
+  propertyFeatures?: {
+    roofSize?: number;
+    hasPool?: boolean;
+    hasGarden?: boolean;
+    hasParking?: boolean;
+    hasEVCharging?: boolean;
+  };
 }
 
 const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   jobId,
   address,
   className,
-  hasSatelliteImage = false
+  hasSatelliteImage = false,
+  propertyFeatures
 }) => {
   const [rotateModel, setRotateModel] = useState(true);
   const [modelRotation, setModelRotation] = useState(0);
@@ -41,7 +49,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   const [errorDismissed, setErrorDismissed] = useState(false);
   const isMobile = useIsMobile();
 
-  const { modelStatus, modelUrl, isLoading, error, statusMessage, handleRefresh } = use3DModel(jobId);
+  const { modelStatus, modelUrl, isLoading, error, statusMessage, progress, handleRefresh } = use3DModel(jobId);
 
   React.useEffect(() => {
     if (!rotateModel) return;
@@ -76,7 +84,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
         <CardContent className="flex flex-col items-center justify-center space-y-4 py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-tiptop-accent" />
           <p className="text-sm text-center text-muted-foreground">{statusMessage}</p>
-          <Progress value={modelStatus === 'processing' ? 75 : 100} className="w-3/4 max-w-xs" />
+          <Progress value={progress} className="w-3/4 max-w-xs" />
         </CardContent>
       </Card>
     );
@@ -87,6 +95,15 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   }
 
   const backgroundOptions = ["#f5f5f5", "#1a1a1a", "#e0f2fe", "#f0fdf4", "#fffbeb"];
+
+  // Property features info for display
+  const propertyFeaturesText = propertyFeatures ? [
+    propertyFeatures.roofSize ? `Solar potential: ${propertyFeatures.roofSize}sq ft roof` : null,
+    propertyFeatures.hasPool ? "Pool: Available for smart systems" : null,
+    propertyFeatures.hasGarden ? "Garden: Perfect for smart irrigation" : null,
+    propertyFeatures.hasParking ? "Parking: Ideal for EV charging" : null,
+    propertyFeatures.hasEVCharging ? "EV Charging: Already installed" : null
+  ].filter(Boolean).join(" • ") : "";
 
   return (
     <Card className={`${className} shadow-md hover:shadow-lg transition-shadow duration-300`}>
@@ -170,11 +187,14 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           zoomLevel={zoomLevel}
           backgroundColor={backgroundColor}
           hasSatelliteImage={hasSatelliteImage}
+          propertyFeatures={propertyFeatures}
         />
         
-        {hasSatelliteImage && (
+        {(hasSatelliteImage || propertyFeaturesText) && (
           <div className="mt-2 text-xs text-center text-tiptop-accent font-medium">
-            Enhanced 3D model using satellite imagery for better accuracy
+            {hasSatelliteImage && "Enhanced 3D model using satellite imagery"}
+            {hasSatelliteImage && propertyFeaturesText && " • "}
+            {propertyFeaturesText && propertyFeaturesText}
           </div>
         )}
         

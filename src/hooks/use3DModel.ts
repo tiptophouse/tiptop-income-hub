@@ -10,6 +10,7 @@ export const use3DModel = (jobId: string) => {
   const [checkCount, setCheckCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>("Initializing 3D model...");
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     if (!jobId) return;
@@ -22,10 +23,11 @@ export const use3DModel = (jobId: string) => {
         // For demo jobs or if we already have the URL, skip API calls
         if (jobId.startsWith('demo-')) {
           console.log("Using demo model");
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await simulateProgressWithDelay(5000);
           setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
           setModelStatus("completed");
           setIsLoading(false);
+          setProgress(100);
           return;
         }
         
@@ -37,9 +39,11 @@ export const use3DModel = (jobId: string) => {
         if (status.state === 'completed') {
           console.log("Model generation completed. Getting download URL...");
           setStatusMessage("Model completed! Loading 3D view...");
+          setProgress(95);
           const url = await getModelDownloadUrl(jobId);
           setModelUrl(url);
           setModelStatus("completed");
+          setProgress(100);
           toast({
             title: "3D Model Ready",
             description: "Your property's 3D model is now ready to view.",
@@ -55,12 +59,16 @@ export const use3DModel = (jobId: string) => {
           });
           
           // Use demo model as fallback
+          await simulateProgressWithDelay(1000);
           setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
           setModelStatus("completed");
+          setProgress(100);
         } else {
           // Still processing, schedule another check with exponential backoff
           console.log("Model still processing. Scheduling another check...");
           const backoffTime = Math.min(5000 * Math.pow(1.5, checkCount), 30000); // Max 30 seconds
+          const progressIncrement = Math.min(10 + (checkCount * 5), 20); // Increase progress with each check
+          setProgress(Math.min(progress + progressIncrement, 90)); // Cap at 90% until complete
           setStatusMessage(`Model generation in progress... (${Math.round(backoffTime/1000)}s until next update)`);
           
           setTimeout(() => {
@@ -74,8 +82,10 @@ export const use3DModel = (jobId: string) => {
         
         // Use demo model as fallback
         console.log("Using demo model as fallback due to error");
+        await simulateProgressWithDelay(1000);
         setModelUrl("https://storage.googleapis.com/realestate-3d-models/demo-property.glb");
         setModelStatus("completed");
+        setProgress(100);
         
         toast({
           title: "Error",
@@ -88,13 +98,29 @@ export const use3DModel = (jobId: string) => {
     };
 
     initializeModel();
-  }, [jobId, checkCount]);
+  }, [jobId, checkCount, progress]);
+
+  // Helper function to simulate progress with delay for demo models
+  const simulateProgressWithDelay = async (totalTime: number) => {
+    const startProgress = progress;
+    const targetProgress = 95;
+    const steps = 10;
+    const stepTime = totalTime / steps;
+    
+    for (let i = 0; i < steps; i++) {
+      await new Promise(resolve => setTimeout(resolve, stepTime));
+      const newProgress = startProgress + ((targetProgress - startProgress) * (i + 1)) / steps;
+      setProgress(Math.min(newProgress, 95));
+      setStatusMessage(`Processing 3D model... ${Math.round(newProgress)}%`);
+    }
+  };
 
   const handleRefresh = () => {
     setIsLoading(true);
     setModelStatus("processing");
     setCheckCount(0);
     setError(null);
+    setProgress(0);
     setStatusMessage("Refreshing 3D model...");
   };
 
@@ -104,6 +130,7 @@ export const use3DModel = (jobId: string) => {
     isLoading,
     error,
     statusMessage,
+    progress,
     handleRefresh
   };
 };

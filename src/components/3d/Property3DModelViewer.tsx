@@ -7,6 +7,7 @@ import { FileDown, Eye, EyeOff } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import PropertyHotspots from "../PropertyHotspots";
 
 interface Property3DModelViewerProps {
   modelUrl: string | null;
@@ -20,6 +21,13 @@ interface Property3DModelViewerProps {
   zoomLevel?: number;
   backgroundColor?: string;
   hasSatelliteImage?: boolean;
+  propertyFeatures?: {
+    roofSize?: number;
+    hasPool?: boolean;
+    hasGarden?: boolean;
+    hasParking?: boolean;
+    hasEVCharging?: boolean;
+  };
 }
 
 const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
@@ -33,22 +41,83 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
   jobId,
   zoomLevel = 105,
   backgroundColor = "#f5f5f5",
-  hasSatelliteImage = false
+  hasSatelliteImage = false,
+  propertyFeatures
 }) => {
   const isMobile = useIsMobile();
   const [showHotspots, setShowHotspots] = React.useState(true);
   
+  // Generate hotspots based on propertyFeatures
+  const hotspots = React.useMemo(() => {
+    const spots = [];
+    
+    // Always add roof hotspot
+    spots.push({
+      id: "roof",
+      position: "0 1 0",
+      normal: "0 1 0",
+      label: propertyFeatures?.roofSize 
+        ? `Roof (${propertyFeatures.roofSize}sq ft) - Solar Panel Potential`
+        : "Roof - Solar Panel Potential"
+    });
+    
+    if (propertyFeatures?.hasParking) {
+      spots.push({
+        id: "parking",
+        position: "0.5 0 0.5",
+        normal: "0 1 0",
+        label: "Parking - EV Charging Potential"
+      });
+    }
+    
+    if (propertyFeatures?.hasGarden) {
+      spots.push({
+        id: "garden",
+        position: "-0.5 0 0.5",
+        normal: "0 1 0",
+        label: "Garden - Smart Irrigation Potential"
+      });
+    }
+    
+    if (propertyFeatures?.hasPool) {
+      spots.push({
+        id: "pool",
+        position: "-0.5 0 -0.5",
+        normal: "0 1 0",
+        label: "Swimming Pool - Smart Pool System"
+      });
+    }
+    
+    // Always add facade/internet hotspot
+    spots.push({
+      id: "internet",
+      position: "0 0.5 0.5",
+      normal: "0 0 1",
+      label: "Facade - Internet Antenna Potential"
+    });
+    
+    return spots;
+  }, [propertyFeatures]);
+  
   return (
     <div className="space-y-2 sm:space-y-4 relative">
-      <ModelViewerDisplay
-        modelUrl={modelUrl}
-        isModelViewerLoaded={isModelViewerLoaded}
-        rotateModel={rotateModel}
-        modelRotation={modelRotation}
-        zoomLevel={zoomLevel}
-        backgroundColor={backgroundColor}
-        showHotspots={showHotspots}
-      />
+      <div className="relative">
+        <ModelViewerDisplay
+          modelUrl={modelUrl}
+          isModelViewerLoaded={isModelViewerLoaded}
+          rotateModel={rotateModel}
+          modelRotation={modelRotation}
+          zoomLevel={zoomLevel}
+          backgroundColor={backgroundColor}
+          showHotspots={showHotspots}
+          hotspots={hotspots}
+        />
+        
+        {showHotspots && propertyFeatures && (
+          <PropertyHotspots features={propertyFeatures} />
+        )}
+      </div>
+      
       <ModelViewerControls
         onRotate={toggleRotate}
         onRefresh={handleRefresh}
@@ -87,7 +156,7 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
       
       {hasSatelliteImage && (
         <div className="text-xs text-center text-muted-foreground">
-          Satellite imagery was captured to enhance the model accuracy
+          Using combined satellite and street view imagery for enhanced accuracy
         </div>
       )}
     </div>
