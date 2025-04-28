@@ -2,9 +2,12 @@
 /**
  * Model status checking and URL retrieval utilities
  */
-import { MESHY_API_URL, getMeshyApiToken, SAMPLE_MODEL_URL } from './meshyConfig';
+import { MESHY_API_URL, getMeshyApiToken } from './meshyConfig';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+// House model URL as sample
+export const SAMPLE_MODEL_URL = "https://raw.githubusercontent.com/google/model-viewer/master/packages/shared-assets/models/glTF-Sample-Models/2.0/House/glTF/House.gltf";
 
 // Status check interval in milliseconds (5 minutes)
 const STATUS_CHECK_INTERVAL = 5 * 60 * 1000;

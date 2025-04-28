@@ -34,6 +34,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
     const handleModelJobCreated = (event: CustomEvent) => {
       if (event.detail) {
         if (event.detail.jobId) {
+          console.log("3D Model: Received modelJobCreated event with jobId:", event.detail.jobId);
           setJobId(event.detail.jobId);
         }
         
@@ -64,6 +65,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
     // Check user metadata for satellite image and property features info when component mounts
     const checkUserMetadata = async () => {
       try {
+        console.log("3D Model: Checking user metadata for property info");
         const { supabase } = await import('@/integrations/supabase/client');
         const { data: { user } } = await supabase.auth.getUser();
         
@@ -72,9 +74,11 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
         }
         
         if (user?.user_metadata?.propertyFeatures) {
+          console.log("3D Model: Found property features in user metadata");
           setPropertyFeatures(user.user_metadata.propertyFeatures);
         } else {
           // Default property features if none are available
+          console.log("3D Model: Using default property features");
           setPropertyFeatures({
             roofSize: 950,
             solarPotentialKw: 6.5,
@@ -96,9 +100,11 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
   }, []);
 
   if (!jobId) {
+    console.log("3D Model: No job ID, showing Property3DModelNoJob");
     return <Property3DModelNoJob address={address} className={className} />;
   }
 
+  console.log("3D Model: Rendering Property3DModelDisplay with jobId:", jobId);
   return (
     <Property3DModelDisplay 
       jobId={jobId} 

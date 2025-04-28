@@ -1,5 +1,5 @@
 
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 
 interface ModelViewerDisplayProps {
   modelUrl: string | null;
@@ -18,6 +18,9 @@ interface ModelViewerDisplayProps {
   }>;
 }
 
+// Default sample model URL as fallback
+const DEFAULT_MODEL_URL = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
+
 const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
   modelUrl,
   isModelViewerLoaded,
@@ -29,14 +32,15 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
   hotspots = []
 }) => {
   const modelViewerRef = React.useRef<HTMLElement | null>(null);
+  const effectiveModelUrl = modelUrl || DEFAULT_MODEL_URL;
 
-  React.useEffect(() => {
+  useEffect(() => {
     const modelViewer = modelViewerRef.current as any;
-    if (!modelViewer || !modelUrl) return;
+    if (!modelViewer || !isModelViewerLoaded) return;
 
-    console.log("[ModelViewerDisplay] Loading model URL:", modelUrl);
+    console.log("[ModelViewerDisplay] Loading model URL:", effectiveModelUrl);
     try {
-      modelViewer.src = modelUrl;
+      modelViewer.src = effectiveModelUrl;
       modelViewer.cameraControls = true;
       modelViewer.autoRotate = false;
       modelViewer.exposure = 1;
@@ -48,15 +52,16 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
     } catch (error) {
       console.error("[ModelViewerDisplay] Error configuring 3D model viewer:", error);
     }
-  }, [modelUrl, zoomLevel]);
+  }, [effectiveModelUrl, isModelViewerLoaded, zoomLevel]);
 
-  React.useEffect(() => {
-    if (!rotateModel || !modelViewerRef.current) return;
+  useEffect(() => {
+    const modelViewer = modelViewerRef.current as any;
+    if (!rotateModel || !modelViewer) return;
 
     console.log("[ModelViewerDisplay] Updating model rotation:", modelRotation);
     try {
       const rotation = `${modelRotation}deg 75deg ${zoomLevel}%`;
-      modelViewerRef.current.setAttribute("camera-orbit", rotation);
+      modelViewer.setAttribute("camera-orbit", rotation);
     } catch (error) {
       console.log("[ModelViewerDisplay] Error applying camera rotation:", error);
     }

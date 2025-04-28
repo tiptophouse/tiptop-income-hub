@@ -4,6 +4,11 @@ import { checkModelStatus, getModelDownloadUrl, startPeriodicStatusCheck } from 
 
 type ModelStatus = 'loading' | 'processing' | 'completed' | 'failed';
 
+// Sample model URL as fallback
+const SAMPLE_MODEL_URL = "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb";
+// House model URL for demo purposes
+const HOUSE_MODEL_URL = "https://raw.githubusercontent.com/google/model-viewer/master/packages/shared-assets/models/glTF-Sample-Models/2.0/House/glTF/House.gltf";
+
 export const use3DModel = (jobId: string) => {
   const [modelStatus, setModelStatus] = useState<ModelStatus>('loading');
   const [modelUrl, setModelUrl] = useState<string | null>(null);
@@ -16,6 +21,8 @@ export const use3DModel = (jobId: string) => {
   useEffect(() => {
     let isMounted = true;
     let timer: NodeJS.Timeout;
+    
+    console.log("use3DModel: Initializing with jobId:", jobId);
     
     // Function to fetch model status
     const fetchModelStatus = async () => {
@@ -35,6 +42,8 @@ export const use3DModel = (jobId: string) => {
         const status = await checkModelStatus(jobId);
         setLastCheckTime(new Date());
 
+        console.log("use3DModel: Model status check result:", status);
+
         if (!isMounted) return;
 
         if (status.state === 'processing') {
@@ -50,13 +59,18 @@ export const use3DModel = (jobId: string) => {
           setProgress(100);
           
           try {
+            console.log("use3DModel: Getting model download URL for jobId:", jobId);
             const url = await getModelDownloadUrl(jobId);
             if (isMounted) {
+              console.log("use3DModel: Model URL retrieved:", url);
               setModelUrl(url);
               setIsLoading(false);
             }
           } catch (urlError) {
             if (isMounted) {
+              console.error("use3DModel: Error getting URL:", urlError);
+              // Use house model as fallback
+              setModelUrl(HOUSE_MODEL_URL);
               setError(urlError instanceof Error ? urlError : new Error('Failed to get model URL'));
               setIsLoading(false);
             }
@@ -65,6 +79,8 @@ export const use3DModel = (jobId: string) => {
           setModelStatus('failed');
           setStatusMessage('Model generation failed.');
           setError(new Error('Model generation failed'));
+          // Use house model as fallback
+          setModelUrl(HOUSE_MODEL_URL);
           setIsLoading(false);
         } else {
           // Unknown state, treat as processing
@@ -79,16 +95,17 @@ export const use3DModel = (jobId: string) => {
         if (!isMounted) return;
         console.error("Error fetching 3D model status:", error);
         
-        // For demo models, treat any error as completed
+        // For demo models or errors, show house model
         if (jobId.startsWith('demo-')) {
           setModelStatus('completed');
           setStatusMessage('Demo model ready!');
           setProgress(100);
-          setModelUrl(null);  // Will use sample model in getModelDownloadUrl
+          setModelUrl(HOUSE_MODEL_URL);
           setIsLoading(false);
         } else {
           setError(error instanceof Error ? error : new Error('Failed to get model status'));
           setModelStatus('failed');
+          setModelUrl(HOUSE_MODEL_URL);
           setIsLoading(false);
         }
       }
@@ -99,10 +116,11 @@ export const use3DModel = (jobId: string) => {
     // Listen for model completed events from the periodic checker
     const handleModelCompleted = (event: CustomEvent) => {
       if (event.detail && event.detail.jobId === jobId) {
+        console.log("use3DModel: Received modelCompleted event:", event.detail);
         setModelStatus('completed');
         setStatusMessage('3D model ready!');
         setProgress(100);
-        setModelUrl(event.detail.modelUrl || null);
+        setModelUrl(event.detail.modelUrl || HOUSE_MODEL_URL);
         setIsLoading(false);
       }
     };
@@ -118,7 +136,7 @@ export const use3DModel = (jobId: string) => {
       document.removeEventListener('modelCompleted', handleModelCompleted as EventListener);
       stopStatusCheck();
     };
-  }, [jobId]);
+  }, [jobId, lastCheckTime]);
 
   // Function to manually refresh the model status
   const handleRefresh = async () => {
@@ -127,14 +145,18 @@ export const use3DModel = (jobId: string) => {
     setProgress(0);
     setStatusMessage('Refreshing model status...');
     try {
+      console.log("use3DModel: Refreshing model for jobId:", jobId);
       const url = await getModelDownloadUrl(jobId);
       setModelUrl(url);
       setModelStatus('completed');
       setStatusMessage('3D model ready!');
       setProgress(100);
     } catch (error) {
+      console.error("use3DModel: Refresh error:", error);
       setError(error instanceof Error ? error : new Error('Failed to refresh model'));
       setModelStatus('failed');
+      // Use house model as fallback
+      setModelUrl(HOUSE_MODEL_URL);
     } finally {
       setIsLoading(false);
     }
