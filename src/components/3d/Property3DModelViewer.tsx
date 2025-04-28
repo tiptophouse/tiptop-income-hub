@@ -1,4 +1,3 @@
-
 import React from "react";
 import ModelViewerDisplay from "./ModelViewerDisplay";
 import ModelViewerControls from "./ModelViewerControls";
@@ -11,22 +10,12 @@ import PropertyHotspots from "../PropertyHotspots";
 
 interface Property3DModelViewerProps {
   modelUrl: string | null;
-  isModelViewerLoaded: boolean;
-  rotateModel: boolean;
-  modelRotation: number;
-  toggleRotate: () => void;
-  handleRefresh: () => void;
-  handleDownload: () => void;
   jobId: string;
   zoomLevel?: number;
   backgroundColor?: string;
   hasSatelliteImage?: boolean;
   propertyFeatures?: {
     roofSize?: number;
-    solarPotentialKw?: number;
-    internetMbps?: number;
-    parkingSpaces?: number;
-    gardenSqFt?: number;
     hasPool?: boolean;
     hasGarden?: boolean;
     hasParking?: boolean;
@@ -36,34 +25,64 @@ interface Property3DModelViewerProps {
 
 const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
   modelUrl,
-  isModelViewerLoaded,
-  rotateModel,
-  modelRotation,
-  toggleRotate,
-  handleRefresh,
-  handleDownload,
   jobId,
   zoomLevel = 105,
   backgroundColor = "#f5f5f5",
   hasSatelliteImage = false,
-  propertyFeatures = {
-    roofSize: 800,
-    solarPotentialKw: 6.5,
-    internetMbps: 100,
-    parkingSpaces: 2,
-    gardenSqFt: 300,
-    hasPool: false,
-    hasGarden: true,
-    hasParking: true,
-    hasEVCharging: false
-  }
+  propertyFeatures
 }) => {
   const isMobile = useIsMobile();
   const [showHotspots, setShowHotspots] = React.useState(true);
   const [selectedAsset, setSelectedAsset] = React.useState<string | null>(null);
-  
+  const [isModelViewerLoaded, setIsModelViewerLoaded] = React.useState(false);
+  const [rotateModel, setRotateModel] = React.useState(false);
+  const [modelRotation, setModelRotation] = React.useState(0);
+
+  React.useEffect(() => {
+    console.log("[Property3DModelViewer] Initializing with model URL:", modelUrl);
+    // Check if model-viewer script is loaded
+    const checkModelViewerLoaded = () => {
+      if (customElements.get('model-viewer')) {
+        console.log("[Property3DModelViewer] model-viewer element loaded successfully");
+        setIsModelViewerLoaded(true);
+      } else {
+        console.log("[Property3DModelViewer] Waiting for model-viewer to load...");
+        setTimeout(checkModelViewerLoaded, 100);
+      }
+    };
+    checkModelViewerLoaded();
+  }, []);
+
+  React.useEffect(() => {
+    if (!rotateModel) return;
+    
+    const rotationInterval = setInterval(() => {
+      setModelRotation(prev => (prev + 1) % 360);
+    }, 50);
+
+    return () => clearInterval(rotationInterval);
+  }, [rotateModel]);
+
+  const toggleRotate = () => {
+    console.log("[Property3DModelViewer] Toggling rotation:", !rotateModel);
+    setRotateModel(prev => !prev);
+  };
+
+  const handleRefresh = () => {
+    console.log("[Property3DModelViewer] Refreshing model view");
+    window.location.reload();
+  };
+
+  const handleDownload = () => {
+    if (modelUrl) {
+      console.log("[Property3DModelViewer] Downloading model from URL:", modelUrl);
+      window.open(modelUrl, '_blank');
+    }
+  };
+
   // Generate hotspots based on propertyFeatures
   const hotspots = React.useMemo(() => {
+    console.log("[Property3DModelViewer] Generating hotspots from features:", propertyFeatures);
     const spots = [];
     
     // Always add roof hotspot

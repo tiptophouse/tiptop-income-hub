@@ -34,6 +34,7 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
     const modelViewer = modelViewerRef.current as any;
     if (!modelViewer || !modelUrl) return;
 
+    console.log("[ModelViewerDisplay] Loading model URL:", modelUrl);
     try {
       modelViewer.src = modelUrl;
       modelViewer.cameraControls = true;
@@ -43,23 +44,26 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
       modelViewer.skyboxImage = null;
       modelViewer.environmentImage = null;
       modelViewer.setAttribute("camera-orbit", `0deg 75deg ${zoomLevel}%`);
+      console.log("[ModelViewerDisplay] Model configured successfully");
     } catch (error) {
-      console.error("Error configuring 3D model viewer:", error);
+      console.error("[ModelViewerDisplay] Error configuring 3D model viewer:", error);
     }
   }, [modelUrl, zoomLevel]);
 
   React.useEffect(() => {
     if (!rotateModel || !modelViewerRef.current) return;
 
+    console.log("[ModelViewerDisplay] Updating model rotation:", modelRotation);
     try {
       const rotation = `${modelRotation}deg 75deg ${zoomLevel}%`;
       modelViewerRef.current.setAttribute("camera-orbit", rotation);
     } catch (error) {
-      console.log("Error applying camera rotation:", error);
+      console.log("[ModelViewerDisplay] Error applying camera rotation:", error);
     }
   }, [modelRotation, rotateModel, zoomLevel]);
 
   if (!isModelViewerLoaded) {
+    console.log("[ModelViewerDisplay] 3D viewer not yet loaded");
     return (
       <div className="w-full aspect-video bg-gray-100 rounded-md flex items-center justify-center">
         <p className="text-gray-500">Loading 3D viewer...</p>
