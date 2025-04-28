@@ -7,13 +7,11 @@ import { EarningsSection } from './components/EarningsSection';
 import { Building } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { supabase } from '@/integrations/supabase/client';
-import { generatePropertyModels } from '@/utils/modelGeneration';
-import { toast } from '@/components/ui/use-toast';
 import Property3DModel from '@/components/Property3DModel';
 
 interface DashboardOverviewProps {
   userName: string;
+  propertyAddress: string;
   earnings: {
     daily: number;
     monthly: number;
@@ -27,6 +25,7 @@ interface DashboardOverviewProps {
 
 const DashboardOverview = ({ 
   userName, 
+  propertyAddress,
   earnings, 
   activeAssets, 
   totalPotentialAssets, 
@@ -34,45 +33,17 @@ const DashboardOverview = ({
   aiRevenueDescription 
 }: DashboardOverviewProps) => {
   const isMobile = useIsMobile();
-  const [propertyAddress, setPropertyAddress] = useState<string>("");
-  const [modelJobId, setModelJobId] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const fetchUserPropertyData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.user_metadata?.propertyAddress) {
-        setPropertyAddress(user.user_metadata.propertyAddress);
-        setModelJobId(user.user_metadata.propertyModelJobId || null);
-      }
-    };
-    
-    fetchUserPropertyData();
-    
-    // Listen for model job creation events
-    const handleModelJobCreated = (event: CustomEvent) => {
-      if (event.detail?.jobId) {
-        setModelJobId(event.detail.jobId);
-      }
-    };
-    
-    document.addEventListener('modelJobCreated', handleModelJobCreated as EventListener);
-    return () => {
-      document.removeEventListener('modelJobCreated', handleModelJobCreated as EventListener);
-    };
-  }, []);
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <DashboardHeader userName={userName} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-6">
-        {propertyAddress && (
-          <Property3DModel
-            jobId={modelJobId}
-            address={propertyAddress}
-            className="w-full"
-          />
-        )}
+        <Property3DModel
+          jobId={null}
+          address={propertyAddress}
+          className="w-full"
+        />
         
         <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
           <CardHeader className={`${isMobile ? 'p-3' : 'pb-2'}`}>
@@ -88,7 +59,7 @@ const DashboardOverview = ({
             <div className="w-full overflow-hidden rounded-lg max-h-[200px] sm:max-h-none">
               <img 
                 src="/lovable-uploads/bc1d5ec4-4a58-4238-85d9-66e0d999e65a.png"
-                alt="Heritage Manor Property"
+                alt="Property Overview"
                 className="w-full h-auto object-cover"
               />
             </div>
