@@ -1,10 +1,8 @@
 
-import React, { useRef, useState, useEffect } from 'react';
-import { toast } from '@/components/ui/use-toast';
+import React, { useEffect, useRef } from 'react';
 import { useGoogleMap } from '@/hooks/useGoogleMap';
-import { geocodeAddress, reverseGeocode, getCurrentLocation } from '@/utils/geocodingService';
+import { useLocationHandler } from '@/hooks/useLocationHandler';
 import { usePropertyData } from '@/hooks/usePropertyData';
-import { useImageCapture } from '@/hooks/useImageCapture';
 import PropertyDetails from '@/components/PropertyDetails';
 import ProfitAnalysis from '@/components/ProfitAnalysis';
 import SolarInsightsCard from '@/components/SolarInsightsCard';
@@ -16,15 +14,9 @@ interface GoogleMapComponentProps {
 
 const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [isLocating, setIsLocating] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
-  
-  const { weatherData, isLoadingData, propertyAnalysis, loadPropertyData, setIsLoadingData } = usePropertyData();
-  const { captureAndSendImages } = useImageCapture();
   
   const { 
     map, 
-    marker, 
     isLoaded, 
     setMapCenter, 
     addRoofOverlay, 
@@ -34,57 +26,14 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
     mapRef
   });
 
+  const { weatherData, isLoadingData, propertyAnalysis } = usePropertyData();
+  const { isLocating, currentLocation, handleAddressGeocoding, handleGetCurrentLocation } = 
+    useLocationHandler(setMapCenter, addRoofOverlay, mapRef);
+
   useEffect(() => {
     if (!isLoaded || !address) return;
-    
-    setIsLoadingData(true);
-    
-    geocodeAddress({
-      address,
-      onSuccess: async (location) => {
-        setMapCenter(location);
-        addRoofOverlay(location);
-        setCurrentLocation(location);
-        await captureAndSendImages(address, mapRef);
-        loadPropertyData(location);
-      }
-    });
-  }, [address, isLoaded, setMapCenter, addRoofOverlay]);
-
-  const handleGetCurrentLocation = () => {
-    setIsLocating(true);
-    setIsLoadingData(true);
-    
-    getCurrentLocation(
-      (userLocation) => {
-        setMapCenter(userLocation);
-        addRoofOverlay(userLocation);
-        setCurrentLocation(userLocation);
-        loadPropertyData(userLocation);
-        
-        reverseGeocode({
-          location: userLocation,
-          onSuccess: (address) => {
-            toast({
-              title: "Location Found",
-              description: `Your current location: ${address}`,
-            });
-            
-            const addressEvent = new CustomEvent('addressFound', { 
-              detail: { address } 
-            });
-            document.dispatchEvent(addressEvent);
-          }
-        });
-        
-        setIsLocating(false);
-      },
-      () => {
-        setIsLocating(false);
-        setIsLoadingData(false);
-      }
-    );
-  };
+    handleAddressGeocoding(address);
+  }, [address, isLoaded]);
 
   return (
     <div className="w-full px-2 sm:px-0">
