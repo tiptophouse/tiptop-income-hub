@@ -24,7 +24,10 @@ export const useLocationHandler = (
         setMapCenter(location);
         addRoofOverlay(location);
         setCurrentLocation(location);
+        
+        // Capture and send images to webhook before loading property data
         await captureAndSendImages(address, mapRef);
+        
         loadPropertyData(location);
       }
     });
@@ -43,11 +46,14 @@ export const useLocationHandler = (
         
         reverseGeocode({
           location: userLocation,
-          onSuccess: (address) => {
+          onSuccess: async (address) => {
             toast({
               title: "Location Found",
               description: `Your current location: ${address}`,
             });
+            
+            // Capture and send images to webhook
+            await captureAndSendImages(address, mapRef);
             
             const addressEvent = new CustomEvent('addressFound', { 
               detail: { address } 
