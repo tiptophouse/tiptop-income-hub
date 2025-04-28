@@ -38,8 +38,8 @@ export const useLocationHandler = (
         // Then load property data
         loadPropertyData(location);
       },
-      onError: (error) => {
-        console.error("Geocoding error:", error);
+      onError: (_error) => { // Modified this line to accept an unused parameter
+        console.error("Geocoding error:", _error);
         toast({
           title: "Address Error",
           description: "Could not find this address. Please try a different one.",
@@ -84,8 +84,8 @@ export const useLocationHandler = (
             });
             document.dispatchEvent(addressEvent);
           },
-          onError: (error) => {
-            console.error("Reverse geocoding error:", error);
+          onError: (_error) => { // Modified this line to accept an unused parameter
+            console.error("Reverse geocoding error:", _error);
             toast({
               title: "Location Error",
               description: "Could not determine your address.",
@@ -97,8 +97,8 @@ export const useLocationHandler = (
         
         setIsLocating(false);
       },
-      (error) => {
-        console.error("Geolocation error:", error);
+      (_error) => { // Modified this line to accept an unused parameter
+        console.error("Geolocation error:", _error);
         toast({
           title: "Location Error",
           description: "Could not access your location. Please check browser permissions.",
