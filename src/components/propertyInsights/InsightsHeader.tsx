@@ -14,11 +14,11 @@ const InsightsHeader: React.FC<InsightsHeaderProps> = ({ address, propertySize, 
       <span className="block bg-white/90 rounded-full p-3 shadow-lg border border-white/60 flex-shrink-0">
         <ChartBar className="h-8 w-8 text-[#8B5CF6]" />
       </span>
-      <div className="text-left max-w-md">
+      <div className="text-left flex-1">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-[#f3eefd] tracking-tight mb-1 leading-tight truncate">
           Property Analysis
         </h1>
-        <p className="font-semibold text-gray-700 dark:text-[#ded9f3] text-base sm:text-lg truncate max-w-[300px]">
+        <p className="font-semibold text-gray-700 dark:text-[#ded9f3] text-base sm:text-lg truncate max-w-[300px] mb-2">
           AI-powered insights for <span className={accentText}>{address.length > 25 ? address.substring(0, 25) + '...' : address}</span>
         </p>
         {propertySize && (
@@ -26,6 +26,14 @@ const InsightsHeader: React.FC<InsightsHeaderProps> = ({ address, propertySize, 
             Estimated Size: {propertySize}
           </p>
         )}
+      </div>
+      <div className="flex flex-col items-end">
+        <div className="text-right">
+          <span className="text-sm text-gray-700 dark:text-[#ded9f3]">Potential Monthly Income</span>
+          <div className="flex items-center gap-2 text-2xl font-bold text-[#8B5CF6]">
+            ★ $485/mo
+          </div>
+        </div>
       </div>
     </div>
     <div className="absolute right-0 bottom-0 z-0 w-1/3 h-44 hidden md:block" aria-hidden>
@@ -35,4 +43,3 @@ const InsightsHeader: React.FC<InsightsHeaderProps> = ({ address, propertySize, 
 );
 
 export default InsightsHeader;
-
