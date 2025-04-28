@@ -16,6 +16,10 @@ interface Property3DModelViewerProps {
   hasSatelliteImage?: boolean;
   propertyFeatures?: {
     roofSize?: number;
+    solarPotentialKw?: number;
+    internetMbps?: number;
+    parkingSpaces?: number;
+    gardenSqFt?: number;
     hasPool?: boolean;
     hasGarden?: boolean;
     hasParking?: boolean;
@@ -40,7 +44,6 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
 
   React.useEffect(() => {
     console.log("[Property3DModelViewer] Initializing with model URL:", modelUrl);
-    // Check if model-viewer script is loaded
     const checkModelViewerLoaded = () => {
       if (customElements.get('model-viewer')) {
         console.log("[Property3DModelViewer] model-viewer element loaded successfully");
@@ -80,12 +83,10 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
     }
   };
 
-  // Generate hotspots based on propertyFeatures
   const hotspots = React.useMemo(() => {
     console.log("[Property3DModelViewer] Generating hotspots from features:", propertyFeatures);
     const spots = [];
     
-    // Always add roof hotspot
     spots.push({
       id: "solar",
       position: "0 1 0",
@@ -96,7 +97,6 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
       active: selectedAsset === "solar"
     });
     
-    // Add internet hotspot
     spots.push({
       id: "internet",
       position: "0 0.5 0.5",

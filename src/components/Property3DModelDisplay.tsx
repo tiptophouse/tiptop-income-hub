@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -23,6 +22,10 @@ interface Property3DModelDisplayProps {
   hasSatelliteImage?: boolean;
   propertyFeatures?: {
     roofSize?: number;
+    solarPotentialKw?: number;
+    internetMbps?: number;
+    parkingSpaces?: number;
+    gardenSqFt?: number;
     hasPool?: boolean;
     hasGarden?: boolean;
     hasParking?: boolean;

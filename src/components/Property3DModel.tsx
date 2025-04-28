@@ -9,6 +9,18 @@ interface Property3DModelProps {
   className?: string;
 }
 
+interface PropertyFeatures {
+  roofSize?: number;
+  solarPotentialKw?: number;
+  internetMbps?: number;
+  parkingSpaces?: number;
+  gardenSqFt?: number;
+  hasPool?: boolean;
+  hasGarden?: boolean;
+  hasParking?: boolean;
+  hasEVCharging?: boolean;
+}
+
 const Property3DModel: React.FC<Property3DModelProps> = ({
   jobId: initialJobId,
   address,
@@ -16,7 +28,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
 }) => {
   const [jobId, setJobId] = useState<string | null>(initialJobId);
   const [hasSatelliteImage, setHasSatelliteImage] = useState(false);
-  const [propertyFeatures, setPropertyFeatures] = useState<any>(null);
+  const [propertyFeatures, setPropertyFeatures] = useState<PropertyFeatures | null>(null);
 
   useEffect(() => {
     const handleModelJobCreated = (event: CustomEvent) => {
@@ -65,6 +77,10 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
           // Default property features if none are available
           setPropertyFeatures({
             roofSize: 950,
+            solarPotentialKw: 6.5,
+            internetMbps: 100,
+            parkingSpaces: 2,
+            gardenSqFt: 300,
             hasPool: Math.random() > 0.6,
             hasGarden: Math.random() > 0.4,
             hasParking: Math.random() > 0.3,
