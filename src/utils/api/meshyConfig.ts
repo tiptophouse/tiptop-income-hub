@@ -4,12 +4,12 @@
  */
 const MESHY_API_URL = "https://api.meshy.ai/v1";
 const SAMPLE_MODEL_URL = "https://storage.googleapis.com/realestate-3d-models/demo-property.glb";
-const GOOGLE_MAPS_API_KEY = "msy_PRKZaCCaJijJsvgUmYg8VNttvNDO3xPFgiux";
+const GOOGLE_MAPS_API_KEY = "AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE";
 
 // Get the API token from environment variables or fallback to a default for development
 export const getMeshyApiToken = () => {
   // In production, this should come from Supabase secrets
-  return "msy_PRKZaCCaJijJsvgUmYg8VNttvNDO3xPFgiux"; 
+  return "msy_mjHKuRjUVHqaoxJtT6yAhV4QrItdmCKQ3UB0"; 
 };
 
 export { MESHY_API_URL, SAMPLE_MODEL_URL, GOOGLE_MAPS_API_KEY };
