@@ -1,15 +1,21 @@
 
 import { toast } from '@/components/ui/use-toast';
-import { getStreetViewImageAsBase64, captureMapScreenshot } from '@/utils/streetViewService';
+import { getStreetViewImageAsBase64, getSatelliteImageAsBase64, captureMapScreenshot } from '@/utils/streetViewService';
 import { sendImagesWebhook } from '@/utils/webhookConfig';
 
 export const useImageCapture = () => {
   const captureAndSendImages = async (address: string, mapRef: React.RefObject<HTMLDivElement>) => {
     try {
       const streetViewImage = await getStreetViewImageAsBase64(address);
+      const satelliteImage = await getSatelliteImageAsBase64(address);
       const mapImage = mapRef.current ? await captureMapScreenshot(mapRef) : null;
       
       await sendImagesWebhook(address, mapImage, streetViewImage);
+      
+      if (satelliteImage) {
+        // Send satellite view in a separate webhook call
+        await sendImagesWebhook(address, satelliteImage, null);
+      }
       
       toast({
         title: "Images Sent",
