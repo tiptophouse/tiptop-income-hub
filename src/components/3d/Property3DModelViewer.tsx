@@ -1,12 +1,9 @@
-import React from "react";
-import ModelViewerDisplay from "./ModelViewerDisplay";
-import ModelViewerControls from "./ModelViewerControls";
-import { Button } from "@/components/ui/button";
-import { FileDown, Eye, EyeOff } from "lucide-react";
+
+import React, { useState } from "react";
+import ModelViewer from "./ModelViewer";
+import ModelControls from "./ModelControls";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import PropertyHotspots from "../PropertyHotspots";
+import { use3DModelControls } from "@/hooks/use3DModelControls";
 
 interface Property3DModelViewerProps {
   modelUrl: string | null;
@@ -27,6 +24,8 @@ interface Property3DModelViewerProps {
   };
 }
 
+const DEFAULT_MODEL_URL = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
+
 const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
   modelUrl,
   jobId,
@@ -35,77 +34,51 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
   hasSatelliteImage = false,
   propertyFeatures
 }) => {
-  const isMobile = useIsMobile();
-  const [showHotspots, setShowHotspots] = React.useState(true);
-  const [selectedAsset, setSelectedAsset] = React.useState<string | null>(null);
-  const [isModelViewerLoaded, setIsModelViewerLoaded] = React.useState(false);
-  const [rotateModel, setRotateModel] = React.useState(false);
-  const [modelRotation, setModelRotation] = React.useState(0);
+  const [showHotspots, setShowHotspots] = useState(true);
+  const [isModelViewerLoaded, setIsModelViewerLoaded] = useState(false);
+  const effectiveModelUrl = modelUrl || DEFAULT_MODEL_URL;
+  
+  const {
+    rotateModel,
+    modelRotation,
+    selectedAsset,
+    setSelectedAsset,
+    zoomLevel: currentZoom,
+  } = use3DModelControls(false, zoomLevel);
 
   React.useEffect(() => {
-    console.log("[Property3DModelViewer] Initializing with model URL:", modelUrl);
     const checkModelViewerLoaded = () => {
       if (customElements.get('model-viewer')) {
-        console.log("[Property3DModelViewer] model-viewer element loaded successfully");
         setIsModelViewerLoaded(true);
       } else {
-        console.log("[Property3DModelViewer] Waiting for model-viewer to load...");
         setTimeout(checkModelViewerLoaded, 100);
       }
     };
     checkModelViewerLoaded();
   }, []);
 
-  React.useEffect(() => {
-    if (!rotateModel) return;
-    
-    const rotationInterval = setInterval(() => {
-      setModelRotation(prev => (prev + 1) % 360);
-    }, 50);
-
-    return () => clearInterval(rotationInterval);
-  }, [rotateModel]);
-
-  const toggleRotate = () => {
-    console.log("[Property3DModelViewer] Toggling rotation:", !rotateModel);
-    setRotateModel(prev => !prev);
-  };
-
-  const handleRefresh = () => {
-    console.log("[Property3DModelViewer] Refreshing model view");
-    window.location.reload();
-  };
-
-  const handleDownload = () => {
-    if (modelUrl) {
-      console.log("[Property3DModelViewer] Downloading model from URL:", modelUrl);
-      window.open(modelUrl, '_blank');
-    }
-  };
-
   const hotspots = React.useMemo(() => {
-    console.log("[Property3DModelViewer] Generating hotspots from features:", propertyFeatures);
     const spots = [];
     
-    spots.push({
-      id: "solar",
-      position: "0 1 0",
-      normal: "0 1 0",
-      label: propertyFeatures?.roofSize 
-        ? `${propertyFeatures.roofSize} sq ft usable with ${propertyFeatures.solarPotentialKw || 6.5}kW potential`
-        : "Solar Panel Potential",
-      active: selectedAsset === "solar"
-    });
+    if (propertyFeatures?.roofSize) {
+      spots.push({
+        id: "solar",
+        position: "0 1 0",
+        normal: "0 1 0",
+        label: `${propertyFeatures.roofSize} sq ft usable with ${propertyFeatures.solarPotentialKw || 6.5}kW potential`,
+        active: selectedAsset === "solar"
+      });
+    }
     
-    spots.push({
-      id: "internet",
-      position: "0 0.5 0.5",
-      normal: "0 0 1",
-      label: propertyFeatures?.internetMbps
-        ? `${propertyFeatures.internetMbps} Mbps available for sharing`
-        : "Internet Bandwidth Sharing",
-      active: selectedAsset === "internet"
-    });
+    if (propertyFeatures?.internetMbps) {
+      spots.push({
+        id: "internet",
+        position: "0 0.5 0.5",
+        normal: "0 0 1",
+        label: `${propertyFeatures.internetMbps} Mbps available for sharing`,
+        active: selectedAsset === "internet"
+      });
+    }
     
     if (propertyFeatures?.hasParking) {
       spots.push({
@@ -143,65 +116,32 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
     
     return spots;
   }, [propertyFeatures, selectedAsset]);
-  
+
+  const handleDownload = () => {
+    if (modelUrl) {
+      window.open(modelUrl, '_blank');
+    }
+  };
+
   return (
     <div className="space-y-2 sm:space-y-4 relative">
-      <div className="relative">
-        <ModelViewerDisplay
-          modelUrl={modelUrl}
-          isModelViewerLoaded={isModelViewerLoaded}
-          rotateModel={rotateModel}
-          modelRotation={modelRotation}
-          zoomLevel={zoomLevel}
-          backgroundColor={backgroundColor}
-          showHotspots={showHotspots}
-          hotspots={hotspots}
-        />
-        
-        {showHotspots && propertyFeatures && (
-          <PropertyHotspots 
-            features={propertyFeatures} 
-            selectedAsset={selectedAsset}
-            onSelectAsset={setSelectedAsset}
-          />
-        )}
-      </div>
-      
-      <ModelViewerControls
-        onRotate={toggleRotate}
-        onRefresh={handleRefresh}
-        onDownload={handleDownload}
+      <ModelViewer
+        modelUrl={effectiveModelUrl}
+        isModelViewerLoaded={isModelViewerLoaded}
+        rotateModel={rotateModel}
+        modelRotation={modelRotation}
+        zoomLevel={currentZoom}
+        backgroundColor={backgroundColor}
+        showHotspots={showHotspots}
+        hotspots={hotspots}
       />
       
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Switch 
-            id="hotspots-toggle"
-            checked={showHotspots}
-            onCheckedChange={setShowHotspots}
-          />
-          <Label htmlFor="hotspots-toggle" className="text-xs sm:text-sm cursor-pointer">
-            {showHotspots ? 
-              <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> Show monetizable areas</span> : 
-              <span className="flex items-center gap-1"><EyeOff className="h-3 w-3" /> Hide monetizable areas</span>
-            }
-          </Label>
-        </div>
-        
-        <p className="text-xs text-muted-foreground">
-          3D Model ID: #{jobId.substring(0, 6)}
-        </p>
-      </div>
-      
-      <Button
-        variant="outline"
-        size={isMobile ? "sm" : "default"}
-        onClick={handleDownload}
-        className="w-full text-xs sm:text-sm"
-      >
-        <FileDown className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
-        Download 3D Model
-      </Button>
+      <ModelControls
+        showHotspots={showHotspots}
+        onHotspotsToggle={setShowHotspots}
+        onDownload={handleDownload}
+        jobId={jobId}
+      />
       
       {hasSatelliteImage && (
         <div className="text-xs text-center text-muted-foreground">
