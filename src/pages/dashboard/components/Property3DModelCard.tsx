@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ModelViewerDisplay from '@/components/3d/ModelViewerDisplay';
-import ModelViewerScript from '@/components/ModelViewerScript';
+import { use3DModel } from '@/hooks/use3DModel';
 
 // Sample model URL - replace with your actual Meshy model URL when available
 const DEMO_MODEL_URL = "https://raw.githubusercontent.com/google/model-viewer/master/packages/shared-assets/models/glTF-Sample-Models/2.0/House/glTF/House.gltf";
@@ -16,6 +16,16 @@ const Property3DModelCard = () => {
   const [zoomLevel, setZoomLevel] = useState(105);
   const [modelRotation, setModelRotation] = useState(0);
   const [isModelViewerLoaded, setIsModelViewerLoaded] = useState(false);
+  
+  // Get stored modelId from localStorage or use demo
+  const [modelJobId, setModelJobId] = useState<string | null>(
+    localStorage.getItem('meshy_latest_job_id') || null
+  );
+  
+  // Get model URL from the use3DModel hook if we have a job ID
+  const { modelUrl, isLoading } = modelJobId ? 
+    use3DModel(modelJobId) : 
+    { modelUrl: DEMO_MODEL_URL, isLoading: false };
 
   // Load the model-viewer script
   useEffect(() => {
@@ -40,6 +50,20 @@ const Property3DModelCard = () => {
     };
     
     document.head.appendChild(script);
+  }, []);
+
+  // Listen for model job created events
+  useEffect(() => {
+    const handleModelJobCreated = (event: CustomEvent) => {
+      if (event.detail?.jobId) {
+        setModelJobId(event.detail.jobId);
+      }
+    };
+    
+    document.addEventListener('modelJobCreated', handleModelJobCreated as EventListener);
+    return () => {
+      document.removeEventListener('modelJobCreated', handleModelJobCreated as EventListener);
+    };
   }, []);
 
   // Handle rotation when play is active
@@ -82,7 +106,7 @@ const Property3DModelCard = () => {
         <div className="w-full overflow-hidden rounded-lg">
           {isModelViewerLoaded ? (
             <ModelViewerDisplay 
-              modelUrl={DEMO_MODEL_URL}
+              modelUrl={modelUrl || DEMO_MODEL_URL}
               isModelViewerLoaded={isModelViewerLoaded}
               rotateModel={isPlaying}
               modelRotation={modelRotation}
