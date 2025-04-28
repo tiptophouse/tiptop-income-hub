@@ -40,12 +40,26 @@ const DashboardOverview = ({
       <DashboardHeader userName={userName} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-6">
-        <Property3DModel
-          jobId={null}
-          address={propertyAddress}
-          className="w-full"
-        />
+        {/* Property 3D Model Card */}
+        <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
+          <CardHeader className={`${isMobile ? 'p-3' : 'pb-2'}`}>
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Building className="h-4 w-4 sm:h-5 sm:w-5 text-tiptop-accent" />
+              Property 3D Model
+            </CardTitle>
+          </CardHeader>
+          <CardContent className={isMobile ? 'p-3 pt-0' : 'pt-0'}>
+            <div className="w-full overflow-hidden rounded-lg">
+              <img 
+                src="/lovable-uploads/bc1d5ec4-4a58-4238-85d9-66e0d999e65a.png"
+                alt="Property 3D Model"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          </CardContent>
+        </Card>
         
+        {/* Property Overview Card */}
         <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
           <CardHeader className={`${isMobile ? 'p-3' : 'pb-2'}`}>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -67,9 +81,14 @@ const DashboardOverview = ({
               </div>
               {propertyAddress && (
                 <p className="text-sm text-muted-foreground">
-                  Beautiful property located in a prime location. This property features modern amenities
+                  This beautiful property is located at {propertyAddress}. The home features modern amenities
                   and excellent potential for various revenue streams including solar panels,
                   high-speed internet sharing, and smart home capabilities.
+                </p>
+              )}
+              {!propertyAddress && (
+                <p className="text-sm text-muted-foreground">
+                  Add your property address to see a detailed overview of your property and its monetization potential.
                 </p>
               )}
             </div>

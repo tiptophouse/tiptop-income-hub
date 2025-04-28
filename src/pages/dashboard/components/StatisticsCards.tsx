@@ -29,7 +29,7 @@ const StatisticsCards = ({ earnings, activeAssets, totalPotentialAssets, pending
           <div className="flex items-center">
             <DollarSign className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-primary mr-2`} />
             <div>
-              <div className={`${isMobile ? 'text-lg' : 'text-xl md:text-2xl'} font-bold`}>${earnings.monthly}</div>
+              <div className={`${isMobile ? 'text-lg' : 'text-xl md:text-2xl'} font-bold`}>{earnings.monthly}</div>
               <p className="text-xs text-muted-foreground">${earnings.yearly} annually</p>
             </div>
           </div>
