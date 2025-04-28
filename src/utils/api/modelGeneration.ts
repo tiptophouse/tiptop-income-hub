@@ -54,6 +54,7 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     
     const MESHY_API_TOKEN = getMeshyApiToken();
     console.log("Using Meshy API with enhanced prompt:", enhancedPrompt);
+    console.log("Meshy API Token available:", !!MESHY_API_TOKEN);
     
     // Make API call to Meshy.ai updated endpoint
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {

@@ -68,6 +68,7 @@ export const capturePropertyImages = async (address: string, user?: any) => {
 
 /**
  * Attempt to capture a map screenshot when other images aren't available
+ * @param mapContainerRef - Reference to the map container element
  * @returns The map screenshot as a data URL, or null if not available
  */
 export const captureMapAsBackup = async (mapContainerRef?: React.RefObject<HTMLDivElement>) => {
@@ -77,6 +78,9 @@ export const captureMapAsBackup = async (mapContainerRef?: React.RefObject<HTMLD
     if (mapContainerRef?.current) {
       console.log("Using provided map container for screenshot");
       const mapImage = await captureMapScreenshot({ current: mapContainerRef.current });
+      if (mapImage) {
+        console.log("Successfully captured map screenshot, size:", mapImage.length);
+      }
       return mapImage;
     }
     

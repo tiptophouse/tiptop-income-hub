@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { DashboardLayout } from '@/pages/dashboard/DashboardLayout';
 import DashboardOverview from '@/pages/dashboard/DashboardOverview';
+import AddressModelSearch from '@/components/dashboard/AddressModelSearch';
 import { toast } from '@/components/ui/use-toast';
 
 const Dashboard: React.FC = () => {
@@ -50,6 +51,12 @@ const Dashboard: React.FC = () => {
           propertyAddress={propertyAddress}
           aiRevenueDescription="Your assets are generating revenue at optimal levels. Solar panels are operating at 94% efficiency."
         />
+        
+        {/* New Address Model Search Component */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Generate New Property Model</h2>
+          <AddressModelSearch />
+        </div>
       </div>
     </DashboardLayout>
   );
