@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React from 'react';
 import DashboardHeader from './components/DashboardHeader';
 import StatisticsCards from './components/StatisticsCards';
 import { DashboardCharts } from './components/DashboardCharts';
@@ -56,12 +57,21 @@ const DashboardOverview = ({
             </CardDescription>
           </CardHeader>
           <CardContent className={isMobile ? 'p-3 pt-0' : 'pt-0'}>
-            <div className="w-full overflow-hidden rounded-lg max-h-[200px] sm:max-h-none">
-              <img 
-                src="/lovable-uploads/bc1d5ec4-4a58-4238-85d9-66e0d999e65a.png"
-                alt="Property Overview"
-                className="w-full h-auto object-cover"
-              />
+            <div className="space-y-4">
+              <div className="w-full overflow-hidden rounded-lg">
+                <img 
+                  src="/lovable-uploads/bc1d5ec4-4a58-4238-85d9-66e0d999e65a.png"
+                  alt="Property Overview"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+              {propertyAddress && (
+                <p className="text-sm text-muted-foreground">
+                  Beautiful property located in a prime location. This property features modern amenities
+                  and excellent potential for various revenue streams including solar panels,
+                  high-speed internet sharing, and smart home capabilities.
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

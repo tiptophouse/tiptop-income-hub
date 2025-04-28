@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Property3DModelNoJob from "./Property3DModelNoJob";
 import Property3DModelDisplay from "./Property3DModelDisplay";
@@ -62,7 +61,6 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
   }, []);
 
   useEffect(() => {
-    // Check user metadata for satellite image and property features info when component mounts
     const checkUserMetadata = async () => {
       try {
         console.log("3D Model: Checking user metadata for property info");
@@ -77,8 +75,6 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
           console.log("3D Model: Found property features in user metadata");
           setPropertyFeatures(user.user_metadata.propertyFeatures);
         } else {
-          // Default property features if none are available
-          console.log("3D Model: Using default property features");
           setPropertyFeatures({
             roofSize: 950,
             solarPotentialKw: 6.5,
@@ -100,8 +96,15 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
   }, []);
 
   if (!jobId) {
-    console.log("3D Model: No job ID, showing Property3DModelNoJob");
-    return <Property3DModelNoJob address={address} className={className} />;
+    return (
+      <div className="w-full overflow-hidden rounded-lg">
+        <img 
+          src="/lovable-uploads/bc1d5ec4-4a58-4238-85d9-66e0d999e65a.png"
+          alt="Property Demo View"
+          className="w-full h-auto object-cover"
+        />
+      </div>
+    );
   }
 
   console.log("3D Model: Rendering Property3DModelDisplay with jobId:", jobId);

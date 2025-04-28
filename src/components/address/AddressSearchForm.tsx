@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
@@ -30,9 +29,7 @@ const AddressSearchForm = ({
     if (!inputRef.current || !window.google?.maps?.places) return;
     
     autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['address'],
-      fields: ['formatted_address', 'geometry'],
-      componentRestrictions: { country: 'us' }
+      fields: ['formatted_address', 'geometry']
     });
     
     const listener = autocompleteRef.current.addListener('place_changed', () => {

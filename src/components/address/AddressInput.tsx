@@ -25,7 +25,7 @@ const AddressInput = forwardRef<HTMLInputElement, AddressInputProps>(
           } shadow-lg border-none bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-tiptop-accent/50 transition-all duration-300`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          autoComplete="street-address"
+          autoComplete="address-line1"
           inputMode="text"
         />
       </div>
