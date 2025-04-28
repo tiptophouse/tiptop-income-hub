@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
@@ -29,7 +30,7 @@ const Hero = () => {
 
   return (
     <GoogleMapsInit>
-      <section className="pt-8 md:pt-14 pb-14 px-2 sm:px-4 lg:px-8 w-full">
+      <section className="pt-8 md:pt-14 pb-14 px-2 sm:px-4 lg:px-8 w-full" style={{ overflow: 'visible' }}>
         <div className="w-full text-center mb-0">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 text-[#AA94E2] font-fahkwang">
             Monetize Your Home Assets
@@ -39,8 +40,8 @@ const Hero = () => {
           </p>
         </div>
 
-        <div className="w-full flex justify-center items-center mb-6">
-          <div className="w-full max-w-xl">
+        <div className="w-full flex justify-center items-center mb-6" style={{ overflow: 'visible' }}>
+          <div className="w-full max-w-xl" style={{ overflow: 'visible' }}>
             <AddressSearchForm 
               address={address} 
               setAddress={setAddress} 

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -24,28 +25,42 @@ const AddressSearchForm = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
   const isMobile = useIsMobile();
+  const [autocompleteInitialized, setAutocompleteInitialized] = useState(false);
 
   useEffect(() => {
-    if (!inputRef.current || !window.google?.maps?.places) return;
+    if (!inputRef.current || !window.google?.maps?.places || autocompleteInitialized) return;
     
-    autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-      fields: ['formatted_address', 'geometry']
-    });
+    // Add a small delay for mobile devices to ensure the input is fully rendered
+    const delay = isMobile ? 300 : 0;
     
-    const listener = autocompleteRef.current.addListener('place_changed', () => {
-      const place = autocompleteRef.current?.getPlace();
-      if (place && place.formatted_address) {
-        setAddress(place.formatted_address);
-        setShowAnalysis(true);
+    const timer = setTimeout(() => {
+      try {
+        autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
+          fields: ['formatted_address', 'geometry']
+        });
+        
+        const listener = autocompleteRef.current.addListener('place_changed', () => {
+          const place = autocompleteRef.current?.getPlace();
+          if (place && place.formatted_address) {
+            setAddress(place.formatted_address);
+            setShowAnalysis(true);
+          }
+        });
+        
+        setAutocompleteInitialized(true);
+        
+        return () => {
+          if (listener && window.google?.maps?.event) {
+            window.google.maps.event.removeListener(listener);
+          }
+        };
+      } catch (error) {
+        console.error("Error initializing Google Places Autocomplete:", error);
       }
-    });
+    }, delay);
     
-    return () => {
-      if (listener && window.google?.maps?.event) {
-        window.google.maps.event.removeListener(listener);
-      }
-    };
-  }, [setAddress, setShowAnalysis]);
+    return () => clearTimeout(timer);
+  }, [setAddress, setShowAnalysis, isMobile, autocompleteInitialized]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,16 +147,17 @@ const AddressSearchForm = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.4 }}
       onSubmit={handleSearch}
+      style={{ overflow: 'visible' }}
     >
-      <div className="relative">
+      <div className="relative" style={{ overflow: 'visible' }}>
         {isMobile ? (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" style={{ overflow: 'visible' }}>
             <LocationDetectButton 
               onClick={handleLocationDetection}
               isLocating={isLocating}
               isMobile={true}
             />
-            <div className="relative flex-1">
+            <div className="relative flex-1" style={{ overflow: 'visible' }}>
               <AddressInput
                 ref={inputRef}
                 value={address}
@@ -154,7 +170,7 @@ const AddressSearchForm = ({
             </div>
           </div>
         ) : (
-          <div className="relative">
+          <div className="relative" style={{ overflow: 'visible' }}>
             <AddressInput
               ref={inputRef}
               value={address}

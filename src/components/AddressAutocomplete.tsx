@@ -1,8 +1,9 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AddressAutocompleteProps {
   onAddressSelect: (address: string) => void;
@@ -17,33 +18,48 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 }) => {
   const autocompleteRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
+  const [autocompleteInitialized, setAutocompleteInitialized] = useState(false);
 
   useEffect(() => {
-    if (!inputRef.current || !window.google?.maps?.places) return;
+    if (!inputRef.current || !window.google?.maps?.places || autocompleteInitialized) return;
 
-    const options = {
-      types: ['address'],
-      componentRestrictions: { country: 'us' }
-    };
+    // Add a small delay for mobile devices
+    const delay = isMobile ? 300 : 0;
+    
+    const timer = setTimeout(() => {
+      try {
+        const options = {
+          types: ['address'],
+          componentRestrictions: { country: 'us' }
+        };
 
-    autocompleteRef.current = new window.google.maps.places.Autocomplete(
-      inputRef.current,
-      options
-    );
+        autocompleteRef.current = new window.google.maps.places.Autocomplete(
+          inputRef.current,
+          options
+        );
 
-    autocompleteRef.current.addListener('place_changed', () => {
-      const place = autocompleteRef.current?.getPlace();
-      if (place?.formatted_address) {
-        onAddressSelect(place.formatted_address);
+        autocompleteRef.current.addListener('place_changed', () => {
+          const place = autocompleteRef.current?.getPlace();
+          if (place?.formatted_address) {
+            onAddressSelect(place.formatted_address);
+          }
+        });
+
+        setAutocompleteInitialized(true);
+        
+        return () => {
+          if (window.google?.maps?.event) {
+            window.google.maps.event.clearInstanceListeners(autocompleteRef.current!);
+          }
+        };
+      } catch (error) {
+        console.error("Error initializing Google Places Autocomplete:", error);
       }
-    });
-
-    return () => {
-      if (window.google?.maps?.event) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current!);
-      }
-    };
-  }, [onAddressSelect]);
+    }, delay);
+    
+    return () => clearTimeout(timer);
+  }, [onAddressSelect, isMobile, autocompleteInitialized]);
 
   const handleLocationDetection = () => {
     if (navigator.geolocation) {
@@ -81,7 +97,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" style={{ overflow: 'visible' }}>
       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
         <Search className="h-5 w-5 text-muted-foreground" />
       </div>
@@ -93,6 +109,9 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         onKeyDown={handleKeyDown}
         placeholder="Enter your property address..."
         className="pl-12 pr-28 py-6 w-full rounded-full text-base sm:text-lg shadow-lg border-none bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-tiptop-accent/50 transition-all duration-300"
+        autoComplete="street-address"
+        inputMode="text"
+        spellCheck="false"
       />
       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
         <Button 
