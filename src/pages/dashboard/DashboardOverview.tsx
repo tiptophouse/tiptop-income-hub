@@ -1,7 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardHeader from './components/DashboardHeader';
-import PropertyOverviewCard from './components/PropertyOverviewCard';
 import StatisticsCards from './components/StatisticsCards';
 import { DashboardCharts } from './components/DashboardCharts';
 import { AssetTable } from './components/AssetTable';
@@ -12,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { generatePropertyModels } from '@/utils/modelGeneration';
 import { toast } from '@/components/ui/use-toast';
+import Property3DModel from '@/components/Property3DModel';
 
 interface DashboardOverviewProps {
   userName: string;
@@ -34,77 +33,56 @@ const DashboardOverview = ({
   pendingActions, 
   aiRevenueDescription 
 }: DashboardOverviewProps) => {
+  const isMobile = useIsMobile();
   const [propertyAddress, setPropertyAddress] = useState<string>("");
-  const [isGenerating3DModel, setIsGenerating3DModel] = useState<boolean>(false);
+  const [modelJobId, setModelJobId] = useState<string | null>(null);
   
   useEffect(() => {
-    // Fetch address from user metadata
-    const fetchAddress = async () => {
+    const fetchUserPropertyData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.user_metadata?.propertyAddress) {
         setPropertyAddress(user.user_metadata.propertyAddress);
-        
-        // Check if we need to generate a 3D model (if not already generated)
-        if (user && !user.user_metadata.propertyModelJobId && !isGenerating3DModel) {
-          setIsGenerating3DModel(true);
-          try {
-            toast({
-              title: "Generating 3D Model",
-              description: "Creating a 3D model of your property for monetization analysis...",
-            });
-            await generatePropertyModels(user.user_metadata.propertyAddress);
-          } catch (error) {
-            console.error("Error generating property model:", error);
-          } finally {
-            setIsGenerating3DModel(false);
-          }
-        }
-      } else {
-        setPropertyAddress("Enter your property address to analyze monetization options");
+        setModelJobId(user.user_metadata.propertyModelJobId || null);
       }
     };
     
-    fetchAddress();
+    fetchUserPropertyData();
     
-    // Listen for any address updates during the session
-    const handleAddressFound = (event: CustomEvent) => {
-      if (event.detail?.address) {
-        setPropertyAddress(event.detail.address);
-        
-        // When a new address is found, try to generate a 3D model
-        if (!isGenerating3DModel) {
-          setIsGenerating3DModel(true);
-          toast({
-            title: "Generating 3D Model",
-            description: "Creating a 3D model of your property for monetization analysis...",
-          });
-          
-          generatePropertyModels(event.detail.address)
-            .finally(() => setIsGenerating3DModel(false));
-        }
+    // Listen for model job creation events
+    const handleModelJobCreated = (event: CustomEvent) => {
+      if (event.detail?.jobId) {
+        setModelJobId(event.detail.jobId);
       }
     };
     
-    document.addEventListener('addressFound', handleAddressFound as EventListener);
+    document.addEventListener('modelJobCreated', handleModelJobCreated as EventListener);
     return () => {
-      document.removeEventListener('addressFound', handleAddressFound as EventListener);
+      document.removeEventListener('modelJobCreated', handleModelJobCreated as EventListener);
     };
-  }, [isGenerating3DModel]);
+  }, []);
 
-  const isMobile = useIsMobile();
-  
   return (
     <div className="space-y-4 sm:space-y-6">
       <DashboardHeader userName={userName} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-6">
+        {propertyAddress && (
+          <Property3DModel
+            jobId={modelJobId}
+            address={propertyAddress}
+            className="w-full"
+          />
+        )}
+        
         <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
           <CardHeader className={`${isMobile ? 'p-3' : 'pb-2'}`}>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Building className="h-4 w-4 sm:h-5 sm:w-5 text-tiptop-accent" />
-              Property 3D Model
+              Property Overview
             </CardTitle>
-            <CardDescription className="text-xs sm:text-sm truncate">{propertyAddress}</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
+              {propertyAddress || "Add your property address to get started"}
+            </CardDescription>
           </CardHeader>
           <CardContent className={isMobile ? 'p-3 pt-0' : 'pt-0'}>
             <div className="w-full overflow-hidden rounded-lg max-h-[200px] sm:max-h-none">
@@ -116,14 +94,13 @@ const DashboardOverview = ({
             </div>
           </CardContent>
         </Card>
-        <PropertyOverviewCard />
       </div>
       
       <StatisticsCards
-        earnings={{ daily: 12.67, monthly: 380, yearly: 4560 }}
-        activeAssets={5}
-        totalPotentialAssets={9}
-        pendingActions={3}
+        earnings={earnings}
+        activeAssets={activeAssets}
+        totalPotentialAssets={totalPotentialAssets}
+        pendingActions={pendingActions}
       />
       
       <DashboardCharts earnings={earnings} aiRevenueDescription={aiRevenueDescription} />
