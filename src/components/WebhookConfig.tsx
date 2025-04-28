@@ -6,7 +6,7 @@ import { toast } from './ui/use-toast';
 import { getWebhookUrl, setWebhookUrl } from '@/utils/webhookConfig';
 
 const WebhookConfig: React.FC = () => {
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState('https://hook.eu1.make.com/p2htoyupq4ltwy9k91krmyv526hxgcym');
   const [isConfiguring, setIsConfiguring] = useState(false);
 
   useEffect(() => {

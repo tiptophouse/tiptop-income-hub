@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useGoogleMap } from '@/hooks/useGoogleMap';
@@ -10,7 +11,7 @@ import ProfitAnalysis from '@/components/ProfitAnalysis';
 import SolarInsightsCard from '@/components/SolarInsightsCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getStreetViewImageAsBase64 } from '@/utils/streetViewService';
-import { captureMapScreenshot,  } from '@/utils/streetViewService';
+import { captureMapScreenshot } from '@/utils/streetViewService';
 import { sendImagesWebhook } from '@/utils/webhookConfig';
 
 interface GoogleMapComponentProps {
@@ -87,7 +88,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
           onSuccess: (data) => {
             setWeatherData(data);
             
-            // Get property analysis data
+            // Get property analysis
             getPropertyAnalysis();
           },
           onError: () => setIsLoadingData(false)
