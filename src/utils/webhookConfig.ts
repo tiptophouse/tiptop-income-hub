@@ -1,6 +1,5 @@
-
 // Store webhook configuration
-let webhookUrl: string | null = "https://hook.eu1.make.com/idp2gmpgp7o5xxaoxj9iir648fuqjo5p";
+let webhookUrl: string | null = "https://hook.eu1.make.com/5mhe6crinisn3d91yg8cbgj1kndlt43e";
 
 export const setWebhookUrl = (url: string) => {
   webhookUrl = url;

@@ -25,7 +25,7 @@ export const useLocationHandler = (
         addRoofOverlay(location);
         setCurrentLocation(location);
         
-        // First capture and send images to webhook - this is important to do before loading property data
+        // First capture and send images to webhook
         console.log("Capturing and sending images for address:", address);
         try {
           const imageResult = await captureAndSendImages(address, mapRef);
@@ -38,7 +38,7 @@ export const useLocationHandler = (
         // Then load property data
         loadPropertyData(location);
       },
-      onError: (error) => { // Now correctly accepts an error parameter
+      onError: (error) => {
         console.error("Geocoding error:", error);
         toast({
           title: "Address Error",
@@ -84,7 +84,7 @@ export const useLocationHandler = (
             });
             document.dispatchEvent(addressEvent);
           },
-          onError: (error) => { // Now correctly accepts an error parameter
+          onError: (error) => {
             console.error("Reverse geocoding error:", error);
             toast({
               title: "Location Error",
@@ -97,7 +97,7 @@ export const useLocationHandler = (
         
         setIsLocating(false);
       },
-      (error) => { // Now correctly matches the expected signature
+      (error) => {
         console.error("Geolocation error:", error);
         toast({
           title: "Location Error",
