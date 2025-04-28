@@ -25,8 +25,10 @@ export const useLocationHandler = (
         addRoofOverlay(location);
         setCurrentLocation(location);
         
-        // Capture and send images to webhook before loading property data
+        // First capture and send images to webhook - this is important to do before loading property data
+        console.log("Capturing and sending images for address:", address);
         await captureAndSendImages(address, mapRef);
+        console.log("Finished capturing and sending images");
         
         loadPropertyData(location);
       }
@@ -53,7 +55,9 @@ export const useLocationHandler = (
             });
             
             // Capture and send images to webhook
+            console.log("Capturing and sending images for detected location:", address);
             await captureAndSendImages(address, mapRef);
+            console.log("Finished capturing and sending images for detected location");
             
             const addressEvent = new CustomEvent('addressFound', { 
               detail: { address } 

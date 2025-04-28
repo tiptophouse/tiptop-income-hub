@@ -38,6 +38,14 @@ const WebhookConfig: React.FC = () => {
 
       console.log("Webhook URL saved:", url);
       setIsConfiguring(false);
+      
+      // Test the webhook connection
+      fetch(url, { 
+        method: 'POST', 
+        body: JSON.stringify({ test: true }),
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(e => console.log("Test connection error (expected for CORS):", e));
+      
     } catch (error) {
       toast({
         title: "Invalid URL",
