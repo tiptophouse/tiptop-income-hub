@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Sun, TrendingUp } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area } from 'recharts';
+import { Sun, TrendingUp, Download, Eye } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import DashboardLayout from '../DashboardLayout';
 
 const monthlyData = [
   { month: 'Jan', revenue: 85 },
@@ -17,6 +19,21 @@ const monthlyData = [
   { month: 'Oct', revenue: 105 },
   { month: 'Nov', revenue: 90 },
   { month: 'Dec', revenue: 80 },
+];
+
+const monthlyEnergyData = [
+  { month: 'Jan', kwh: 450 },
+  { month: 'Feb', kwh: 500 },
+  { month: 'Mar', kwh: 600 },
+  { month: 'Apr', kwh: 700 },
+  { month: 'May', kwh: 780 },
+  { month: 'Jun', kwh: 820 },
+  { month: 'Jul', kwh: 840 },
+  { month: 'Aug', kwh: 800 },
+  { month: 'Sep', kwh: 720 },
+  { month: 'Oct', kwh: 650 },
+  { month: 'Nov', kwh: 520 },
+  { month: 'Dec', kwh: 420 },
 ];
 
 const systemDetails = {
@@ -36,9 +53,9 @@ const performanceMetrics = {
   billReduction: '66%'
 };
 
-const SolarAssetDetail: React.FC = () => {
+const SolarAssetDetailContent: React.FC = () => {
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold text-purple-600">Solar Panel Asset</h1>
         <p className="text-gray-600">Monetized with SolarCity</p>
@@ -110,26 +127,29 @@ const SolarAssetDetail: React.FC = () => {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">System Performance</CardTitle>
-          <p className="text-sm text-gray-600">Energy production and efficiency metrics</p>
+      <Card className="bg-amber-50/50 border-amber-100">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <Sun className="h-5 w-5 text-amber-500" />
+            <CardTitle className="text-lg text-amber-700">System Performance</CardTitle>
+          </div>
+          <p className="text-sm text-amber-700/80">Energy production and efficiency metrics</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div>
-              <h3 className="text-lg font-medium mb-4 text-purple-600">Energy Production</h3>
+              <h3 className="text-lg font-medium mb-4 text-amber-700">Energy Production</h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-600">Yearly Production</p>
+                  <p className="text-sm text-amber-700/80">Yearly Production</p>
                   <p className="font-medium">{performanceMetrics.yearlyProduction}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Average Daily</p>
+                  <p className="text-sm text-amber-700/80">Average Daily</p>
                   <p className="font-medium">{performanceMetrics.averageDaily}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">System Efficiency</p>
+                  <p className="text-sm text-amber-700/80">System Efficiency</p>
                   <p className="font-medium">{performanceMetrics.systemEfficiency}</p>
                 </div>
               </div>
@@ -154,7 +174,81 @@ const SolarAssetDetail: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Card className="bg-gradient-to-br from-amber-50 to-amber-100/40 border-amber-100">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <Sun className="h-5 w-5 text-amber-500" />
+            <CardTitle className="text-lg text-amber-700">Monthly Energy Production</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={monthlyEnergyData}>
+                <defs>
+                  <linearGradient id="colorKwh" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="month" />
+                <YAxis unit=" kWh" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f4" />
+                <Tooltip 
+                  formatter={(value) => [`${value} kWh`, 'Energy']}
+                  labelFormatter={(label) => `Month: ${label}`}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="kwh" 
+                  stroke="#f97316" 
+                  fillOpacity={1} 
+                  fill="url(#colorKwh)" 
+                  name="Energy"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border border-amber-100">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-lg text-purple-700">Contract Details</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-800 mb-6">
+            Your rooftop solar agreement with SolarCity generates passive income by selling excess energy back to the grid. The system is fully maintained by SolarCity at no cost to you.
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              View Contract
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Download Statement
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
+  );
+};
+
+const SolarAssetDetail: React.FC = () => {
+  const handleSignOut = () => {
+    console.log("Sign out clicked");
+    // Implement sign out logic here
+  };
+
+  return (
+    <DashboardLayout onSignOut={handleSignOut}>
+      <SolarAssetDetailContent />
+    </DashboardLayout>
   );
 };
 
