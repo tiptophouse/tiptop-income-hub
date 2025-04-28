@@ -66,7 +66,7 @@ const WebhookConfig: React.FC = () => {
     <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-4">
       <h3 className="font-medium text-gray-800 mb-2">Webhook Configuration</h3>
       <p className="text-sm text-gray-600 mb-4">
-        Enter your Make.com or other webhook URL to receive property screenshots for 3D modeling
+        Enter your Make.com or other webhook URL to receive property screenshots
       </p>
       
       <div className="flex flex-col gap-3">

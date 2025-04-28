@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useGoogleMap } from '@/hooks/useGoogleMap';
@@ -10,6 +9,9 @@ import PropertyDetails from '@/components/PropertyDetails';
 import ProfitAnalysis from '@/components/ProfitAnalysis';
 import SolarInsightsCard from '@/components/SolarInsightsCard';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getStreetViewImageAsBase64 } from '@/utils/streetViewService';
+import { captureMapScreenshot,  } from '@/utils/streetViewService';
+import { sendImagesWebhook } from '@/utils/webhookConfig';
 
 interface GoogleMapComponentProps {
   address?: string;
@@ -36,6 +38,32 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
   } = useGoogleMap({
     mapRef
   });
+
+  // Function to capture and send images to webhook
+  const captureAndSendImages = async (location: { lat: number; lng: number }) => {
+    try {
+      // Get Street View image
+      const streetViewImage = await getStreetViewImageAsBase64(address || '');
+      
+      // Get map screenshot
+      const mapImage = mapRef.current ? await captureMapScreenshot(mapRef) : null;
+      
+      // Send both images to webhook
+      await sendImagesWebhook(address || '', mapImage, streetViewImage);
+      
+      toast({
+        title: "Images Sent",
+        description: "Property views have been sent to your webhook",
+      });
+    } catch (error) {
+      console.error("Error capturing and sending images:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send property views to webhook",
+        variant: "destructive",
+      });
+    }
+  };
   
   // Update map when address changes
   useEffect(() => {
@@ -45,10 +73,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
     
     geocodeAddress({
       address,
-      onSuccess: (location) => {
+      onSuccess: async (location) => {
         setMapCenter(location);
         addRoofOverlay(location);
         setCurrentLocation(location);
+        
+        // Capture and send images when location is set
+        await captureAndSendImages(location);
         
         // Get weather data
         fetchWeatherData({
