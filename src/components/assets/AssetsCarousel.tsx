@@ -62,9 +62,9 @@ const AssetsCarousel: React.FC = () => {
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {additionalAssets.map((asset) => (
-            <CarouselItem key={asset.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+            <CarouselItem key={asset.id} className="pl-2 md:pl-4 basis-[85%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
               <Card className="border border-[#E5DEFF] bg-white/50 backdrop-blur-sm hover:shadow-md transition-all">
-                <CardContent className="p-3">
+                <CardContent className="p-2 sm:p-3">
                   <div className="flex items-start gap-2">
                     <Checkbox id={`asset-${asset.id}`} className="mt-1.5" />
                     <div className="flex-1 min-w-0">
