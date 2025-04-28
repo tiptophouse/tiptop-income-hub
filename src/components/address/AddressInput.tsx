@@ -12,7 +12,7 @@ interface AddressInputProps {
 const AddressInput = forwardRef<HTMLInputElement, AddressInputProps>(
   ({ value, onChange, isMobile = false }, ref) => {
     return (
-      <div className="relative flex-1" style={{ overflow: 'visible' }}>
+      <div className="relative flex-1">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-muted-foreground" />
         </div>
@@ -28,7 +28,6 @@ const AddressInput = forwardRef<HTMLInputElement, AddressInputProps>(
           autoComplete="street-address"
           inputMode="text"
           spellCheck="false"
-          aria-label="Property address input"
         />
       </div>
     );

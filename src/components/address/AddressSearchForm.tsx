@@ -30,32 +30,24 @@ const AddressSearchForm = ({
   useEffect(() => {
     if (!inputRef.current || !window.google?.maps?.places || autocompleteInitialized) return;
     
-    console.log("Initializing Google Places Autocomplete for AddressSearchForm");
-    
-    // Add a larger delay for mobile devices to ensure the input is fully rendered
-    const delay = isMobile ? 800 : 200;
+    // Add a small delay for mobile devices to ensure the input is fully rendered
+    const delay = isMobile ? 300 : 0;
     
     const timer = setTimeout(() => {
       try {
         autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-          fields: ['formatted_address', 'geometry'],
-          types: ['address']
+          fields: ['formatted_address', 'geometry']
         });
         
         const listener = autocompleteRef.current.addListener('place_changed', () => {
           const place = autocompleteRef.current?.getPlace();
           if (place && place.formatted_address) {
-            console.log("Selected place:", place.formatted_address);
             setAddress(place.formatted_address);
             setShowAnalysis(true);
-            document.dispatchEvent(new CustomEvent('addressFound', { 
-              detail: { address: place.formatted_address } 
-            }));
           }
         });
         
         setAutocompleteInitialized(true);
-        console.log("AddressSearchForm autocomplete initialized");
         
         return () => {
           if (listener && window.google?.maps?.event) {
@@ -63,7 +55,7 @@ const AddressSearchForm = ({
           }
         };
       } catch (error) {
-        console.error("Error initializing Google Places Autocomplete in AddressSearchForm:", error);
+        console.error("Error initializing Google Places Autocomplete:", error);
       }
     }, delay);
     

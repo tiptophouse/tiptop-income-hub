@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState } from 'react';
-import { toast } from '@/components/ui/use-toast';
 
 interface GoogleMapsInitProps {
   apiKey?: string;
@@ -39,15 +38,14 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
       return () => clearInterval(checkExisting);
     }
     
-    // Create script element with async loading
+    // Create script element
     const script = document.createElement('script');
     script.id = 'google-maps-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMapsCallback`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
     script.async = true;
     script.defer = true;
     
-    // Define the callback function for async loading
-    window.initGoogleMapsCallback = () => {
+    script.onload = () => {
       console.log('Google Maps API loaded successfully');
       isGoogleMapsLoaded = true;
       setIsLoaded(true);
@@ -56,20 +54,13 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
     script.onerror = (error) => {
       console.error('Error loading Google Maps API:', error);
       setHasError(true);
-      toast({
-        title: "Maps Error",
-        description: "Failed to load Google Maps API. Please check your internet connection and try again.",
-        variant: "destructive"
-      });
     };
     
     document.head.appendChild(script);
 
     return () => {
-      // Cleanup callback when component unmounts
-      if (window.initGoogleMapsCallback) {
-        delete window.initGoogleMapsCallback;
-      }
+      // Don't remove the script on unmount, as other components might be using it
+      // This prevents reloading the API when components using it unmount and remount
     };
   }, [apiKey, hasError]);
 

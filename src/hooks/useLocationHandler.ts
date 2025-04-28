@@ -16,27 +16,16 @@ export const useLocationHandler = (
   const { captureAndSendImages } = useImageCapture();
 
   const handleAddressGeocoding = async (address: string) => {
-    if (!address.trim()) {
-      toast({
-        title: "Address Required",
-        description: "Please enter a valid address to analyze.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    console.log("Geocoding address:", address);
     setIsLoadingData(true);
     
     geocodeAddress({
       address,
       onSuccess: async (location) => {
-        console.log("Successfully geocoded address to location:", location);
         setMapCenter(location);
         addRoofOverlay(location);
         setCurrentLocation(location);
         
-        // First capture and send images to webhook
+        // First capture and send images to webhook - this is important to do before loading property data
         console.log("Capturing and sending images for address:", address);
         try {
           const imageResult = await captureAndSendImages(address, mapRef);
@@ -49,7 +38,7 @@ export const useLocationHandler = (
         // Then load property data
         loadPropertyData(location);
       },
-      onError: (error) => {
+      onError: (error) => { // Now correctly accepts an error parameter
         console.error("Geocoding error:", error);
         toast({
           title: "Address Error",
@@ -64,11 +53,9 @@ export const useLocationHandler = (
   const handleGetCurrentLocation = () => {
     setIsLocating(true);
     setIsLoadingData(true);
-    console.log("Getting current location...");
     
     getCurrentLocation(
       (userLocation) => {
-        console.log("Current location detected:", userLocation);
         setMapCenter(userLocation);
         addRoofOverlay(userLocation);
         setCurrentLocation(userLocation);
@@ -77,7 +64,6 @@ export const useLocationHandler = (
         reverseGeocode({
           location: userLocation,
           onSuccess: async (address) => {
-            console.log("Reverse geocoded to address:", address);
             toast({
               title: "Location Found",
               description: `Your current location: ${address}`,
@@ -98,7 +84,7 @@ export const useLocationHandler = (
             });
             document.dispatchEvent(addressEvent);
           },
-          onError: (error) => {
+          onError: (error) => { // Now correctly accepts an error parameter
             console.error("Reverse geocoding error:", error);
             toast({
               title: "Location Error",
@@ -111,7 +97,7 @@ export const useLocationHandler = (
         
         setIsLocating(false);
       },
-      (error) => {
+      (error) => { // Now correctly matches the expected signature
         console.error("Geolocation error:", error);
         toast({
           title: "Location Error",
