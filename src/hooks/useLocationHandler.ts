@@ -27,10 +27,25 @@ export const useLocationHandler = (
         
         // First capture and send images to webhook - this is important to do before loading property data
         console.log("Capturing and sending images for address:", address);
-        await captureAndSendImages(address, mapRef);
+        try {
+          const imageResult = await captureAndSendImages(address, mapRef);
+          console.log("Image capture and send result:", imageResult ? "Success" : "Failed");
+        } catch (err) {
+          console.error("Error during image capture and send:", err);
+        }
         console.log("Finished capturing and sending images");
         
+        // Then load property data
         loadPropertyData(location);
+      },
+      onError: (error) => {
+        console.error("Geocoding error:", error);
+        toast({
+          title: "Address Error",
+          description: "Could not find this address. Please try a different one.",
+          variant: "destructive"
+        });
+        setIsLoadingData(false);
       }
     });
   };
@@ -56,19 +71,39 @@ export const useLocationHandler = (
             
             // Capture and send images to webhook
             console.log("Capturing and sending images for detected location:", address);
-            await captureAndSendImages(address, mapRef);
+            try {
+              const imageResult = await captureAndSendImages(address, mapRef);
+              console.log("Image capture and send result for current location:", imageResult ? "Success" : "Failed");
+            } catch (err) {
+              console.error("Error during image capture and send for current location:", err);
+            }
             console.log("Finished capturing and sending images for detected location");
             
             const addressEvent = new CustomEvent('addressFound', { 
               detail: { address } 
             });
             document.dispatchEvent(addressEvent);
+          },
+          onError: (error) => {
+            console.error("Reverse geocoding error:", error);
+            toast({
+              title: "Location Error",
+              description: "Could not determine your address.",
+              variant: "destructive"
+            });
+            setIsLoadingData(false);
           }
         });
         
         setIsLocating(false);
       },
-      () => {
+      (error) => {
+        console.error("Geolocation error:", error);
+        toast({
+          title: "Location Error",
+          description: "Could not access your location. Please check browser permissions.",
+          variant: "destructive"
+        });
         setIsLocating(false);
         setIsLoadingData(false);
       }
