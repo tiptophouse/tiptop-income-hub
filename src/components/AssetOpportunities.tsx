@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Star } from 'lucide-react';
 import AssetAdditionalInfo from './assets/AssetAdditionalInfo';
 import AssetOpportunitiesList from './assets/AssetOpportunitiesList';
 import { getPropertyInsightsFromAI } from '@/utils/openaiApi';
@@ -99,14 +99,17 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
     <div className="w-full">
       <div className="mb-8 bg-[#9b87f5] rounded-2xl p-8">
         <div className="text-white max-w-3xl">
-          <h2 className="text-2xl font-bold mb-2">Property Analysis</h2>
+          <h2 className="text-2xl font-bold mb-2 text-white">Property Analysis</h2>
           <p className="text-white/90 mb-1">{address}</p>
           <p className="mb-4">We've analyzed your property and identified several monetization opportunities based on its features and location.</p>
           <div className="flex justify-between items-center">
             <p className="text-sm">→ Select which assets you want to monetize below</p>
-            <div className="text-right">
+            <div className="text-right flex items-center gap-2">
               <div className="text-sm">Potential Monthly Income</div>
-              <div className="text-2xl font-bold">$485/mo</div>
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-yellow-300 fill-yellow-300" />
+                <div className="text-2xl font-bold">$485/mo</div>
+              </div>
             </div>
           </div>
         </div>
@@ -116,26 +119,24 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({ address }) => {
         <h2 className="text-2xl font-bold mb-6 text-[#6E59A5] font-fahkwang">
           Immediately Available Asset Opportunities
         </h2>
-        <div className="bg-white/50 backdrop-blur-sm border border-[#E5DEFF] rounded-2xl p-6">
-          <AssetOpportunitiesList
-            selectedAssets={selectedAssets}
-            onAssetToggle={handleAssetToggle}
-            address={address}
-            insights={insights}
-            isLoading={isLoading}
-          />
+        <AssetOpportunitiesList
+          selectedAssets={selectedAssets}
+          onAssetToggle={handleAssetToggle}
+          address={address}
+          insights={insights}
+          isLoading={isLoading}
+        />
 
-          {selectedAssets.length > 0 && (
-            <div className="flex justify-center mt-8">
-              <button
-                onClick={handleContinue}
-                className="bg-[#AA94E2] hover:bg-[#9b87f5] text-[#FFFDED] px-8 py-4 text-lg rounded-full font-fahkwang transition-all shadow-md hover:shadow-lg"
-              >
-                Continue with Selected Assets
-              </button>
-            </div>
-          )}
-        </div>
+        {selectedAssets.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleContinue}
+              className="bg-[#AA94E2] hover:bg-[#9b87f5] text-[#FFFDED] px-8 py-4 text-lg rounded-full font-fahkwang transition-all shadow-md hover:shadow-lg"
+            >
+              Continue with Selected Assets
+            </button>
+          </div>
+        )}
       </div>
 
       <AssetsCarousel />

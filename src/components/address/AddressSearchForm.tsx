@@ -35,6 +35,10 @@ const AddressSearchForm = ({
       componentRestrictions: { country: 'us' }
     });
     
+    // Enable autocomplete on mobile devices
+    inputRef.current.setAttribute('autocomplete', 'street-address');
+    inputRef.current.setAttribute('inputmode', 'text');
+    
     const listener = autocompleteRef.current.addListener('place_changed', () => {
       const place = autocompleteRef.current?.getPlace();
       if (place && place.formatted_address) {
