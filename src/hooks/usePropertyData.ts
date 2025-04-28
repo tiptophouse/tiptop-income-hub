@@ -28,7 +28,10 @@ export const usePropertyData = () => {
         setWeatherData(data);
         getPropertyAnalysis();
       },
-      onError: () => setIsLoadingData(false)
+      onError: (error) => {
+        console.error("Error fetching weather:", error);
+        setIsLoadingData(false);
+      }
     });
   };
 

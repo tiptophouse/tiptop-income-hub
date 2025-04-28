@@ -1,15 +1,16 @@
+
 import { toast } from '@/components/ui/use-toast';
 
 interface GeocodeAddressProps {
   address: string;
   onSuccess: (location: { lat: number; lng: number }) => void;
-  onError?: () => void;
+  onError?: (error: any) => void; // Changed to accept error parameter
 }
 
 interface GeocodeLocationProps {
   location: { lat: number; lng: number };
   onSuccess: (address: string) => void;
-  onError?: () => void;
+  onError?: (error: any) => void; // Changed to accept error parameter
 }
 
 // Simple cache to reduce redundant API calls
@@ -74,7 +75,7 @@ const queueRequest = (type: 'geocode' | 'reverse', params: any): Promise<void> =
 const processGeocodeRequest = ({ address, onSuccess, onError }: GeocodeAddressProps) => {
   if (!window.google) {
     console.error('Google Maps API not loaded');
-    if (onError) onError();
+    if (onError) onError(new Error('Google Maps API not loaded'));
     return;
   }
   
@@ -98,7 +99,7 @@ const processGeocodeRequest = ({ address, onSuccess, onError }: GeocodeAddressPr
       onSuccess(result);
     } else {
       console.error('Geocode was not successful:', status);
-      if (onError) onError();
+      if (onError) onError(status);
     }
   });
 };
@@ -107,7 +108,7 @@ const processGeocodeRequest = ({ address, onSuccess, onError }: GeocodeAddressPr
 const processReverseGeocodeRequest = ({ location, onSuccess, onError }: GeocodeLocationProps) => {
   if (!window.google) {
     console.error('Google Maps API not loaded');
-    if (onError) onError();
+    if (onError) onError(new Error('Google Maps API not loaded'));
     return;
   }
 
@@ -126,7 +127,7 @@ const processReverseGeocodeRequest = ({ location, onSuccess, onError }: GeocodeL
       onSuccess(address);
     } else {
       console.error('Reverse geocode was not successful:', status);
-      if (onError) onError();
+      if (onError) onError(status);
     }
   });
 };
@@ -144,7 +145,7 @@ export const reverseGeocode = async (params: GeocodeLocationProps): Promise<void
 // Function to get the user's current location
 export const getCurrentLocation = (
   onSuccess: (location: { lat: number; lng: number }) => void,
-  onError: () => void
+  onError: (error: any) => void // Changed to accept error parameter
 ): void => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -162,7 +163,7 @@ export const getCurrentLocation = (
           description: "Unable to get your location. Please check your browser permissions.",
           variant: "destructive"
         });
-        onError();
+        onError(error);
       },
       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
@@ -172,6 +173,6 @@ export const getCurrentLocation = (
       description: "Your browser does not support geolocation.",
       variant: "destructive"
     });
-    onError();
+    onError(new Error("Geolocation not supported"));
   }
 };
