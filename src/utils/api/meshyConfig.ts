@@ -9,7 +9,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE";
 // Get the API token from environment variables or fallback to a default for development
 export const getMeshyApiToken = () => {
   // In production, this should come from Supabase secrets
-  return "msy_kQuxDmFz4rthNCX7tCf6n9XUFuUq7ZXi5MHP"; 
+  return "msy_eMWReunOS9vuwTnJdqFTZAqD2N0q6FWWSj2w"; 
 };
 
 export { MESHY_API_URL, SAMPLE_MODEL_URL, GOOGLE_MAPS_API_KEY };
