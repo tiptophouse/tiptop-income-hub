@@ -42,7 +42,7 @@ const DashboardOverview = ({
       <DashboardCharts earnings={earnings} aiRevenueDescription={aiRevenueDescription} />
       
       <div className="space-y-4 sm:space-y-6">
-        <h2 className="text-2xl font-semibold text-violet-300">Manage your assets</h2>
+        <h2 className="text-2xl font-normal text-violet-400">Manage your assets</h2>
         <div className="overflow-x-auto -mx-2 sm:mx-0">
           <div className="min-w-full px-2 sm:px-0">
             <AssetTable />
