@@ -1,31 +1,40 @@
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Building } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const PropertyOverviewCard = () => {
+interface PropertyOverviewCardProps {
+  propertyAddress: string;
+}
+
+const PropertyOverviewCard = ({ propertyAddress }: PropertyOverviewCardProps) => {
   const isMobile = useIsMobile();
-  
+
   return (
-    <Card>
-      <CardHeader className={isMobile ? 'p-3' : ''}>
-        <CardTitle className="text-base sm:text-lg">Property Overview</CardTitle>
+    <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
+      <CardHeader className={`${isMobile ? 'p-3' : 'pb-2'}`}>
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Building className="h-4 w-4 sm:h-5 sm:w-5 text-tiptop-accent" />
+          Property Overview
+        </CardTitle>
+        <CardDescription className="text-xs sm:text-sm">
+          {propertyAddress || "Add your property address to get started"}
+        </CardDescription>
       </CardHeader>
-      <CardContent className={isMobile ? 'p-3 pt-0' : ''}>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          This beautiful property features a spacious rooftop perfect for solar panel installation. 
-          The building's orientation and roof angle provide optimal conditions for solar energy generation. 
-          Current estimates suggest potential for significant energy production and cost savings.
-        </p>
-        <div className="mt-2 sm:mt-4">
-          <h4 className="font-medium text-sm sm:text-base">Key Features:</h4>
-          <ul className="list-disc list-inside text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
-            <li>1,200 sq ft rooftop area</li>
-            <li>Southern exposure</li>
-            <li>30° roof pitch - optimal for solar panels</li>
-            <li>No surrounding tall buildings causing shade</li>
-          </ul>
-        </div>
+      <CardContent className={isMobile ? 'p-3 pt-0' : 'pt-0'}>
+        {propertyAddress && (
+          <p className="text-sm text-muted-foreground">
+            This beautiful property is located at {propertyAddress}. The home features modern amenities
+            and excellent potential for various revenue streams including solar panels,
+            high-speed internet sharing, and smart home capabilities.
+          </p>
+        )}
+        {!propertyAddress && (
+          <p className="text-sm text-muted-foreground">
+            Add your property address to see a detailed overview of your property and its monetization potential.
+          </p>
+        )}
       </CardContent>
     </Card>
   );
