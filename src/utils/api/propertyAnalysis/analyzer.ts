@@ -60,10 +60,11 @@ export const analyzePropertyImage = async (imageBase64: string): Promise<Propert
           installationCost: data.monetization_opportunities?.rooftop_solar?.upfront_cost_usd || 15000,
           annualSavings: (data.monetization_opportunities?.rooftop_solar?.est_monthly_savings_usd || 120) * 12,
           breakEvenYears: (data.monetization_opportunities?.rooftop_solar?.payback_period_months || 120) / 12,
-          lifetimeValue: calculate20YearProfit({
-            monthlySavings: data.monetization_opportunities?.rooftop_solar?.est_monthly_savings_usd || 120,
-            installationCost: data.monetization_opportunities?.rooftop_solar?.upfront_cost_usd || 15000
-          }),
+          lifetimeValue: calculate20YearProfit(
+            (data.monetization_opportunities?.rooftop_solar?.est_monthly_savings_usd || 120) * 12,
+            data.monetization_opportunities?.rooftop_solar?.upfront_cost_usd || 15000,
+            25 // Default panel lifetime in years
+          ),
           billBeforeSolar: 2400,
           billAfterSolar: 1200,
           monthlyIncome: 100,
@@ -78,8 +79,8 @@ export const analyzePropertyImage = async (imageBase64: string): Promise<Propert
           carbonOffsetKg: 4380,
           roofDirection: 180,
           roofSlope: 20,
-          installationComplexity: calculateInstallationComplexity(0.78),
-          efficiencyRating: calculateEfficiencyRating(0.75)
+          installationComplexity: calculateInstallationComplexity(20),
+          efficiencyRating: calculateEfficiencyRating(180, 8)
         },
         internetMbps: data.monetization_opportunities?.internet_bandwidth?.shareable_capacity_mbps || 100,
         parkingSpaces: data.monetization_opportunities?.parking_space?.spaces_available_for_rent || 2,
