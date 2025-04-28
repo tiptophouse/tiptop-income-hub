@@ -205,7 +205,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           </div>
         )}
         
-        <ModelStatusDisplay jobId={jobId} modelStatus={modelStatus} />
+        <ModelStatusDisplay jobId={jobId} modelStatus={modelStatus === 'loading' ? 'processing' : modelStatus} />
       </CardContent>
     </Card>
   );

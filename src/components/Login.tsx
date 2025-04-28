@@ -191,7 +191,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = async () => {
     // Start model completion checker
     startModelCompletionChecker();
     
