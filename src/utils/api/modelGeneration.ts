@@ -18,6 +18,9 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
       throw new Error("Invalid image data for model generation");
     }
     
+    // Log the image data length to help with debugging
+    console.log(`Image data length: ${base64Image.length} characters`);
+    
     // Create enhanced prompt with property features
     let enhancedPrompt = `Create a photorealistic 3D model of this residential property with:`;
     
