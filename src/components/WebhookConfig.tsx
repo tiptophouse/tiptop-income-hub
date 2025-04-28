@@ -6,7 +6,7 @@ import { toast } from './ui/use-toast';
 import { getWebhookUrl, setWebhookUrl } from '@/utils/webhookConfig';
 
 const WebhookConfig: React.FC = () => {
-  const [url, setUrl] = useState('https://hook.eu1.make.com/p2htoyupq4ltwy9k91krmyv526hxgcym');
+  const [url, setUrl] = useState('');
   const [isConfiguring, setIsConfiguring] = useState(false);
 
   useEffect(() => {
@@ -36,6 +36,7 @@ const WebhookConfig: React.FC = () => {
         description: "Property screenshots will be sent to this webhook",
       });
 
+      console.log("Webhook URL saved:", url);
       setIsConfiguring(false);
     } catch (error) {
       toast({
@@ -53,6 +54,7 @@ const WebhookConfig: React.FC = () => {
           <div>
             <h3 className="font-medium text-gray-800">Webhook Configuration</h3>
             <p className="text-sm text-gray-600">Property screenshots will be sent to your webhook</p>
+            <p className="text-xs text-gray-500 mt-1">{url}</p>
           </div>
           <Button variant="outline" onClick={() => setIsConfiguring(true)}>
             Change

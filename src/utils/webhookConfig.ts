@@ -24,23 +24,31 @@ export const sendImagesWebhook = async (address: string, mapImage: string | null
 
   try {
     console.log("Sending images to webhook for address:", address);
-    await fetch(webhook, {
+    console.log("Webhook URL:", webhook);
+    
+    const payload = JSON.stringify({
+      address,
+      mapImage,
+      streetViewImage,
+      timestamp: new Date().toISOString(),
+      source: window.location.origin
+    });
+    
+    console.log("Payload size:", Math.round(payload.length / 1024), "KB");
+    
+    const response = await fetch(webhook, {
       method: 'POST',
-      mode: 'no-cors',
+      mode: 'no-cors', // This is essential for cross-origin webhook calls
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        address,
-        mapImage,
-        streetViewImage,
-        timestamp: new Date().toISOString(),
-        source: window.location.origin
-      })
+      body: payload
     });
     
-    console.log("Successfully sent images to webhook");
+    console.log("Webhook request sent successfully");
+    return true;
   } catch (error) {
     console.error("Error sending images to webhook:", error);
+    return false;
   }
 };
