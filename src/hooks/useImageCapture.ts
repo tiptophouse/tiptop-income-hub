@@ -35,15 +35,26 @@ export const useImageCapture = () => {
         return false;
       }
       
-      // Instead of sending one big payload with both images, send them individually
-      // to avoid potential payload size limitations
+      // Try sending to webhook with multiple retries
+      let success = false;
+      let attempts = 0;
+      const maxAttempts = 3;
       
-      // Create a combined payload with both images for Make.com
-      console.log("Sending combined payload to Make.com webhook...");
-      const combinedResult = await sendImagesWebhook(address, satelliteImage, streetViewImage);
-      console.log("Combined webhook send result:", combinedResult ? "Success" : "Failed");
+      while (!success && attempts < maxAttempts) {
+        attempts++;
+        console.log(`Attempt ${attempts}/${maxAttempts} sending to Make.com webhook...`);
+        
+        success = await sendImagesWebhook(address, satelliteImage, streetViewImage);
+        
+        if (!success && attempts < maxAttempts) {
+          console.log(`Retrying in 1 second...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
       
-      if (combinedResult) {
+      console.log("Webhook send result:", success ? "Success" : "Failed");
+      
+      if (success) {
         toast({
           title: "Images Sent",
           description: "Property images were sent to the webhook",
@@ -52,7 +63,7 @@ export const useImageCapture = () => {
       } else {
         toast({
           title: "Warning",
-          description: "Failed to send property images to webhook",
+          description: "Failed to send property images to webhook after multiple attempts",
           variant: "destructive",
         });
         return false;

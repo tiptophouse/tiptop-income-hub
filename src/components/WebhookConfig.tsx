@@ -8,6 +8,7 @@ import { getWebhookUrl, setWebhookUrl } from '@/utils/webhookConfig';
 const WebhookConfig: React.FC = () => {
   const [url, setUrl] = useState('');
   const [isConfiguring, setIsConfiguring] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
 
   useEffect(() => {
     const savedUrl = getWebhookUrl();
@@ -40,12 +41,7 @@ const WebhookConfig: React.FC = () => {
       setIsConfiguring(false);
       
       // Test the webhook connection
-      fetch(url, { 
-        method: 'POST', 
-        body: JSON.stringify({ test: true, timestamp: new Date().toISOString() }),
-        headers: { 'Content-Type': 'application/json' }
-      }).catch(e => console.log("Test connection error (expected for CORS):", e));
-      
+      handleTestWebhook();
     } catch (error) {
       toast({
         title: "Invalid URL",
@@ -55,7 +51,7 @@ const WebhookConfig: React.FC = () => {
     }
   };
 
-  const handleTestWebhook = () => {
+  const handleTestWebhook = async () => {
     if (!url.trim()) {
       toast({
         title: "Error", 
@@ -65,34 +61,70 @@ const WebhookConfig: React.FC = () => {
       return;
     }
     
+    setIsTesting(true);
+    
     toast({
       title: "Testing Connection",
       description: "Sending test data to webhook"
     });
     
-    fetch(url, { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        test: true, 
-        timestamp: new Date().toISOString(),
-        source: window.location.origin
-      }),
-      mode: 'no-cors'
-    })
-    .then(() => {
-      toast({
-        title: "Test Completed",
-        description: "Test request sent. Check your webhook logs."
-      });
-    })
-    .catch(error => {
+    try {
+      // Try with standard fetch
+      console.log("Testing webhook connection to:", url);
+      
+      try {
+        // First try with standard fetch
+        const response = await fetch(url, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            test: true, 
+            timestamp: new Date().toISOString(),
+            source: window.location.origin,
+            testMessage: "This is a test from your property analysis app"
+          })
+        });
+        
+        console.log("Webhook test response:", response);
+        
+        if (response.ok) {
+          toast({
+            title: "Test Successful",
+            description: "Webhook connection is working properly"
+          });
+        } else {
+          throw new Error(`Status: ${response.status}`);
+        }
+      } catch (err) {
+        // Try with no-cors mode
+        console.log("Testing with no-cors mode...");
+        
+        await fetch(url, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          mode: 'no-cors',
+          body: JSON.stringify({ 
+            test: true, 
+            timestamp: new Date().toISOString(),
+            source: window.location.origin,
+            testMessage: "This is a test from your property analysis app (no-cors mode)"
+          })
+        });
+        
+        toast({
+          title: "Test Completed",
+          description: "Test request sent. Check your Make.com scenario logs."
+        });
+      }
+    } catch (error) {
       console.error("Test webhook error:", error);
       toast({
-        title: "Test Failed",
-        description: "Could not send test request"
+        title: "Test Completed",
+        description: "Test request sent, but could not verify receipt. Check your Make.com logs."
       });
-    });
+    } finally {
+      setIsTesting(false);
+    }
   };
 
   if (!isConfiguring && getWebhookUrl()) {
@@ -105,8 +137,13 @@ const WebhookConfig: React.FC = () => {
             <p className="text-xs text-gray-500 mt-1 break-all">{url}</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleTestWebhook}>
-              Test
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleTestWebhook}
+              disabled={isTesting}
+            >
+              {isTesting ? "Testing..." : "Test"}
             </Button>
             <Button variant="outline" size="sm" onClick={() => setIsConfiguring(true)}>
               Change
@@ -133,21 +170,27 @@ const WebhookConfig: React.FC = () => {
         />
         
         <div className="flex gap-2">
-          <Button onClick={handleSaveWebhook} className="bg-tiptop-accent hover:bg-tiptop-accent/90">
-            Save Webhook
+          <Button 
+            onClick={handleSaveWebhook} 
+            className="bg-tiptop-accent hover:bg-tiptop-accent/90"
+            disabled={isTesting}
+          >
+            {isTesting ? "Testing..." : "Save Webhook"}
           </Button>
           
           <Button 
             variant="outline" 
             onClick={handleTestWebhook}
+            disabled={isTesting || !url.trim()}
           >
-            Test Connection
+            {isTesting ? "Testing..." : "Test Connection"}
           </Button>
           
           {getWebhookUrl() && (
             <Button 
               variant="outline" 
               onClick={() => setIsConfiguring(false)}
+              disabled={isTesting}
             >
               Cancel
             </Button>

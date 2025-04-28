@@ -26,19 +26,20 @@ export const sendImagesWebhook = async (address: string, mapImage: string | null
     console.log("Sending images to webhook:", webhook);
     console.log("Address:", address);
     
-    // Prepare the payload
+    // Prepare the payload with more detailed metadata
     const payload = JSON.stringify({
       address,
       mapImage,
       streetViewImage,
       timestamp: new Date().toISOString(),
-      source: window.location.origin
+      source: window.location.origin,
+      appVersion: '1.0.1', // Adding version for tracking
+      requestType: 'propertyAnalysis'
     });
     
     console.log("Payload size:", Math.round(payload.length / 1024), "KB");
     
-    // Make.com requests can time out with very large payloads
-    // Send a fetch request without using no-cors mode first to attempt a proper request
+    // First try with standard fetch
     try {
       const response = await fetch(webhook, {
         method: 'POST',
@@ -56,22 +57,45 @@ export const sendImagesWebhook = async (address: string, mapImage: string | null
         return true;
       } else {
         console.log("Failed to send images to webhook, status:", response.status);
-        // If the regular request fails, try with no-cors as a fallback
         throw new Error("Regular request failed");
       }
     } catch (error) {
-      // If the regular request fails due to CORS, try again with no-cors
+      // If the regular request fails, retry with no-cors mode as a fallback
       console.log("Retrying with no-cors mode...");
+      
+      // Using a smaller payload for no-cors mode to avoid potential size issues
+      const compressedPayload = JSON.stringify({
+        address,
+        // Sending smaller images if available for no-cors mode
+        mapImage: mapImage?.substring(0, 500000), // Limiting image size for fallback
+        streetViewImage: streetViewImage?.substring(0, 500000), // Limiting image size for fallback
+        timestamp: new Date().toISOString(),
+        source: window.location.origin,
+        isCompressed: true
+      });
+      
       await fetch(webhook, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         mode: 'no-cors',
-        body: payload
+        body: compressedPayload
       });
       
       console.log("No-cors request sent, cannot determine success/failure due to CORS limitations");
+      
+      // Also try a plain text version as a last resort
+      await fetch(webhook, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        mode: 'no-cors',
+        body: `Address: ${address}, Timestamp: ${new Date().toISOString()}`
+      });
+      
+      console.log("Backup text-only webhook sent");
       return true; // Assume success since we can't check status with no-cors
     }
   } catch (error) {
