@@ -42,4 +42,40 @@ button, a {
 .pac-container {
   z-index: 9999 !important;
   position: absolute !important;
+  margin-top: 5px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
+
+/* Style the Google Places suggestion items */
+.pac-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: 'Work Sans', sans-serif;
+}
+
+.pac-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure all address input containers don't clip the dropdown */
+[class*="address-container"], 
+[class*="address-input"], 
+[class*="AddressSearch"], 
+[class*="autocomplete"] {
+  overflow: visible !important;
+}
+
+/* Ensure main container doesn't block popups */
+#root, 
+main, 
+section, 
+.container, 
+.content {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+

@@ -16,11 +16,22 @@ export const useLocationHandler = (
   const { captureAndSendImages } = useImageCapture();
 
   const handleAddressGeocoding = async (address: string) => {
+    if (!address.trim()) {
+      toast({
+        title: "Address Required",
+        description: "Please enter a valid address to analyze.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log("Geocoding address:", address);
     setIsLoadingData(true);
     
     geocodeAddress({
       address,
       onSuccess: async (location) => {
+        console.log("Successfully geocoded address to location:", location);
         setMapCenter(location);
         addRoofOverlay(location);
         setCurrentLocation(location);
@@ -53,9 +64,11 @@ export const useLocationHandler = (
   const handleGetCurrentLocation = () => {
     setIsLocating(true);
     setIsLoadingData(true);
+    console.log("Getting current location...");
     
     getCurrentLocation(
       (userLocation) => {
+        console.log("Current location detected:", userLocation);
         setMapCenter(userLocation);
         addRoofOverlay(userLocation);
         setCurrentLocation(userLocation);
@@ -64,6 +77,7 @@ export const useLocationHandler = (
         reverseGeocode({
           location: userLocation,
           onSuccess: async (address) => {
+            console.log("Reverse geocoded to address:", address);
             toast({
               title: "Location Found",
               description: `Your current location: ${address}`,

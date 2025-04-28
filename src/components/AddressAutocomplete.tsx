@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Search, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { toast } from '@/components/ui/use-toast';
 
 interface AddressAutocompleteProps {
   onAddressSelect: (address: string) => void;
@@ -22,10 +23,13 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   const [autocompleteInitialized, setAutocompleteInitialized] = useState(false);
 
   useEffect(() => {
+    // Exit early if no input element, no google maps API, or autocomplete already initialized
     if (!inputRef.current || !window.google?.maps?.places || autocompleteInitialized) return;
-
-    // Add a small delay for mobile devices
-    const delay = isMobile ? 300 : 0;
+    
+    console.log("Initializing Google Places Autocomplete");
+    
+    // Add a delay for mobile devices to ensure the DOM is fully rendered
+    const delay = isMobile ? 500 : 100;
     
     const timer = setTimeout(() => {
       try {
@@ -34,27 +38,38 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           componentRestrictions: { country: 'us' }
         };
 
+        // Create a new autocomplete instance
         autocompleteRef.current = new window.google.maps.places.Autocomplete(
           inputRef.current,
           options
         );
-
-        autocompleteRef.current.addListener('place_changed', () => {
-          const place = autocompleteRef.current?.getPlace();
+        
+        // Add a listener for when a place is selected
+        const listener = autocompleteRef.current.addListener('place_changed', () => {
+          const place = autocompleteRef.current.getPlace();
           if (place?.formatted_address) {
+            console.log("Place selected:", place.formatted_address);
             onAddressSelect(place.formatted_address);
           }
         });
-
-        setAutocompleteInitialized(true);
         
+        // Mark as initialized to prevent duplicate initialization
+        setAutocompleteInitialized(true);
+        console.log("Google Places Autocomplete initialized successfully");
+        
+        // Return cleanup function
         return () => {
-          if (window.google?.maps?.event) {
-            window.google.maps.event.clearInstanceListeners(autocompleteRef.current!);
+          if (listener && window.google?.maps?.event) {
+            window.google.maps.event.removeListener(listener);
           }
         };
       } catch (error) {
         console.error("Error initializing Google Places Autocomplete:", error);
+        toast({
+          title: "Address Search Error",
+          description: "Failed to initialize address search. Please try entering your address manually.",
+          variant: "destructive"
+        });
       }
     }, delay);
     
@@ -69,6 +84,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
+          
           if (window.google?.maps) {
             const geocoder = new window.google.maps.Geocoder();
             geocoder.geocode({ location: latlng }, (results, status) => {
@@ -76,14 +92,37 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
                 const detectedAddress = results[0].formatted_address;
                 onChange(detectedAddress);
                 onAddressSelect(detectedAddress);
+              } else {
+                toast({
+                  title: "Location Error",
+                  description: "Unable to determine your address.",
+                  variant: "destructive"
+                });
               }
+            });
+          } else {
+            toast({
+              title: "Maps API Not Loaded",
+              description: "Please try entering your address manually.",
+              variant: "destructive"
             });
           }
         },
         (error) => {
           console.error('Geolocation error:', error);
+          toast({
+            title: "Location Error",
+            description: "Unable to get your location. Please check your browser permissions.",
+            variant: "destructive"
+          });
         }
       );
+    } else {
+      toast({
+        title: "Geolocation Not Supported",
+        description: "Your browser does not support geolocation.",
+        variant: "destructive"
+      });
     }
   };
 

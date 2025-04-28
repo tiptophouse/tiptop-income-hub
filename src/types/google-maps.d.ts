@@ -1,4 +1,3 @@
-
 /// <reference types="google.maps" />
 
 declare global {
@@ -33,6 +32,7 @@ declare global {
         };
       }
     };
+    initGoogleMapsCallback?: () => void;
   }
 }
 
