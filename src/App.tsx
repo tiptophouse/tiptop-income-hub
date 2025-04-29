@@ -58,6 +58,7 @@ function App() {
               <Route path="/dashboard/add-asset" element={<AddAssetPage />} />
               <Route path="/dashboard/account" element={<AccountPage />} />
               <Route path="/dashboard/admin" element={<AdminPage />} />
+              <Route path="/auth/callback" element={<Dashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
