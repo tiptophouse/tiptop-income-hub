@@ -79,6 +79,7 @@ export const generatePropertyModels = async (address: string) => {
       
       if (mapElement) {
         console.log("Found map element, capturing screenshot");
+        // Pass the element directly, the function now handles both types
         const mapImage = await captureMapScreenshot(mapElement as HTMLDivElement);
         if (mapImage) {
           // Use map image as fallback
