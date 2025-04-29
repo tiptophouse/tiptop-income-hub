@@ -27,40 +27,80 @@ const AddressSearchForm = ({
   const isMobile = useIsMobile();
   const [autocompleteInitialized, setAutocompleteInitialized] = useState(false);
 
-  useEffect(() => {
+  // Function to initialize Google Places Autocomplete
+  const initializeAutocomplete = () => {
     if (!inputRef.current || !window.google?.maps?.places || autocompleteInitialized) return;
     
-    // Add a small delay for mobile devices to ensure the input is fully rendered
-    const delay = isMobile ? 300 : 0;
-    
-    const timer = setTimeout(() => {
-      try {
-        autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-          fields: ['formatted_address', 'geometry']
-        });
-        
-        const listener = autocompleteRef.current.addListener('place_changed', () => {
-          const place = autocompleteRef.current?.getPlace();
-          if (place && place.formatted_address) {
-            setAddress(place.formatted_address);
-            setShowAnalysis(true);
-          }
-        });
-        
-        setAutocompleteInitialized(true);
-        
-        return () => {
-          if (listener && window.google?.maps?.event) {
-            window.google.maps.event.removeListener(listener);
-          }
-        };
-      } catch (error) {
-        console.error("Error initializing Google Places Autocomplete:", error);
+    try {
+      console.log('Initializing Google Places Autocomplete in AddressSearchForm...');
+      
+      // Clear any previous instances
+      if (autocompleteRef.current && window.google?.maps?.event) {
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
-    }, delay);
+      
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
+        fields: ['formatted_address', 'geometry'],
+        types: ['address']
+      });
+      
+      const listener = autocompleteRef.current.addListener('place_changed', () => {
+        const place = autocompleteRef.current?.getPlace();
+        console.log('Place selected in AddressSearchForm:', place);
+        if (place && place.formatted_address) {
+          setAddress(place.formatted_address);
+          setShowAnalysis(true);
+          document.dispatchEvent(new CustomEvent('addressFound', { 
+            detail: { address: place.formatted_address } 
+          }));
+        }
+      });
+      
+      setAutocompleteInitialized(true);
+      console.log('Google Places Autocomplete initialized successfully in AddressSearchForm');
+      
+      return () => {
+        if (listener && window.google?.maps?.event) {
+          window.google.maps.event.removeListener(listener);
+        }
+      };
+    } catch (error) {
+      console.error("Error initializing Google Places Autocomplete in AddressSearchForm:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Add a small delay to ensure Google Maps API is fully loaded
+    const timer = setTimeout(() => {
+      initializeAutocomplete();
+    }, isMobile ? 1000 : 500);
     
-    return () => clearTimeout(timer);
-  }, [setAddress, setShowAnalysis, isMobile, autocompleteInitialized]);
+    return () => {
+      clearTimeout(timer);
+      if (autocompleteRef.current && window.google?.maps?.event) {
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
+    };
+  }, [isMobile]); // Re-initialize when mobile status changes
+
+  // Re-initialize when the component is visible
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !autocompleteInitialized) {
+        initializeAutocomplete();
+      }
+    }, { threshold: 0.1 });
+    
+    if (inputRef.current) {
+      observer.observe(inputRef.current);
+    }
+    
+    return () => {
+      if (inputRef.current) {
+        observer.unobserve(inputRef.current);
+      }
+    };
+  }, [autocompleteInitialized]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,7 +168,8 @@ const AddressSearchForm = ({
             variant: "destructive"
           });
           setIsLocating(false);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
       toast({
