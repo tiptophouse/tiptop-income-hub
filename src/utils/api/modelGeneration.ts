@@ -18,6 +18,9 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
       throw new Error("Invalid image data for model generation");
     }
     
+    // Log the image data length to help with debugging
+    console.log(`Image data length: ${base64Image.length} characters`);
+    
     // Create enhanced prompt with property features
     let enhancedPrompt = `Create a photorealistic 3D model of this residential property with:`;
     
@@ -51,8 +54,9 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     
     const MESHY_API_TOKEN = getMeshyApiToken();
     console.log("Using Meshy API with enhanced prompt:", enhancedPrompt);
+    console.log("Meshy API Token available:", !!MESHY_API_TOKEN);
     
-    // Make API call to Meshy.ai
+    // Make API call to Meshy.ai updated endpoint
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
       method: 'POST',
       headers: {
@@ -61,13 +65,10 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
       },
       body: JSON.stringify({
         image: base64Image,
-        mode: "geometry",
-        background_removal: true,
-        generate_material: true,
-        prompt: enhancedPrompt, 
-        reference_model_id: "house",
-        preserve_topology: true,
-        mesh_quality: "high",
+        enable_pbr: true,
+        should_remesh: true, 
+        should_texture: true,
+        prompt: enhancedPrompt,
         callback_url: window.location.origin + "/api/meshy-webhook" // Optional webhook for completion notification
       })
     });
@@ -82,10 +83,10 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     console.log("Meshy API response:", data);
     
     // Store the job ID in localStorage for status checking
-    localStorage.setItem('meshy_latest_job_id', data.id);
+    localStorage.setItem('meshy_latest_job_id', data.task_id);
     localStorage.setItem('meshy_job_created_at', new Date().toString());
     
-    return data.id;
+    return data.task_id;
   } catch (error) {
     console.error("Error in model generation:", error);
     // Generate a demo model ID for fallback
