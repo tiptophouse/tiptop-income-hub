@@ -127,35 +127,43 @@ export const getSatelliteImageAsBase64 = async (address: string): Promise<string
  * Captures Street View and satellite images for a given address
  * 
  * @param address Address to capture images for
- * @returns Object with street view and satellite images
+ * @returns Object with street view, satellite, and aerial images
  */
 export const captureStreetViewForModel = async (address: string): Promise<{ 
   streetView: string | null;
   satellite: string | null;
+  aerialView: string | null;
 }> => {
   // Get both Street View and satellite images in parallel
   const [streetViewImage, satelliteImage] = await Promise.all([
-    getStreetViewImageAsBase64(address),
-    getSatelliteImageAsBase64(address)
+    getStreetViewImageAsBase64(address).catch(err => {
+      console.error("Error capturing Street View:", err);
+      return null;
+    }),
+    getSatelliteImageAsBase64(address).catch(err => {
+      console.error("Error capturing Satellite View:", err);
+      return null;
+    })
   ]);
   
   return {
     streetView: streetViewImage,
-    satellite: satelliteImage
+    satellite: satelliteImage,
+    aerialView: null // We don't have aerial view yet, but adding for type compatibility
   };
 };
 
 /**
  * Captures a screenshot of a map container element
  */
-export const captureMapScreenshot = async (mapContainer: HTMLElement): Promise<string | null> => {
+export const captureMapScreenshot = async (mapRef: React.RefObject<HTMLDivElement>): Promise<string | null> => {
   try {
-    if (!mapContainer) {
+    if (!mapRef.current) {
       console.error("Map container not found");
       return null;
     }
     
-    const canvas = await html2canvas(mapContainer);
+    const canvas = await html2canvas(mapRef.current);
     const base64 = canvas.toDataURL('image/png');
     return base64;
   } catch (error) {

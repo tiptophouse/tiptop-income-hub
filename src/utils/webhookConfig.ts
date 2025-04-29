@@ -2,6 +2,16 @@
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+// Store the webhook URL in localStorage
+export const setWebhookUrl = (url: string): void => {
+  localStorage.setItem('webhook_url', url);
+};
+
+// Get the webhook URL from localStorage
+export const getWebhookUrl = (): string => {
+  return localStorage.getItem('webhook_url') || '';
+};
+
 /**
  * Sends captured property images to the processing edge function
  * 

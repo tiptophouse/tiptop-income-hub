@@ -20,6 +20,9 @@ export const useImageCapture = () => {
         })
       ]);
       
+      // Initialize aerialView as null - we'll handle this separately if needed
+      const aerialView = null;
+      
       console.log("Images captured:", {
         streetView: streetViewImage ? "✓" : "✗",
         satellite: satelliteImage ? "✓" : "✗"

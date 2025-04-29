@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { captureStreetViewForModel, captureMapScreenshot } from './streetViewService';
 import { generateModelFromImage, analyzePropertyImage } from './meshyApi';
@@ -80,7 +79,7 @@ export const generatePropertyModels = async (address: string) => {
       
       if (mapElement) {
         console.log("Found map element, capturing screenshot");
-        const mapImage = await captureMapScreenshot({ current: mapElement as HTMLElement });
+        const mapImage = await captureMapScreenshot(mapElement as HTMLDivElement);
         if (mapImage) {
           // Use map image as fallback
           streetViewImage = mapImage;
