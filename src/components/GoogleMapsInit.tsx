@@ -1,5 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
+import { getGoogleMapsApiKey } from '../utils/api/meshyConfig';
 
 interface GoogleMapsInitProps {
   apiKey?: string;
@@ -10,16 +10,42 @@ interface GoogleMapsInitProps {
 let isGoogleMapsLoaded = false;
 
 const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({ 
-  apiKey = "AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE",
+  apiKey,
   children 
 }) => {
   const [isLoaded, setIsLoaded] = useState(isGoogleMapsLoaded);
   const [hasError, setHasError] = useState(false);
+  const [apiKeyState, setApiKeyState] = useState<string | null>(apiKey || null);
 
   useEffect(() => {
-    // Skip if already loaded globally or an error occurred
-    if (isGoogleMapsLoaded || window.google?.maps || hasError) {
-      setIsLoaded(true);
+    // If API key is provided directly, use it
+    if (apiKey) {
+      setApiKeyState(apiKey);
+      return;
+    }
+    
+    // Otherwise fetch it from Supabase
+    const fetchApiKey = async () => {
+      try {
+        const key = await getGoogleMapsApiKey();
+        setApiKeyState(key);
+      } catch (error) {
+        console.error("Failed to fetch Google Maps API key:", error);
+        // Fall back to the default key as a last resort
+        setApiKeyState("AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE");
+        setHasError(true);
+      }
+    };
+    
+    fetchApiKey();
+  }, [apiKey]);
+
+  useEffect(() => {
+    // Skip if already loaded globally or an error occurred or no API key
+    if (isGoogleMapsLoaded || window.google?.maps || !apiKeyState) {
+      if (window.google?.maps) {
+        setIsLoaded(true);
+      }
       return;
     }
     
@@ -41,7 +67,7 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
     // Create script element
     const script = document.createElement('script');
     script.id = 'google-maps-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKeyState}&libraries=places`;
     script.async = true;
     script.defer = true;
     
@@ -62,7 +88,7 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
       // Don't remove the script on unmount, as other components might be using it
       // This prevents reloading the API when components using it unmount and remount
     };
-  }, [apiKey, hasError]);
+  }, [apiKeyState]);
 
   if (hasError) {
     return (
@@ -72,7 +98,7 @@ const GoogleMapsInit: React.FC<GoogleMapsInitProps> = ({
     );
   }
 
-  if (!isLoaded) {
+  if (!isLoaded || !apiKeyState) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-tiptop-accent"></div>

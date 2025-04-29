@@ -4,6 +4,9 @@ project_id = "eihzjfanyqdzeiitslyd"
 [functions.property-insights]
 verify_jwt = false
 
+[functions.get-api-tokens]
+verify_jwt = true
+
 [auth.external.google]
 enabled = true
 client_id = "${GOOGLE_CLIENT_ID}"
