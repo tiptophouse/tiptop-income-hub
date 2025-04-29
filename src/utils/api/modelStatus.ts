@@ -50,11 +50,11 @@ const checkPendingJobs = async () => {
     const status = await checkModelStatus(latestJobId);
     
     // Store the latest status
-    localStorage.setItem('meshy_last_status_' + latestJobId, status.status);
+    localStorage.setItem('meshy_last_status_' + latestJobId, status.state);
     
-    if (status.status === 'SUCCESS') {
+    if (status.state === 'completed') {
       // Model is complete, trigger notification
-      notifyModelComplete(latestJobId, status.result?.model_url || status.result?.url);
+      notifyModelComplete(latestJobId, status.output?.model_url);
     }
   } catch (error) {
     console.error("Error in periodic status check:", error);
@@ -122,8 +122,9 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
     // Check if this is a demo job ID (fallback)
     if (jobId.startsWith('demo-')) {
       return {
-        status: 'SUCCESS',
-        result: {
+        state: 'completed',
+        status: 'completed',
+        output: {
           model_url: SAMPLE_MODEL_URL
         }
       };
@@ -131,7 +132,7 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
     
     const MESHY_API_TOKEN = getMeshyApiToken();
     
-    const response = await fetch(`${MESHY_API_URL}/image-to-3d/${jobId}`, {
+    const response = await fetch(`${MESHY_API_URL}/tasks/${jobId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${MESHY_API_TOKEN}`
@@ -146,14 +147,15 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
     console.log("Job status response:", data);
     
     // Store the most recent status
-    localStorage.setItem('meshy_last_status_' + jobId, data.status);
+    localStorage.setItem('meshy_last_status_' + jobId, data.state);
     
     return data;
   } catch (error) {
     console.error("Error checking model status:", error);
     return {
-      status: 'SUCCESS',
-      result: {
+      state: 'completed',
+      status: 'completed',
+      output: {
         model_url: SAMPLE_MODEL_URL
       }
     };
@@ -169,8 +171,8 @@ export const getModelDownloadUrl = async (jobId: string): Promise<string> => {
     
     const status = await checkModelStatus(jobId);
     
-    if (status.status === 'SUCCESS' && (status.result?.model_url || status.result?.url)) {
-      return status.result?.model_url || status.result?.url;
+    if (status.state === 'completed' && status.output?.model_url) {
+      return status.output.model_url;
     }
     
     throw new Error('Model not ready yet or no model URL available');

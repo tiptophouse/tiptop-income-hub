@@ -26,9 +26,8 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.7, delay: 0.2 }}
     onSubmit={onSubmit}
-    style={{ overflow: 'visible' }}
   >
-    <div className="relative" style={{ overflow: 'visible' }}>
+    <div className="relative">
       <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
         <Search className="h-5 w-5 text-muted-foreground" />
       </div>
@@ -45,8 +44,6 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
           }
         }}
         aria-label="Property address"
-        autoComplete="street-address"
-        spellCheck="false"
       />
       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
         <Button 
