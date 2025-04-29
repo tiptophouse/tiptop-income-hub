@@ -37,6 +37,29 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     },
   });
 
+  // Add a helper function to add touch instructions for mobile users
+  React.useEffect(() => {
+    if (mapInstance && mapContainerRef.current) {
+      // Add a small instruction tooltip for mobile users
+      const instructionEl = document.createElement('div');
+      instructionEl.className = 'absolute bottom-14 left-1/2 transform -translate-x-1/2 bg-black/70 text-white text-xs px-3 py-1 rounded-full pointer-events-none z-10 opacity-80 transition-opacity duration-300';
+      instructionEl.textContent = 'Use two fingers to move map';
+      mapContainerRef.current.appendChild(instructionEl);
+
+      // Hide instruction after 5 seconds
+      setTimeout(() => {
+        instructionEl.style.opacity = '0';
+        
+        // Remove element after fade out
+        setTimeout(() => {
+          if (mapContainerRef.current?.contains(instructionEl)) {
+            mapContainerRef.current.removeChild(instructionEl);
+          }
+        }, 300);
+      }, 5000);
+    }
+  }, [mapInstance]);
+
   const toggleMapType = () => {
     if (!mapInstance) return;
     const newView = view === 'satellite' ? 'map' : 'satellite';

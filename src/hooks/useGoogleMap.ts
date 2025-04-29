@@ -1,40 +1,43 @@
-
 import { useEffect, useState, useRef, RefObject } from 'react';
 
 interface UseGoogleMapProps {
-  mapRef: RefObject<HTMLDivElement>;
+  mapRef: React.RefObject<HTMLDivElement>;
+  gestureHandling?: 'cooperative' | 'greedy' | 'auto' | 'none';
 }
 
-export function useGoogleMap({ mapRef }: UseGoogleMapProps) {
+export function useGoogleMap({ 
+  mapRef,
+  gestureHandling = 'cooperative'  // Default to cooperative to require two fingers on mobile
+}: UseGoogleMapProps) {
   const [map, setMap] = useState<any | null>(null);
   const [marker, setMarker] = useState<any | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [propertyDetails, setPropertyDetails] = useState<any>(null);
   const roofOverlayRef = useRef<any | null>(null);
   const streetViewRef = useRef<any | null>(null);
+  const [mapInitialized, setMapInitialized] = useState(false);
+
+  const defaultLocation = { lat: 40.7128, lng: -74.006 }; // Default NYC
 
   useEffect(() => {
-    // Initialize the map
-    if (mapRef.current && !map && window.google && window.google.maps) {
-      const mapInstance = new window.google.maps.Map(mapRef.current, {
-        center: { lat: 40.7128, lng: -74.006 }, // Default NYC
-        zoom: 15,
-        mapTypeControl: true,
-        streetViewControl: true,
-        fullscreenControl: true,
-      });
+    if (!window.google?.maps || !mapRef.current || mapInitialized) return;
 
-      const markerInstance = new window.google.maps.Marker({
-        map: mapInstance,
-        position: { lat: 40.7128, lng: -74.006 },
-        animation: window.google.maps.Animation.DROP,
-      });
+    const mapOptions = {
+      center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
+      zoom: 12,
+      mapTypeId: "roadmap",
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControl: false,
+      gestureHandling: gestureHandling, // Use the passed gesture handling option
+    };
 
-      setMap(mapInstance);
-      setMarker(markerInstance);
-      setIsLoaded(true);
-    }
-  }, [mapRef, map]);
+    const newMap = new window.google.maps.Map(mapRef.current, mapOptions);
+    setMap(newMap);
+    setMapInitialized(true);
+    setIsLoaded(true);
+  }, [mapInitialized, gestureHandling]); // Add gestureHandling to dependencies
 
   const setMapCenter = (location: { lat: number; lng: number }) => {
     if (map && marker) {

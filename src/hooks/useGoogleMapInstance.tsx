@@ -1,3 +1,4 @@
+
 import { useEffect, useState, RefObject, useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -42,6 +43,7 @@ export function useGoogleMapInstance({
             streetViewControl: false,
             fullscreenControl: false,
             zoomControl: false,
+            gestureHandling: 'cooperative', // Require two fingers for scrolling/panning on mobile
           });
           
           const newMarker = new window.google.maps.Marker({

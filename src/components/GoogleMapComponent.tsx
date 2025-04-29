@@ -23,7 +23,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({ address }) => {
     createStreetView,
     propertyDetails
   } = useGoogleMap({
-    mapRef
+    mapRef,
+    gestureHandling: 'cooperative', // Add cooperative gesture handling to require two-finger panning
   });
 
   const { weatherData, isLoadingData, propertyAnalysis } = usePropertyData();
