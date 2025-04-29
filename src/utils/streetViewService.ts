@@ -1,173 +1,177 @@
 
+import { getGoogleMapsApiKey } from './api/meshyConfig';
 import html2canvas from 'html2canvas';
 
 /**
- * Gets Street View image for an address as base64
+ * Gets a static Street View image for the specified address as base64
+ * 
+ * @param address The address to get the Street View for
+ * @returns Base64 encoded image or null if not available
  */
 export const getStreetViewImageAsBase64 = async (address: string): Promise<string | null> => {
   try {
-    console.log("Fetching Street View image from:", `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${encodeURIComponent(address)}&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`);
+    if (!window.google?.maps) {
+      console.error("Google Maps API not loaded");
+      return null;
+    }
+
+    // Get API key
+    const apiKey = await getGoogleMapsApiKey();
     
-    // Create an image element to load the Street View image
-    const img = new Image();
-    const imagePromise = new Promise<string>((resolve, reject) => {
-      img.crossOrigin = "Anonymous"; // Allow cross-origin image loading
-      img.onload = () => {
-        // Create a canvas and draw the image on it
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          // Convert the canvas to base64 data URL
-          resolve(canvas.toDataURL("image/jpeg", 0.9));
-        } else {
-          reject(new Error("Failed to get canvas context"));
+    // First geocode the address
+    const geocoder = new window.google.maps.Geocoder();
+    
+    return new Promise((resolve, reject) => {
+      geocoder.geocode({ address }, async (results, status) => {
+        if (status !== "OK" || !results || !results[0]) {
+          console.error("Geocoding failed:", status);
+          resolve(null);
+          return;
         }
-      };
-      img.onerror = () => reject(new Error("Failed to load Street View image"));
-      
-      // Set the image source after defining the onload handler
-      img.src = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${encodeURIComponent(address)}&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`;
+
+        const location = results[0].geometry.location;
+        const lat = location.lat();
+        const lng = location.lng();
+
+        // Check if Street View is available
+        const streetViewService = new window.google.maps.StreetViewService();
+        
+        try {
+          const streetViewData = await new Promise((resolveStreetView, rejectStreetView) => {
+            streetViewService.getPanorama({
+              location: { lat, lng },
+              radius: 50,
+              source: window.google.maps.StreetViewSource.OUTDOOR
+            }, (data, status) => {
+              if (status === "OK" && data) {
+                resolveStreetView(data);
+              } else {
+                rejectStreetView(new Error("Street View not available"));
+              }
+            });
+          });
+
+          // Street View is available, get the image directly via Static API
+          const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${lat},${lng}&key=${apiKey}`;
+          
+          // Fetch the image and convert to base64
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const base64 = await blobToBase64(blob);
+          resolve(base64);
+        } catch (err) {
+          console.log("Street View not available for this location");
+          resolve(null);
+        }
+      });
     });
-    
-    // Set a timeout to avoid hanging if the image load takes too long
-    const timeoutPromise = new Promise<string>((_, reject) => {
-      setTimeout(() => reject(new Error("Street View image load timeout")), 10000);
-    });
-    
-    const imageData = await Promise.race([imagePromise, timeoutPromise]);
-    return imageData;
   } catch (error) {
-    console.error("Error fetching Street View image:", error);
+    console.error("Error getting Street View image:", error);
     return null;
   }
 };
 
 /**
- * Gets Satellite image for an address as base64
- * Using zoom level 18 for optimal aerial view
+ * Gets a static satellite image for the specified address as base64
+ * 
+ * @param address The address to get the satellite view for
+ * @returns Base64 encoded image or null if not available
  */
 export const getSatelliteImageAsBase64 = async (address: string): Promise<string | null> => {
   try {
-    console.log("Fetching Satellite image for:", address);
+    if (!window.google?.maps) {
+      console.error("Google Maps API not loaded");
+      return null;
+    }
+
+    // Get API key
+    const apiKey = await getGoogleMapsApiKey();
     
-    // Create an image element to load the Satellite image
-    const img = new Image();
-    const imagePromise = new Promise<string>((resolve, reject) => {
-      img.crossOrigin = "Anonymous"; // Allow cross-origin image loading
-      img.onload = () => {
-        // Create a canvas and draw the image on it
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          // Convert the canvas to base64 data URL
-          resolve(canvas.toDataURL("image/jpeg", 0.9));
-        } else {
-          reject(new Error("Failed to get canvas context"));
+    // First geocode the address
+    const geocoder = new window.google.maps.Geocoder();
+    
+    return new Promise((resolve, reject) => {
+      geocoder.geocode({ address }, async (results, status) => {
+        if (status !== "OK" || !results || !results[0]) {
+          console.error("Geocoding failed:", status);
+          resolve(null);
+          return;
         }
-      };
-      img.onerror = () => reject(new Error("Failed to load Satellite image"));
-      
-      // Static map with satellite imagery - using zoom=18 for optimal aerial detail
-      img.src = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(address)}&zoom=18&size=600x400&maptype=satellite&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`;
+
+        const location = results[0].geometry.location;
+        const lat = location.lat();
+        const lng = location.lng();
+
+        // Get satellite image via Static API
+        const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=18&size=600x400&maptype=satellite&key=${apiKey}`;
+        
+        // Fetch the image and convert to base64
+        try {
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const base64 = await blobToBase64(blob);
+          resolve(base64);
+        } catch (err) {
+          console.error("Error fetching satellite image:", err);
+          resolve(null);
+        }
+      });
     });
-    
-    // Set a timeout to avoid hanging if the image load takes too long
-    const timeoutPromise = new Promise<string>((_, reject) => {
-      setTimeout(() => reject(new Error("Satellite image load timeout")), 10000);
-    });
-    
-    const imageData = await Promise.race([imagePromise, timeoutPromise]);
-    return imageData;
   } catch (error) {
-    console.error("Error fetching Satellite image:", error);
+    console.error("Error getting satellite image:", error);
     return null;
   }
 };
 
 /**
- * Captures property view images for 3D model generation
- * Captures both street view and satellite images (zoom level 12 and 18)
+ * Captures Street View and satellite images for a given address
+ * 
+ * @param address Address to capture images for
+ * @returns Object with street view and satellite images
  */
-export const captureStreetViewForModel = async (address: string): Promise<{streetView: string | null, satellite: string | null, aerialView: string | null}> => {
-  try {
-    console.log("Capturing property views for:", address);
-    
-    // Try to get both Street View and Satellite images in parallel
-    const [streetViewImage, satelliteImage] = await Promise.allSettled([
-      getStreetViewImageAsBase64(address),
-      getSatelliteImageAsBase64(address)
-    ]);
-    
-    // Get aerial view with zoom level 12 for wider context
-    const aerialViewPromise = new Promise<string | null>(async (resolve) => {
-      try {
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-        
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.drawImage(img, 0, 0);
-            resolve(canvas.toDataURL("image/jpeg", 0.9));
-          } else {
-            resolve(null);
-          }
-        };
-        
-        img.onerror = () => resolve(null);
-        img.src = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(address)}&zoom=12&size=600x400&maptype=satellite&key=AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE`;
-        
-        setTimeout(() => resolve(null), 10000); // Timeout after 10 seconds
-      } catch (error) {
-        console.error("Error capturing aerial view:", error);
-        resolve(null);
-      }
-    });
-    
-    const aerialView = await aerialViewPromise;
-    
-    // Return all captured images
-    return {
-      streetView: streetViewImage.status === 'fulfilled' ? streetViewImage.value : null,
-      satellite: satelliteImage.status === 'fulfilled' ? satelliteImage.value : null,
-      aerialView: aerialView
-    };
-  } catch (error) {
-    console.error("Error capturing views for model:", error);
-    return {
-      streetView: null,
-      satellite: null,
-      aerialView: null
-    };
-  }
+export const captureStreetViewForModel = async (address: string): Promise<{ 
+  streetView: string | null;
+  satellite: string | null;
+}> => {
+  // Get both Street View and satellite images in parallel
+  const [streetViewImage, satelliteImage] = await Promise.all([
+    getStreetViewImageAsBase64(address),
+    getSatelliteImageAsBase64(address)
+  ]);
+  
+  return {
+    streetView: streetViewImage,
+    satellite: satelliteImage
+  };
 };
 
 /**
- * Captures a map screenshot from a map container element
+ * Captures a screenshot of a map container element
  */
-export const captureMapScreenshot = async (mapContainerRef: React.RefObject<HTMLElement>): Promise<string | null> => {
+export const captureMapScreenshot = async (mapContainer: HTMLElement): Promise<string | null> => {
   try {
-    console.log("Capturing map screenshot...");
-    if (!mapContainerRef.current) {
-      throw new Error("Map container not found");
+    if (!mapContainer) {
+      console.error("Map container not found");
+      return null;
     }
     
-    const canvas = await html2canvas(mapContainerRef.current);
-    const imageData = canvas.toDataURL('image/jpeg', 0.9);
-    console.log("Map screenshot captured successfully");
-    return imageData;
+    const canvas = await html2canvas(mapContainer);
+    const base64 = canvas.toDataURL('image/png');
+    return base64;
   } catch (error) {
     console.error("Error capturing map screenshot:", error);
     return null;
   }
 };
 
+/**
+ * Converts a Blob to base64
+ */
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
