@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AssetCard from './AssetCard';
-import { Sun, Wifi, Car, TreeDeciduous } from 'lucide-react';
+import { Sun, Wifi, Car, TreeDeciduous, Box, Antenna } from 'lucide-react';
 
 const accentText = "text-[#8B5CF6] font-extrabold tracking-tight";
 const glassStyle = "backdrop-blur-xl bg-white/70 dark:bg-[#18122B]/70 border border-white/40 shadow-[0_20px_60px_0_rgba(135,87,236,0.25),0_3px_12px_rgba(126,105,171,0.12)]";
@@ -18,26 +18,28 @@ const assetIcons = {
   rooftopSolar: <Sun className="h-6 w-6 text-amber-500" />,
   internetBandwidth: <Wifi className="h-6 w-6 text-blue-500" />,
   parkingSpace: <Car className="h-6 w-6 text-purple-500" />,
-  gardenSpace: <TreeDeciduous className="h-6 w-6 text-green-500" />
+  gardenSpace: <TreeDeciduous className="h-6 w-6 text-green-500" />,
+  storage: <Box className="h-6 w-6 text-orange-500" />,
+  antenna5g: <Antenna className="h-6 w-6 text-indigo-500" />
 };
 
 // Helper function to determine if an opportunity is viable
-const isOpportunityViable = (opportunity: any) => {
-  if (!opportunity) return false;
-
-  // Check if confidence is too low or if key metrics are zero/null
-  const hasConfidence = opportunity.confidence > 0.2; // 20% minimum confidence
+const isOpportunityViable = (insights, type) => {
+  if (!insights) return false;
   
-  // Check specific metrics for each type
-  switch (true) {
-    case 'usable_rooftop_sq_ft' in opportunity:
-      return hasConfidence && opportunity.usable_rooftop_sq_ft > 0 && opportunity.est_monthly_savings_usd > 0;
-    case 'shareable_capacity_mbps' in opportunity:
-      return hasConfidence && opportunity.shareable_capacity_mbps > 0 && opportunity.est_monthly_revenue_usd > 0;
-    case 'spaces_total' in opportunity:
-      return hasConfidence && opportunity.spaces_available_for_rent > 0 && opportunity.est_monthly_rent_usd_total > 0;
-    case 'garden_sq_ft' in opportunity:
-      return hasConfidence && opportunity.garden_sq_ft > 0 && opportunity.est_monthly_revenue_usd > 0;
+  switch (type) {
+    case 'rooftopSolar':
+      return insights.rooftop_area_m2 > 0 || insights.estimated_solar_capacity_kw > 0;
+    case 'internetBandwidth':
+      return insights.unused_bandwidth_mbps > 0;
+    case 'parkingSpace':
+      return insights.parking_spaces > 0;
+    case 'gardenSpace':
+      return insights.garden_area_m2 > 0;
+    case 'storage':
+      return insights.storage_volume_m3 > 0;
+    case 'antenna5g':
+      return insights.rooftop_area_5g_m2 > 0;
     default:
       return false;
   }
@@ -46,10 +48,12 @@ const isOpportunityViable = (opportunity: any) => {
 const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setActiveTab }) => {
   // Filter viable opportunities
   const viableOpportunities = {
-    rooftopSolar: isOpportunityViable(insights?.monetization_opportunities?.rooftop_solar),
-    internetBandwidth: isOpportunityViable(insights?.monetization_opportunities?.internet_bandwidth),
-    parkingSpace: isOpportunityViable(insights?.monetization_opportunities?.parking_space),
-    gardenSpace: isOpportunityViable(insights?.monetization_opportunities?.garden_space),
+    rooftopSolar: isOpportunityViable(insights, 'rooftopSolar'),
+    internetBandwidth: isOpportunityViable(insights, 'internetBandwidth'),
+    parkingSpace: isOpportunityViable(insights, 'parkingSpace'),
+    gardenSpace: isOpportunityViable(insights, 'gardenSpace'),
+    storage: isOpportunityViable(insights, 'storage'),
+    antenna5g: isOpportunityViable(insights, 'antenna5g'),
   };
 
   // Get the data for viable opportunities
@@ -57,15 +61,22 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
     const cards = [];
 
     if (viableOpportunities.rooftopSolar) {
-      const solar = insights.monetization_opportunities.rooftop_solar;
+      const solarValue = insights.estimated_solar_capacity_kw 
+        ? Math.round(insights.estimated_solar_capacity_kw * 0.4) 
+        : Math.round(insights.rooftop_area_m2 / 10);
+      
+      const solarDescription = insights.estimated_solar_capacity_kw
+        ? `${insights.estimated_solar_capacity_kw}kW potential`
+        : "Solar potential";
+      
       cards.push(
         <AssetCard
           key="solar"
           color="border-l-amber-600"
           title="Rooftop Solar"
-          main={`${solar.usable_rooftop_sq_ft} sq ft`}
-          details={solar.notes}
-          value={`$${solar.est_monthly_savings_usd.toFixed(2)}/mo`}
+          main={`${Math.round(insights.rooftop_area_m2 * 10.764)} sq ft`}
+          details={insights.regulatory_summary?.substring(0, 100) || solarDescription}
+          value={`$${solarValue}/mo`}
           icon={assetIcons.rooftopSolar}
           glassStyle={glassStyle}
           accentText={accentText}
@@ -74,15 +85,16 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
     }
 
     if (viableOpportunities.internetBandwidth) {
-      const internet = insights.monetization_opportunities.internet_bandwidth;
+      const internetValue = Math.round(insights.unused_bandwidth_mbps * 0.8 / 10);
+      
       cards.push(
         <AssetCard
           key="internet"
           color="border-l-blue-600"
           title="Internet"
-          main={`${internet.shareable_capacity_mbps} Mbps`}
-          details={internet.notes}
-          value={`$${internet.est_monthly_revenue_usd.toFixed(2)}/mo`}
+          main={`${insights.unused_bandwidth_mbps} Mbps`}
+          details="Share excess bandwidth capacity with ISP partners or local networks"
+          value={`$${internetValue}/mo`}
           icon={assetIcons.internetBandwidth}
           glassStyle={glassStyle}
           accentText={accentText}
@@ -91,33 +103,73 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
     }
 
     if (viableOpportunities.parkingSpace) {
-      const parking = insights.monetization_opportunities.parking_space;
+      const parkingValue = insights.avg_parking_rate_usd_per_day 
+        ? Math.round(insights.avg_parking_rate_usd_per_day * 30 * 0.7) 
+        : insights.parking_spaces * 15;
+      
       cards.push(
         <AssetCard
           key="parking"
           color="border-l-purple-600"
           title="Parking"
-          main={`${parking.spaces_available_for_rent} spaces`}
-          details={parking.notes}
-          value={`$${parking.est_monthly_rent_usd_total.toFixed(2)}/mo`}
+          main={`${insights.parking_spaces} spaces`}
+          details={`Average parking rate: $${insights.avg_parking_rate_usd_per_day || 15}/day`}
+          value={`$${parkingValue}/mo`}
           icon={assetIcons.parkingSpace}
           glassStyle={glassStyle}
           accentText={accentText}
         />
       );
     }
-
+    
     if (viableOpportunities.gardenSpace) {
-      const garden = insights.monetization_opportunities.garden_space;
+      const gardenValue = Math.round(insights.garden_area_m2 * 0.2);
+      
       cards.push(
         <AssetCard
           key="garden"
           color="border-l-green-600"
           title="Garden"
-          main={`${garden.garden_sq_ft} sq ft`}
-          details={garden.notes}
-          value={`$${garden.est_monthly_revenue_usd.toFixed(2)}/mo`}
+          main={`${Math.round(insights.garden_area_m2 * 10.764)} sq ft`}
+          details="Garden space for community or commercial use"
+          value={`$${gardenValue || 80}/mo`}
           icon={assetIcons.gardenSpace}
+          glassStyle={glassStyle}
+          accentText={accentText}
+        />
+      );
+    }
+    
+    if (viableOpportunities.storage) {
+      const storageValue = Math.round(insights.storage_volume_m3 * 0.05);
+      
+      cards.push(
+        <AssetCard
+          key="storage"
+          color="border-l-orange-600"
+          title="Storage"
+          main={`${Math.round(insights.storage_volume_m3)} cubic m`}
+          details="Unused storage space for rental"
+          value={`$${storageValue}/mo`}
+          icon={assetIcons.storage}
+          glassStyle={glassStyle}
+          accentText={accentText}
+        />
+      );
+    }
+    
+    if (viableOpportunities.antenna5g) {
+      const antennaValue = Math.round(insights.rooftop_area_5g_m2 * 15);
+      
+      cards.push(
+        <AssetCard
+          key="antenna5g"
+          color="border-l-indigo-600"
+          title="5G Antenna"
+          main={`${Math.round(insights.rooftop_area_5g_m2)} sq m`}
+          details="Rooftop space for 5G antenna installation"
+          value={`$${antennaValue}/mo`}
+          icon={assetIcons.antenna5g}
           glassStyle={glassStyle}
           accentText={accentText}
         />

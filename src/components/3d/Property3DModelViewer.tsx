@@ -17,10 +17,14 @@ interface Property3DModelViewerProps {
     internetMbps?: number;
     parkingSpaces?: number;
     gardenSqFt?: number;
+    storageVolume?: number;
+    antenna5gArea?: number;
     hasPool?: boolean;
     hasGarden?: boolean;
     hasParking?: boolean;
+    hasStorage?: boolean;
     hasEVCharging?: boolean;
+    has5G?: boolean;
   };
 }
 
@@ -60,12 +64,12 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
   const hotspots = React.useMemo(() => {
     const spots = [];
     
-    if (propertyFeatures?.roofSize) {
+    if (propertyFeatures?.roofSize || propertyFeatures?.solarPotentialKw) {
       spots.push({
         id: "solar",
         position: "0 1 0",
         normal: "0 1 0",
-        label: `${propertyFeatures.roofSize} sq ft usable with ${propertyFeatures.solarPotentialKw || 6.5}kW potential`,
+        label: `${propertyFeatures?.roofSize || 800} sq ft usable with ${propertyFeatures?.solarPotentialKw || 6.5}kW potential`,
         active: selectedAsset === "solar"
       });
     }
@@ -80,7 +84,7 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
       });
     }
     
-    if (propertyFeatures?.hasParking) {
+    if (propertyFeatures?.hasParking || propertyFeatures?.parkingSpaces) {
       spots.push({
         id: "parking",
         position: "0.5 0 0.5",
@@ -92,7 +96,7 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
       });
     }
     
-    if (propertyFeatures?.hasGarden) {
+    if (propertyFeatures?.hasGarden || propertyFeatures?.gardenSqFt) {
       spots.push({
         id: "garden",
         position: "-0.5 0 0.5",
@@ -101,6 +105,30 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
           ? `${propertyFeatures.gardenSqFt} sq ft garden space`
           : "Garden Space",
         active: selectedAsset === "garden"
+      });
+    }
+    
+    if (propertyFeatures?.hasStorage || propertyFeatures?.storageVolume) {
+      spots.push({
+        id: "storage",
+        position: "0 -0.5 -0.5",
+        normal: "0 0 -1",
+        label: propertyFeatures?.storageVolume
+          ? `${propertyFeatures.storageVolume} cubic meters storage`
+          : "Storage Space",
+        active: selectedAsset === "storage"
+      });
+    }
+    
+    if (propertyFeatures?.has5G || propertyFeatures?.antenna5gArea) {
+      spots.push({
+        id: "antenna",
+        position: "-0.5 1 -0.5",
+        normal: "0 1 0",
+        label: propertyFeatures?.antenna5gArea
+          ? `${propertyFeatures.antenna5gArea} sq meters for 5G antennas`
+          : "5G Antenna Hosting",
+        active: selectedAsset === "antenna"
       });
     }
     
