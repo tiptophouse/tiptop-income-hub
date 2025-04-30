@@ -30,8 +30,19 @@ export const useAddressSearch = (
     const result = await sendAddressToWebhook(address);
     if (result) {
       console.log("Address analysis webhook completed successfully");
+      
+      // Confirm to user that Google Maps images were included
+      toast({
+        title: "Analysis Started",
+        description: "Property images captured and sent for analysis",
+      });
     } else {
       console.warn("Address analysis webhook had issues - continuing with analysis");
+      toast({
+        title: "Warning",
+        description: "Some issues occurred when processing images",
+        variant: "destructive"
+      });
     }
     
     setShowAnalysis(true);

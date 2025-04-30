@@ -46,12 +46,25 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
     setIsSubmitting(true);
     toast({
       title: "Processing",
-      description: "Capturing property images...",
+      description: "Capturing property images and analyzing address...",
     });
 
     try {
       // Send address to webhook before calling the original onSubmit
-      await sendAddressToWebhook(address);
+      const result = await sendAddressToWebhook(address);
+      
+      if (result) {
+        toast({
+          title: "Images Captured",
+          description: "Property images have been sent to Make.com",
+        });
+      } else {
+        toast({
+          title: "Warning",
+          description: "There was an issue capturing property images",
+          variant: "destructive"
+        });
+      }
       
       // Call the original onSubmit function
       onSubmit(e);
