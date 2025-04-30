@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { captureStreetViewForModel, captureMapScreenshot } from './streetViewService';
 import { generateModelFromImage, analyzePropertyImage } from './meshyApi';
@@ -61,6 +62,7 @@ export const generatePropertyModels = async (address: string) => {
     let satelliteImage = capturedImages.satellite;
     let aerialView = capturedImages.aerialView;
     const hasSatelliteImage = !!satelliteImage;
+    const hasAerialImage = !!aerialView;
     
     // If no street view is available, try to use stored images
     if (!streetViewImage) {
@@ -71,8 +73,12 @@ export const generatePropertyModels = async (address: string) => {
       satelliteImage = user.user_metadata.propertySatelliteImage;
     }
     
+    if (!aerialView) {
+      aerialView = user.user_metadata.propertyAerialView;
+    }
+    
     // If still no images available, try to capture map screenshot
-    if (!streetViewImage && !satelliteImage) {
+    if (!streetViewImage && !satelliteImage && !aerialView) {
       console.log("No property views available, looking for map container to capture");
       const mapElement = document.querySelector('[id^="map-"], [class*="map-container"]') ||
         document.querySelector('[class*="property-map"]');
@@ -117,7 +123,7 @@ export const generatePropertyModels = async (address: string) => {
     
     // Determine which image to use for model generation
     // Prefer street view for facade, satellite for rooftop
-    const primaryImage = streetViewImage || satelliteImage;
+    const primaryImage = streetViewImage || satelliteImage || aerialView;
     
     if (!primaryImage) {
       console.error("Failed to capture any property image");
@@ -145,6 +151,7 @@ export const generatePropertyModels = async (address: string) => {
         data: { 
           propertyModelJobId: modelJobId,
           hasSatelliteImage: hasSatelliteImage,
+          hasAerialImage: hasAerialImage,
           propertyFeatures: propertyFeatures
         }
       });
@@ -156,11 +163,12 @@ export const generatePropertyModels = async (address: string) => {
       }
 
       // Dispatch event for the dashboard to pick up
-      console.log("Dispatching modelJobCreated event with satellite flag:", hasSatelliteImage);
+      console.log("Dispatching modelJobCreated event with image flags:", {satellite: hasSatelliteImage, aerial: hasAerialImage});
       const modelEvent = new CustomEvent('modelJobCreated', {
         detail: { 
           jobId: modelJobId,
           hasSatelliteImage: hasSatelliteImage,
+          hasAerialImage: hasAerialImage,
           propertyFeatures: propertyFeatures
         }
       });
@@ -186,6 +194,7 @@ export const generatePropertyModels = async (address: string) => {
       detail: { 
         jobId: fallbackId,
         hasSatelliteImage: false,
+        hasAerialImage: false,
         propertyFeatures: {
           roofSize: 950,
           hasPool: true,

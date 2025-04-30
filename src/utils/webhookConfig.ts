@@ -76,12 +76,14 @@ export const sendAddressToWebhook = async (address: string): Promise<boolean> =>
  * @param address The property address
  * @param satelliteImage Base64 satellite image (if available)
  * @param streetViewImage Base64 street view image (if available)
+ * @param aerialImageZoom12 Base64 aerial image at zoom level 12 (if available)
  * @returns Success status
  */
 export const sendImagesWebhook = async (
   address: string,
   satelliteImage: string | null, 
-  streetViewImage: string | null
+  streetViewImage: string | null,
+  aerialImageZoom12: string | null = null
 ): Promise<boolean> => {
   try {
     if (!address) {
@@ -96,7 +98,7 @@ export const sendImagesWebhook = async (
     }
 
     // Ensure we have at least one image
-    if (!satelliteImage && !streetViewImage) {
+    if (!satelliteImage && !streetViewImage && !aerialImageZoom12) {
       console.error("No images available to send to Make.com");
       return false;
     }
@@ -109,7 +111,8 @@ export const sendImagesWebhook = async (
       source: window.location.origin,
       images: {
         satelliteView: satelliteImage,
-        streetView: streetViewImage
+        streetView: streetViewImage,
+        aerialZoom12: aerialImageZoom12
       },
       analyzeRequest: true
     };
@@ -149,7 +152,8 @@ export const sendImagesWebhook = async (
         body: {
           address,
           mapImage: streetViewImage,
-          satelliteImage: satelliteImage
+          satelliteImage: satelliteImage,
+          aerialImage: aerialImageZoom12
         }
       });
 

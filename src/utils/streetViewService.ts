@@ -124,6 +124,58 @@ export const getSatelliteImageAsBase64 = async (address: string): Promise<string
 };
 
 /**
+ * Gets a static aerial image at zoom level 12 for the specified address as base64
+ * 
+ * @param address The address to get the aerial view for
+ * @returns Base64 encoded image or null if not available
+ */
+export const getAerialImageZoom12AsBase64 = async (address: string): Promise<string | null> => {
+  try {
+    if (!window.google?.maps) {
+      console.error("Google Maps API not loaded");
+      return null;
+    }
+
+    // Get API key
+    const apiKey = await getGoogleMapsApiKey();
+    
+    // First geocode the address
+    const geocoder = new window.google.maps.Geocoder();
+    
+    return new Promise((resolve, reject) => {
+      geocoder.geocode({ address }, async (results, status) => {
+        if (status !== "OK" || !results || !results[0]) {
+          console.error("Geocoding failed:", status);
+          resolve(null);
+          return;
+        }
+
+        const location = results[0].geometry.location;
+        const lat = location.lat();
+        const lng = location.lng();
+
+        // Get aerial image via Static API at zoom level 12
+        const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=12&size=600x400&maptype=satellite&key=${apiKey}`;
+        
+        // Fetch the image and convert to base64
+        try {
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const base64 = await blobToBase64(blob);
+          resolve(base64);
+        } catch (err) {
+          console.error("Error fetching aerial image:", err);
+          resolve(null);
+        }
+      });
+    });
+  } catch (error) {
+    console.error("Error getting aerial image:", error);
+    return null;
+  }
+};
+
+/**
  * Captures Street View and satellite images for a given address
  * 
  * @param address Address to capture images for
@@ -134,8 +186,8 @@ export const captureStreetViewForModel = async (address: string): Promise<{
   satellite: string | null;
   aerialView: string | null;
 }> => {
-  // Get both Street View and satellite images in parallel
-  const [streetViewImage, satelliteImage] = await Promise.all([
+  // Get all images in parallel
+  const [streetViewImage, satelliteImage, aerialImage] = await Promise.all([
     getStreetViewImageAsBase64(address).catch(err => {
       console.error("Error capturing Street View:", err);
       return null;
@@ -143,13 +195,17 @@ export const captureStreetViewForModel = async (address: string): Promise<{
     getSatelliteImageAsBase64(address).catch(err => {
       console.error("Error capturing Satellite View:", err);
       return null;
+    }),
+    getAerialImageZoom12AsBase64(address).catch(err => {
+      console.error("Error capturing Aerial View at zoom 12:", err);
+      return null;
     })
   ]);
   
   return {
     streetView: streetViewImage,
     satellite: satelliteImage,
-    aerialView: null // We don't have aerial view yet, but adding for type compatibility
+    aerialView: aerialImage
   };
 };
 

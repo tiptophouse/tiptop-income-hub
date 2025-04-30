@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Card,
@@ -20,6 +21,7 @@ interface Property3DModelDisplayProps {
   address: string;
   className?: string;
   hasSatelliteImage?: boolean;
+  hasAerialImage?: boolean;
   propertyFeatures?: {
     roofSize?: number;
     solarPotentialKw?: number;
@@ -38,6 +40,7 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
   address,
   className,
   hasSatelliteImage = false,
+  hasAerialImage = false,
   propertyFeatures
 }) => {
   const [showControls, setShowControls] = useState(false);
@@ -112,13 +115,17 @@ const Property3DModelDisplay: React.FC<Property3DModelDisplayProps> = ({
           zoomLevel={zoomLevel}
           backgroundColor={backgroundColor}
           hasSatelliteImage={hasSatelliteImage}
+          hasAerialImage={hasAerialImage}
           propertyFeatures={propertyFeatures}
         />
         
-        {(hasSatelliteImage || propertyFeaturesText) && (
+        {(hasSatelliteImage || hasAerialImage || propertyFeaturesText) && (
           <div className="mt-2 text-xs text-center text-tiptop-accent font-medium">
-            {hasSatelliteImage && "Enhanced 3D model using satellite imagery"}
-            {hasSatelliteImage && propertyFeaturesText && " • "}
+            {(hasSatelliteImage || hasAerialImage) && "Enhanced 3D model using " + 
+              (hasSatelliteImage ? "satellite" : "") + 
+              (hasSatelliteImage && hasAerialImage ? " and " : "") + 
+              (hasAerialImage ? "aerial" : "") + " imagery"}
+            {(hasSatelliteImage || hasAerialImage) && propertyFeaturesText && " • "}
             {propertyFeaturesText}
           </div>
         )}

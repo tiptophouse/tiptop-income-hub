@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import Property3DModelNoJob from "./Property3DModelNoJob";
 import Property3DModelDisplay from "./Property3DModelDisplay";
@@ -27,6 +28,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
 }) => {
   const [jobId, setJobId] = useState<string | null>(initialJobId);
   const [hasSatelliteImage, setHasSatelliteImage] = useState(false);
+  const [hasAerialImage, setHasAerialImage] = useState(false);
   const [propertyFeatures, setPropertyFeatures] = useState<PropertyFeatures | null>(null);
 
   useEffect(() => {
@@ -39,6 +41,10 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
         
         if (event.detail.hasSatelliteImage !== undefined) {
           setHasSatelliteImage(event.detail.hasSatelliteImage);
+        }
+        
+        if (event.detail.hasAerialImage !== undefined) {
+          setHasAerialImage(event.detail.hasAerialImage);
         }
         
         if (event.detail.propertyFeatures) {
@@ -69,6 +75,10 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
         
         if (user?.user_metadata?.propertySatelliteImage) {
           setHasSatelliteImage(true);
+        }
+        
+        if (user?.user_metadata?.propertyAerialView) {
+          setHasAerialImage(true);
         }
         
         if (user?.user_metadata?.propertyFeatures) {
@@ -114,6 +124,7 @@ const Property3DModel: React.FC<Property3DModelProps> = ({
       address={address} 
       className={className}
       hasSatelliteImage={hasSatelliteImage}
+      hasAerialImage={hasAerialImage}
       propertyFeatures={propertyFeatures}
     />
   );

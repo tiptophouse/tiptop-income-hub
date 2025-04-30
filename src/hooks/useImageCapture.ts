@@ -1,6 +1,6 @@
 
 import { toast } from '@/components/ui/use-toast';
-import { getStreetViewImageAsBase64, getSatelliteImageAsBase64, captureMapScreenshot } from '@/utils/streetViewService';
+import { getStreetViewImageAsBase64, getSatelliteImageAsBase64, captureMapScreenshot, getAerialImageZoom12AsBase64 } from '@/utils/streetViewService';
 import { sendImagesWebhook } from '@/utils/webhookConfig';
 
 export const useImageCapture = () => {
@@ -9,7 +9,7 @@ export const useImageCapture = () => {
       console.log("Starting image capture process for address:", address);
       
       // Capture all images in parallel to improve performance
-      const [streetViewImage, satelliteImage] = await Promise.all([
+      const [streetViewImage, satelliteImage, aerialImageZoom12] = await Promise.all([
         getStreetViewImageAsBase64(address).catch(err => {
           console.error("Error capturing Street View:", err);
           return null;
@@ -17,18 +17,20 @@ export const useImageCapture = () => {
         getSatelliteImageAsBase64(address).catch(err => {
           console.error("Error capturing Satellite View:", err);
           return null;
+        }),
+        getAerialImageZoom12AsBase64(address).catch(err => {
+          console.error("Error capturing Aerial View at zoom 12:", err);
+          return null;
         })
       ]);
       
-      // Initialize aerialView as null - we'll handle this separately if needed
-      const aerialView = null;
-      
       console.log("Images captured:", {
         streetView: streetViewImage ? "✓" : "✗",
-        satellite: satelliteImage ? "✓" : "✗"
+        satellite: satelliteImage ? "✓" : "✗",
+        aerialZoom12: aerialImageZoom12 ? "✓" : "✗"
       });
       
-      if (!streetViewImage && !satelliteImage) {
+      if (!streetViewImage && !satelliteImage && !aerialImageZoom12) {
         console.error("Failed to capture any images");
         toast({
           title: "Warning",
@@ -47,7 +49,7 @@ export const useImageCapture = () => {
         attempts++;
         console.log(`Attempt ${attempts}/${maxAttempts} sending to Make.com webhook...`);
         
-        success = await sendImagesWebhook(address, satelliteImage, streetViewImage);
+        success = await sendImagesWebhook(address, satelliteImage, streetViewImage, aerialImageZoom12);
         
         if (!success && attempts < maxAttempts) {
           console.log(`Retrying in 1 second...`);

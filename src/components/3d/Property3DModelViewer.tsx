@@ -11,6 +11,7 @@ interface Property3DModelViewerProps {
   zoomLevel?: number;
   backgroundColor?: string;
   hasSatelliteImage?: boolean;
+  hasAerialImage?: boolean;
   propertyFeatures?: {
     roofSize?: number;
     solarPotentialKw?: number;
@@ -36,6 +37,7 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
   zoomLevel = 105,
   backgroundColor = "#f5f5f5",
   hasSatelliteImage = false,
+  hasAerialImage = false,
   propertyFeatures
 }) => {
   const [showHotspots, setShowHotspots] = useState(true);
@@ -171,9 +173,9 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
         jobId={jobId}
       />
       
-      {hasSatelliteImage && (
+      {(hasSatelliteImage || hasAerialImage) && (
         <div className="text-xs text-center text-muted-foreground">
-          Using combined satellite and street view imagery for enhanced accuracy
+          Using {hasSatelliteImage && "satellite"}{hasSatelliteImage && hasAerialImage && " and "}{hasAerialImage && "aerial"} imagery for enhanced accuracy
         </div>
       )}
     </div>
