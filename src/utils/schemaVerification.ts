@@ -17,41 +17,39 @@ export const useDatabaseSchemaVerification = () => {
   const verifySchema = async () => {
     setIsVerifying(true);
     try {
-      // Using information_schema to check tables instead of pg_tables
-      // This is more compatible with Supabase's security policies
-      const { data: tables, error } = await supabase
-        .from('information_schema.tables')
-        .select('table_name')
-        .eq('table_schema', 'public');
+      // Use a raw SQL query to check tables - this is more reliable than trying to query information_schema directly
+      const { data, error } = await supabase
+        .rpc('get_tables', {})
+        .select('*');
 
       if (error) {
         console.error("Error verifying database schema:", error);
-        toast({
-          title: "Database Error",
-          description: "Could not verify database schema. Some features may not work correctly.",
-          variant: "destructive"
-        });
-        return false;
+        
+        // Try alternative approach if RPC fails
+        const { data: tablesData, error: tablesError } = await supabase
+          .from('pg_catalog.pg_tables')
+          .select('tablename')
+          .eq('schemaname', 'public');
+        
+        if (tablesError) {
+          console.error("Error with fallback schema verification:", tablesError);
+          toast({
+            title: "Database Error",
+            description: "Could not verify database schema. Some features may not work correctly.",
+            variant: "destructive"
+          });
+          setIsVerifying(false);
+          return false;
+        }
+        
+        // Extract table names from the response
+        const existingTables = tablesData?.map(table => table.tablename) || [];
+        return checkMissingTables(existingTables);
       }
 
-      // Extract table names from the response
-      const existingTables = tables?.map(table => table.table_name) || [];
-      
-      // Check if all expected tables exist
-      const missingTables = expectedTables.filter(table => !existingTables.includes(table));
-
-      if (missingTables.length > 0) {
-        console.warn("Missing database tables:", missingTables);
-        toast({
-          title: "Database Schema Warning",
-          description: `Some required tables are missing: ${missingTables.join(', ')}. You may need to run database migrations.`,
-          variant: "destructive"
-        });
-        return false;
-      }
-
-      console.log("Database schema verification successful");
-      return true;
+      // Extract table names from the RPC response
+      const existingTables = data?.map(item => item.table_name) || [];
+      return checkMissingTables(existingTables);
     } catch (error) {
       console.error("Error in schema verification:", error);
       toast({
@@ -59,10 +57,30 @@ export const useDatabaseSchemaVerification = () => {
         description: "Could not verify database schema. Please check your database connection.",
         variant: "destructive"
       });
-      return false;
-    } finally {
       setIsVerifying(false);
+      return false;
     }
+  };
+
+  // Helper function to check missing tables and show appropriate messages
+  const checkMissingTables = (existingTables: string[]) => {
+    // Check if all expected tables exist
+    const missingTables = expectedTables.filter(table => !existingTables.includes(table));
+
+    if (missingTables.length > 0) {
+      console.warn("Missing database tables:", missingTables);
+      toast({
+        title: "Database Schema Warning",
+        description: `Some required tables are missing: ${missingTables.join(', ')}. You may need to run database migrations.`,
+        variant: "destructive"
+      });
+      setIsVerifying(false);
+      return false;
+    }
+
+    console.log("Database schema verification successful");
+    setIsVerifying(false);
+    return true;
   };
 
   return { verifySchema, isVerifying };
