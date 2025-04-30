@@ -12,7 +12,7 @@ interface AssetSearchInputProps {
   address: string;
   isLocating: boolean;
   onAddressChange: (value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent, data?: any) => void;
   onDetectLocation: () => void;
 }
 
@@ -29,7 +29,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
   const [autocompleteInitialized, setAutocompleteInitialized] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Modified submit handler to send address to webhook
+  // Modified submit handler to send address to webhook and wait for response
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -50,21 +50,23 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
     });
 
     try {
-      // Send address to webhook before calling the original onSubmit
+      // Send address to webhook and wait for response data
       const result = await sendAddressToWebhook(address);
       
-      if (result) {
+      if (result.success) {
         toast({
           title: "Request Processed",
-          description: "Address successfully sent. Waiting for webhook response...",
+          description: result.data 
+            ? "Analysis completed successfully" 
+            : "Address sent successfully. Waiting for response...",
         });
         
-        // Only call the original onSubmit if the webhook was successful
-        onSubmit(e);
+        // Only call the original onSubmit with the response data if the webhook was successful
+        onSubmit(e, result.data);
       } else {
         toast({
           title: "Error",
-          description: "Failed to process address. Please check your webhook configuration.",
+          description: "Failed to process address. Please try again.",
           variant: "destructive"
         });
       }

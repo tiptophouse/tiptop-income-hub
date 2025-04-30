@@ -7,7 +7,8 @@ export const useAddressSearch = (
   address: string,
   setAddress: (value: string) => void,
   setIsLocating: (value: boolean) => void,
-  setShowAnalysis: (value: boolean) => void
+  setShowAnalysis: (value: boolean) => void,
+  setPropertyInsights?: (value: any) => void
 ) => {
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,15 +29,20 @@ export const useAddressSearch = (
     
     // Send to webhook including images - wait for actual webhook response
     const result = await sendAddressToWebhook(address);
-    if (result) {
-      console.log("Address analysis webhook completed successfully");
+    if (result && result.data) {
+      console.log("Address analysis webhook completed successfully", result.data);
+      
+      // If we have setPropertyInsights function, pass the data to it
+      if (setPropertyInsights && typeof setPropertyInsights === 'function') {
+        setPropertyInsights(result.data);
+      }
       
       toast({
-        title: "Analysis Started",
-        description: "Property data sent for analysis. Waiting for webhook response...",
+        title: "Analysis Complete",
+        description: "Property data received and analysis is ready",
       });
       
-      // Only show analysis when we get confirmation back
+      // Only show analysis when we get confirmation back with data
       setShowAnalysis(true);
     } else {
       console.warn("Address analysis webhook had issues");

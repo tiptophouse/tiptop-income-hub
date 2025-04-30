@@ -7,14 +7,14 @@ import AssetSearchInput from './asset-search/AssetSearchInput';
 import AssetCard from './asset-search/AssetCard';
 
 interface AssetSearchProps {
-  onAddressSubmit: (address: string) => void;
+  onAddressSubmit: (address: string, propertyData?: any) => void;
 }
 
 const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
   const [address, setAddress] = useState('');
   const [isLocating, setIsLocating] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent, propertyData?: any) => {
     e.preventDefault();
     if (!address.trim()) {
       toast({
@@ -25,8 +25,8 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
       return;
     }
     
-    // The webhook is now called directly in the AssetSearchInput component
-    onAddressSubmit(address);
+    // Pass both the address and property data to the parent component
+    onAddressSubmit(address, propertyData);
   };
 
   const handleDetectLocation = () => {
