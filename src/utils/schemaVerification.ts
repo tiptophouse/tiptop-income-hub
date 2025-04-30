@@ -20,19 +20,19 @@ export async function verifyDatabaseSchema() {
       'working_hours'
     ];
     
-    // Check if the tables exist
-    // Using a raw query to check table existence in PostgreSQL
-    const { data: tables, error: tablesError } = await supabase
-      .rpc('get_tables', {}, { count: 'exact' });
+    // Check if the tables exist using raw SQL query
+    const { data: tablesData, error: tablesError } = await supabase
+      .rpc('get_tables')
+      .select();
     
     if (tablesError) {
       console.error("Error fetching tables:", tablesError);
       
       // Try alternative approach with direct SQL query
       const { data: pgTables, error: pgTablesError } = await supabase
-        .from('information_schema.tables')
-        .select('table_name')
-        .eq('table_schema', 'public');
+        .from('pg_tables')
+        .select('tablename')
+        .eq('schemaname', 'public');
       
       if (pgTablesError) {
         console.error("Error with alternative table fetch:", pgTablesError);
@@ -44,13 +44,15 @@ export async function verifyDatabaseSchema() {
         return false;
       }
       
-      // Get table names from information_schema
-      const existingTableNames = pgTables?.map(t => t.table_name) || [];
+      // Get table names from pg_tables
+      const existingTableNames = pgTables?.map(t => t.tablename) || [];
       return checkTables(existingTableNames, expectedTables);
     }
     
     // Get table names from the RPC call
-    const existingTableNames = tables || [];
+    const existingTableNames = tablesData ? 
+      Array.isArray(tablesData) ? tablesData : [tablesData] : 
+      [];
     return checkTables(existingTableNames, expectedTables);
   } catch (error) {
     console.error("Error verifying database schema:", error);
@@ -66,7 +68,7 @@ export async function verifyDatabaseSchema() {
 /**
  * Helper function to check if expected tables exist
  */
-function checkTables(existingTableNames, expectedTables) {
+function checkTables(existingTableNames: string[], expectedTables: string[]) {
   console.log("Existing tables:", existingTableNames);
   
   // Check for missing tables

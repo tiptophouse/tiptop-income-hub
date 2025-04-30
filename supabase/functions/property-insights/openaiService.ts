@@ -1,5 +1,5 @@
 
-export async function callOpenAI(address, apiKey) {
+export async function callOpenAI(address: string, apiKey: string) {
   // System prompt for property monetization analysis
   const systemPrompt = `You are **Tiptop's Property Monetization Analyst**.  
 **Respond with exactly one JSON object**, UTF-8 encoded, no comments, no extra text.  

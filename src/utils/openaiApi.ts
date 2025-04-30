@@ -39,7 +39,7 @@ export async function getPropertyInsightsFromAI(address: string) {
       toast({
         title: "OpenAI Analysis Error",
         description: data.error.includes("API key") 
-          ? "OpenAI API key not configured in new Supabase environment. Using estimated data instead." 
+          ? "OpenAI API key not configured in Supabase environment. Using estimated data instead." 
           : "Could not generate AI analysis. Using estimated data instead.",
         variant: "destructive"
       });

@@ -1,8 +1,7 @@
-
 /**
  * Property analysis and feature detection utilities
  */
-import { GOOGLE_MAPS_API_KEY } from './meshyConfig';
+import { getGoogleMapsApiKey, getGoogleSunroofApiKey } from './meshyConfig';
 
 interface SolarApiResponse {
   buildingStats: {
@@ -122,8 +121,15 @@ export const analyzePropertyImage = async (imageData: string): Promise<PropertyA
     const latitude = 37.4219999;
     const longitude = -122.0840575;
 
+    // Get API key securely
+    const apiKey = await getGoogleMapsApiKey();
+    const sunroofApiKey = await getGoogleSunroofApiKey() || apiKey;
+
+    // Use the sunroof API key if available, otherwise fall back to the maps key
+    const activeKey = sunroofApiKey || apiKey;
+
     const response = await fetch(
-      `https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${latitude}&location.longitude=${longitude}&key=${GOOGLE_MAPS_API_KEY}`
+      `https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${latitude}&location.longitude=${longitude}&key=${activeKey}`
     );
 
     if (!response.ok) {

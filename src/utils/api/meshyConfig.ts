@@ -60,4 +60,99 @@ export const getGoogleMapsApiKey = async (): Promise<string> => {
   }
 };
 
+// Get OpenAI API Key securely
+export const getOpenAIApiKey = async (): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('get-api-tokens', {
+      body: { tokenType: 'openai' }
+    });
+    
+    if (error) {
+      console.error('Error fetching OpenAI API key:', error);
+      return null;
+    }
+    
+    return data?.token || null;
+  } catch (error) {
+    console.error('Error getting OpenAI API key:', error);
+    return null;
+  }
+};
+
+// Get Google Cloud API Key securely
+export const getGoogleCloudApiKey = async (): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('get-api-tokens', {
+      body: { tokenType: 'google_cloud' }
+    });
+    
+    if (error) {
+      console.error('Error fetching Google Cloud API key:', error);
+      return null;
+    }
+    
+    return data?.token || null;
+  } catch (error) {
+    console.error('Error getting Google Cloud API key:', error);
+    return null;
+  }
+};
+
+// Get Google Sunroof API Key securely
+export const getGoogleSunroofApiKey = async (): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('get-api-tokens', {
+      body: { tokenType: 'google_sunroof' }
+    });
+    
+    if (error) {
+      console.error('Error fetching Google Sunroof API key:', error);
+      return null;
+    }
+    
+    return data?.token || null;
+  } catch (error) {
+    console.error('Error getting Google Sunroof API key:', error);
+    return null;
+  }
+};
+
+// Get Google OAuth Client ID securely
+export const getGoogleClientId = async (): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('get-api-tokens', {
+      body: { tokenType: 'google_client_id' }
+    });
+    
+    if (error) {
+      console.error('Error fetching Google Client ID:', error);
+      return null;
+    }
+    
+    return data?.token || null;
+  } catch (error) {
+    console.error('Error getting Google Client ID:', error);
+    return null;
+  }
+};
+
+// Get Google OAuth Client Secret securely
+export const getGoogleClientSecret = async (): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('get-api-tokens', {
+      body: { tokenType: 'google_client_secret' }
+    });
+    
+    if (error) {
+      console.error('Error fetching Google Client Secret:', error);
+      return null;
+    }
+    
+    return data?.token || null;
+  } catch (error) {
+    console.error('Error getting Google Client Secret:', error);
+    return null;
+  }
+};
+
 export { MESHY_API_URL, SAMPLE_MODEL_URL, GOOGLE_MAPS_API_KEY };
