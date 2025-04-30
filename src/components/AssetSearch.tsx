@@ -25,6 +25,7 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
       return;
     }
     
+    // The webhook is now called directly in the AssetSearchInput component
     onAddressSubmit(address);
   };
 

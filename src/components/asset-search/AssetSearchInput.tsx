@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { sendAddressToWebhook } from '@/utils/webhookConfig';
 
 interface AssetSearchInputProps {
   address: string;
@@ -26,6 +27,26 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
   const autocompleteRef = useRef<any>(null);
   const isMobile = useIsMobile();
   const [autocompleteInitialized, setAutocompleteInitialized] = useState(false);
+
+  // Modified submit handler to send address to webhook
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!address.trim()) {
+      toast({
+        title: "Address Required",
+        description: "Please enter your property address to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Send address to webhook before calling the original onSubmit
+    await sendAddressToWebhook(address);
+    
+    // Call the original onSubmit function
+    onSubmit(e);
+  };
 
   useEffect(() => {
     if (!inputRef.current || !window.google?.maps?.places || autocompleteInitialized) return;
@@ -87,7 +108,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.2 }}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       style={{ overflow: 'visible' }}
     >
       <div className="relative" style={{ overflow: 'visible' }}>
@@ -104,7 +125,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              onSubmit(e);
+              handleSubmit(e);
             }
           }}
           aria-label="Property address"

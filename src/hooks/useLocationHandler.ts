@@ -4,6 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import { geocodeAddress, reverseGeocode, getCurrentLocation } from '@/utils/geocodingService';
 import { usePropertyData } from '@/hooks/usePropertyData';
 import { useImageCapture } from '@/hooks/useImageCapture';
+import { sendAddressToWebhook } from '@/utils/webhookConfig';
 
 export const useLocationHandler = (
   setMapCenter: (location: { lat: number; lng: number }) => void,
@@ -17,6 +18,9 @@ export const useLocationHandler = (
 
   const handleAddressGeocoding = async (address: string) => {
     setIsLoadingData(true);
+    
+    // Send address to Make.com webhook first
+    await sendAddressToWebhook(address);
     
     geocodeAddress({
       address,
@@ -64,6 +68,9 @@ export const useLocationHandler = (
         reverseGeocode({
           location: userLocation,
           onSuccess: async (address) => {
+            // Send the detected address to Make.com webhook
+            await sendAddressToWebhook(address);
+            
             toast({
               title: "Location Found",
               description: `Your current location: ${address}`,

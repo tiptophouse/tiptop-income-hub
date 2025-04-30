@@ -13,6 +13,64 @@ export const getWebhookUrl = (): string => {
 };
 
 /**
+ * Send address to Make.com webhook when user clicks Analyze Now
+ * 
+ * @param address The property address entered by the user
+ * @returns Success status
+ */
+export const sendAddressToWebhook = async (address: string): Promise<boolean> => {
+  try {
+    if (!address) {
+      console.error("No address provided to sendAddressToWebhook");
+      return false;
+    }
+
+    const webhookUrl = getWebhookUrl();
+    console.log("Sending address to Make.com webhook:", address);
+
+    const payload = {
+      address,
+      timestamp: new Date().toISOString(),
+      source: window.location.origin,
+      action: "address_submission"
+    };
+
+    // Try to send with regular fetch first
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (response.ok) {
+        console.log("Successfully sent address to Make.com webhook, response:", response);
+        return true;
+      }
+      
+      console.log("Make.com webhook response not OK:", response.status);
+      // Fall through to no-cors attempt
+    } catch (error) {
+      console.log("Error with standard fetch to Make.com, trying no-cors mode:", error);
+    }
+    
+    // Try with no-cors mode as a fallback
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      body: JSON.stringify(payload)
+    });
+    
+    console.log("Address sent to Make.com webhook with no-cors mode");
+    return true;
+  } catch (error) {
+    console.error("Error sending address to Make.com webhook:", error);
+    return false;
+  }
+};
+
+/**
  * Sends captured property images to the Make.com webhook
  * 
  * @param address The property address

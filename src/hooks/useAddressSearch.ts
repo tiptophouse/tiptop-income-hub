@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
+import { sendAddressToWebhook } from '@/utils/webhookConfig';
 
 export function useAddressSearch(
   address: string, 
@@ -8,7 +9,7 @@ export function useAddressSearch(
   setIsLocating: (isLocating: boolean) => void,
   setShowAnalysis: (show: boolean) => void
 ) {
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!address.trim()) {
@@ -20,6 +21,9 @@ export function useAddressSearch(
       return;
     }
 
+    // Send address to Make.com webhook
+    await sendAddressToWebhook(address);
+
     setShowAnalysis(true);
     document.dispatchEvent(new CustomEvent('addressFound', { detail: { address } }));
   };
@@ -28,7 +32,7 @@ export function useAddressSearch(
     if (navigator.geolocation) {
       setIsLocating(true);
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const latlng = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
@@ -36,10 +40,14 @@ export function useAddressSearch(
           
           if (window.google && window.google.maps) {
             const geocoder = new window.google.maps.Geocoder();
-            geocoder.geocode({ location: latlng }, (results, status) => {
+            geocoder.geocode({ location: latlng }, async (results, status) => {
               if (status === "OK" && results && results[0]) {
                 const detectedAddress = results[0].formatted_address;
                 setAddress(detectedAddress);
+                
+                // Send the detected address to Make.com webhook
+                await sendAddressToWebhook(detectedAddress);
+                
                 toast({
                   title: "Location Detected",
                   description: `Your location: ${detectedAddress}`
