@@ -4,6 +4,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from '@/components/ui/use-toast';
 
 /**
  * Get property insights from AI analysis
@@ -24,12 +25,22 @@ export async function getPropertyInsightsFromAI(address: string) {
     
     if (error) {
       console.error("Error calling property-insights function:", error);
+      toast({
+        title: "Analysis Error",
+        description: "There was a problem analyzing the property. Using default data instead.",
+        variant: "destructive"
+      });
       throw new Error(error.message || "Failed to analyze property");
     }
     
     // Handle error response from the function itself
-    if (data.error) {
+    if (data && data.error) {
       console.error("Function error:", data.error);
+      toast({
+        title: "OpenAI Analysis Error",
+        description: "Could not generate AI analysis. Using estimated data instead.",
+        variant: "destructive"
+      });
       return data.defaultData; // Return fallback data if provided
     }
     
@@ -37,6 +48,11 @@ export async function getPropertyInsightsFromAI(address: string) {
     return data;
   } catch (error) {
     console.error("Error in getPropertyInsightsFromAI:", error);
+    toast({
+      title: "Analysis Error",
+      description: "There was a problem analyzing the property. Using default data instead.",
+      variant: "destructive"
+    });
     
     // Simulate fallback data if the function fails entirely
     const fallbackData = {

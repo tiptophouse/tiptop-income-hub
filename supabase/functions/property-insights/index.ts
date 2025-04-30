@@ -3,9 +3,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
-if (!openAIApiKey) {
-  console.error("OPENAI_API_KEY is not set");
-}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,65 +28,23 @@ serve(async (req) => {
 
     console.log(`Analyzing property at address: ${address} (uniqueId: ${uniqueId || 'none'}, forceRefresh: ${forceRefresh})`);
     
-    // Check if we should use the OpenAI API or return fixed data for testing
-    if (!openAIApiKey || forceRefresh === 'mockdata') {
-      // Return fixed demo data as before
-      const mockData = {
-        version: "10",
-        property_address: address,
-        property_size_sq_ft: 2400,
-        property_size_acres: 0.28,
-        monetization_opportunities: {
-          rooftop_solar: {
-            confidence: 0.85,
-            notes: "Excellent sun exposure with unobstructed southern exposure",
-            usable_rooftop_sq_ft: 800,
-            max_kw_installed: 6.5,
-            est_monthly_savings_usd: 120,
-            payback_period_months: 100
-          },
-          internet_bandwidth: {
-            confidence: 0.92,
-            notes: "High-speed fiber connection available with low utilization",
-            shareable_capacity_mbps: 100,
-            connection_type: "fiber",
-            est_monthly_revenue_usd: 200,
-            deployment_cost_usd: 250
-          },
-          parking_space: {
-            confidence: 0.78,
-            notes: "Easy street access with good visibility",
-            spaces_total: 3,
-            spaces_available_for_rent: 2,
-            avg_rent_per_space_usd: 150,
-            est_monthly_rent_usd_total: 300,
-            upgrades_needed_usd: 180
-          },
-          garden_space: {
-            confidence: 0.65,
-            notes: "Fertile soil with good drainage and sun exposure",
-            garden_sq_ft: 300,
-            community_garden_viable: true,
-            est_monthly_revenue_usd: 80,
-            irrigation_required_usd: 350
-          }
-        },
-        summary_metrics: {
-          total_est_monthly_revenue_usd: 700,
-          total_upfront_cost_usd: 12780,
-          est_annual_roi_percent: 65.72
-        },
-        overall_assumptions: [
-          "Property features estimated based on satellite imagery",
-          "Solar generation estimated based on local climate data",
-          "Internet sharing assumes 50% capacity dedication",
-          "Parking estimates based on local market rates",
-          "Garden estimates based on seasonal potential"
-        ]
-      };
-      
+    // Check if OpenAI API key is available
+    if (!openAIApiKey) {
+      console.error("OPENAI_API_KEY is not set in environment variables");
       return new Response(
-        JSON.stringify(mockData),
+        JSON.stringify({ 
+          error: "OpenAI API key is not configured", 
+          defaultData: generateMockData(address)
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Check if we should use the OpenAI API or return fixed data for testing
+    if (forceRefresh === 'mockdata') {
+      console.log("Using mock data as requested by forceRefresh=mockdata parameter");
+      return new Response(
+        JSON.stringify(generateMockData(address)),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -182,6 +137,11 @@ Estimate the property size, solar potential, internet sharing capacity, parking 
 Make realistic estimates based on typical properties at this address.`;
 
     try {
+      console.log("Sending request to OpenAI API...");
+      
+      // Log the API key status (not the actual key)
+      console.log("OpenAI API key status:", openAIApiKey ? "Present" : "Missing");
+      
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -200,10 +160,17 @@ Make realistic estimates based on typical properties at this address.`;
         })
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("OpenAI API returned an error:", response.status, errorText);
+        throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      }
+
       const openaiResponse = await response.json();
       
-      if (!response.ok) {
-        throw new Error(`OpenAI API error: ${JSON.stringify(openaiResponse)}`);
+      if (!openaiResponse || !openaiResponse.choices || !openaiResponse.choices[0]) {
+        console.error("Unexpected response format from OpenAI:", openaiResponse);
+        throw new Error("Invalid response format from OpenAI");
       }
 
       const generatedContent = openaiResponse.choices[0].message.content;
@@ -212,59 +179,22 @@ Make realistic estimates based on typical properties at this address.`;
       
       try {
         const parsedResponse = JSON.parse(generatedContent);
+        console.log("Successfully parsed JSON response from OpenAI");
         return new Response(
           JSON.stringify(parsedResponse),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       } catch (parseError) {
-        console.error("Failed to parse OpenAI response as JSON:", parseError);
+        console.error("Failed to parse OpenAI response as JSON:", parseError, "Raw response:", generatedContent);
         throw new Error("Invalid JSON response from OpenAI");
       }
     } catch (openAiError) {
       console.error("OpenAI API call failed:", openAiError);
       
       // Fall back to mock data if the API call fails
-      const fallbackData = {
-        property_address: address,
-        property_size: {
-          value: 2400,
-          unit: "sq_ft"
-        },
-        monetization_opportunities: {
-          rooftop_solar: {
-            usable_rooftop_sq_ft: 800,
-            max_kw_installed: 6.5,
-            est_monthly_savings_usd: 120,
-            notes: "Excellent sun exposure with unobstructed southern exposure"
-          },
-          internet_bandwidth: {
-            shareable_capacity_mbps: 100,
-            est_monthly_revenue_usd: 200,
-            deployment_notes: "High-speed fiber connection available with low utilization"
-          },
-          parking_space: {
-            spaces_available: 2,
-            est_monthly_rent_usd: 300,
-            details: "Easy street access with good visibility"
-          },
-          garden_space: {
-            garden_sq_ft: 300,
-            community_garden_viable: true,
-            est_monthly_revenue_usd: 80,
-            notes: "Fertile soil with good drainage and sun exposure"
-          }
-        },
-        overall_assumptions: [
-          "Property features estimated based on satellite imagery",
-          "Solar generation estimated based on local climate data",
-          "Internet sharing assumes 50% capacity dedication",
-          "Parking estimates based on local market rates",
-          "Garden estimates based on seasonal potential"
-        ]
-      };
-      
+      console.log("Falling back to mock data due to OpenAI API error");
       return new Response(
-        JSON.stringify(fallbackData),
+        JSON.stringify(generateMockData(address)),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
@@ -274,50 +204,11 @@ Make realistic estimates based on typical properties at this address.`;
   } catch (error) {
     console.error("Error processing request:", error);
     
-    // Create fallback data with the same structure as expected
-    const fallbackData = {
-      property_address: "Sample Address",
-      property_size: {
-        value: 2400,
-        unit: "sq_ft"
-      },
-      monetization_opportunities: {
-        rooftop_solar: {
-          usable_rooftop_sq_ft: 800,
-          max_kw_installed: 6.5,
-          est_monthly_savings_usd: 120,
-          notes: "Excellent sun exposure with unobstructed southern exposure"
-        },
-        internet_bandwidth: {
-          shareable_capacity_mbps: 100,
-          est_monthly_revenue_usd: 200,
-          deployment_notes: "High-speed fiber connection available with low utilization"
-        },
-        parking_space: {
-          spaces_available: 2,
-          est_monthly_rent_usd: 300,
-          details: "Easy street access with good visibility"
-        },
-        garden_space: {
-          garden_sq_ft: 300,
-          community_garden_viable: true,
-          est_monthly_revenue_usd: 80,
-          notes: "Fertile soil with good drainage and sun exposure"
-        }
-      },
-      overall_assumptions: [
-        "Property features estimated based on satellite imagery",
-        "Solar generation estimated based on local climate data",
-        "Internet sharing assumes 50% capacity dedication",
-        "Parking estimates based on local market rates",
-        "Garden estimates based on seasonal potential"
-      ]
-    };
-    
+    // Return fallback data with error information
     return new Response(
       JSON.stringify({ 
         error: error.message, 
-        defaultData: fallbackData
+        defaultData: generateMockData("Sample Address")
       }),
       { 
         status: 500, 
@@ -326,3 +217,45 @@ Make realistic estimates based on typical properties at this address.`;
     );
   }
 });
+
+// Helper function to generate mock data
+function generateMockData(address) {
+  return {
+    property_address: address,
+    property_size: {
+      value: 2400,
+      unit: "sq_ft"
+    },
+    monetization_opportunities: {
+      rooftop_solar: {
+        usable_rooftop_sq_ft: 800,
+        max_kw_installed: 6.5,
+        est_monthly_savings_usd: 120,
+        notes: "Excellent sun exposure with unobstructed southern exposure"
+      },
+      internet_bandwidth: {
+        shareable_capacity_mbps: 100,
+        est_monthly_revenue_usd: 200,
+        deployment_notes: "High-speed fiber connection available with low utilization"
+      },
+      parking_space: {
+        spaces_available: 2,
+        est_monthly_rent_usd: 300,
+        details: "Easy street access with good visibility"
+      },
+      garden_space: {
+        garden_sq_ft: 300,
+        community_garden_viable: true,
+        est_monthly_revenue_usd: 80,
+        notes: "Fertile soil with good drainage and sun exposure"
+      }
+    },
+    overall_assumptions: [
+      "Property features estimated based on satellite imagery",
+      "Solar generation estimated based on local climate data",
+      "Internet sharing assumes 50% capacity dedication",
+      "Parking estimates based on local market rates",
+      "Garden estimates based on seasonal potential"
+    ]
+  };
+}
