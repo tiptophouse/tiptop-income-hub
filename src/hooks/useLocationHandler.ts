@@ -25,20 +25,20 @@ export const useLocationHandler = (
         addRoofOverlay(location);
         setCurrentLocation(location);
         
-        // First capture and send images to webhook - this is important to do before loading property data
+        // First capture and send images to Make.com webhook - this is important to do before loading property data
         console.log("Capturing and sending images for address:", address);
         try {
           const imageResult = await captureAndSendImages(address, mapRef);
-          console.log("Image capture and send result:", imageResult ? "Success" : "Failed");
+          console.log("Image capture and send result to Make.com:", imageResult ? "Success" : "Failed");
         } catch (err) {
-          console.error("Error during image capture and send:", err);
+          console.error("Error during image capture and send to Make.com:", err);
         }
-        console.log("Finished capturing and sending images");
+        console.log("Finished capturing and sending images to Make.com");
         
         // Then load property data
         loadPropertyData(location);
       },
-      onError: (error) => { // Now correctly accepts an error parameter
+      onError: (error) => {
         console.error("Geocoding error:", error);
         toast({
           title: "Address Error",
@@ -69,22 +69,22 @@ export const useLocationHandler = (
               description: `Your current location: ${address}`,
             });
             
-            // Capture and send images to webhook
-            console.log("Capturing and sending images for detected location:", address);
+            // Capture and send images to Make.com webhook
+            console.log("Capturing and sending images for detected location to Make.com:", address);
             try {
               const imageResult = await captureAndSendImages(address, mapRef);
-              console.log("Image capture and send result for current location:", imageResult ? "Success" : "Failed");
+              console.log("Image capture and send result for current location to Make.com:", imageResult ? "Success" : "Failed");
             } catch (err) {
-              console.error("Error during image capture and send for current location:", err);
+              console.error("Error during image capture and send for current location to Make.com:", err);
             }
-            console.log("Finished capturing and sending images for detected location");
+            console.log("Finished capturing and sending images for detected location to Make.com");
             
             const addressEvent = new CustomEvent('addressFound', { 
               detail: { address } 
             });
             document.dispatchEvent(addressEvent);
           },
-          onError: (error) => { // Now correctly accepts an error parameter
+          onError: (error) => {
             console.error("Reverse geocoding error:", error);
             toast({
               title: "Location Error",
@@ -97,7 +97,7 @@ export const useLocationHandler = (
         
         setIsLocating(false);
       },
-      (error) => { // Now correctly matches the expected signature
+      (error) => {
         console.error("Geolocation error:", error);
         toast({
           title: "Location Error",

@@ -38,14 +38,14 @@ export const useImageCapture = () => {
         return false;
       }
       
-      // Try sending to webhook with multiple retries
+      // Try sending to Make.com webhook with multiple retries
       let success = false;
       let attempts = 0;
       const maxAttempts = 3;
       
       while (!success && attempts < maxAttempts) {
         attempts++;
-        console.log(`Attempt ${attempts}/${maxAttempts} sending to processing function...`);
+        console.log(`Attempt ${attempts}/${maxAttempts} sending to Make.com webhook...`);
         
         success = await sendImagesWebhook(address, satelliteImage, streetViewImage);
         
@@ -55,18 +55,18 @@ export const useImageCapture = () => {
         }
       }
       
-      console.log("Webhook send result:", success ? "Success" : "Failed");
+      console.log("Make.com webhook send result:", success ? "Success" : "Failed");
       
       if (success) {
         toast({
-          title: "Images Sent",
-          description: "Property images were sent for 3D model processing",
+          title: "Data Sent",
+          description: "Property details were sent to Make.com for processing",
         });
         return true;
       } else {
         toast({
           title: "Warning",
-          description: "Failed to send property images for processing after multiple attempts",
+          description: "Failed to send property data for processing. Make sure your Make.com webhook is configured.",
           variant: "destructive",
         });
         return false;

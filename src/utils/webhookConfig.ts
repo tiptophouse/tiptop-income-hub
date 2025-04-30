@@ -13,7 +13,7 @@ export const getWebhookUrl = (): string => {
 };
 
 /**
- * Sends captured property images to the processing edge function
+ * Sends captured property images to the Make.com webhook
  * 
  * @param address The property address
  * @param satelliteImage Base64 satellite image (if available)
@@ -31,49 +31,91 @@ export const sendImagesWebhook = async (
       return false;
     }
 
+    const webhookUrl = getWebhookUrl();
+    if (!webhookUrl) {
+      console.log("No Make.com webhook URL configured, skipping webhook send");
+      return false;
+    }
+
     // Ensure we have at least one image
     if (!satelliteImage && !streetViewImage) {
-      console.error("No images available to send");
+      console.error("No images available to send to Make.com");
       return false;
     }
 
-    console.log("Sending images to processing function for address:", address);
+    console.log("Sending property data to Make.com webhook for address:", address);
 
-    // Call the Supabase Edge Function
-    const { data, error } = await supabase.functions.invoke('process-map-image', {
-      body: {
-        address,
-        mapImage: streetViewImage,
-        satelliteImage: satelliteImage
-      }
-    });
+    const payload = {
+      address,
+      timestamp: new Date().toISOString(),
+      source: window.location.origin,
+      images: {
+        satelliteView: satelliteImage,
+        streetView: streetViewImage
+      },
+      analyzeRequest: true
+    };
 
-    if (error) {
-      console.error("Error calling process-map-image function:", error);
-      return false;
-    }
-
-    console.log("Function response:", data);
-    
-    if (data?.jobId) {
-      console.log("Successfully initiated 3D model generation, job ID:", data.jobId);
+    // Try to send with regular fetch first
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
       
-      // Dispatch event with job ID
-      const jobEvent = new CustomEvent('modelJobCreated', {
-        detail: { 
-          jobId: data.jobId,
-          address: address
+      if (response.ok) {
+        console.log("Successfully sent data to Make.com webhook, response:", response);
+        return true;
+      }
+      
+      console.log("Make.com webhook response not OK:", response.status);
+      // Fall through to no-cors attempt
+    } catch (error) {
+      console.log("Error with standard fetch to Make.com, trying no-cors mode:", error);
+    }
+    
+    // Try with no-cors mode as a fallback
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      body: JSON.stringify(payload)
+    });
+    
+    console.log("Data sent to Make.com webhook with no-cors mode");
+    
+    // Also call the Supabase Edge Function if it's set up
+    try {
+      const { data, error } = await supabase.functions.invoke('process-map-image', {
+        body: {
+          address,
+          mapImage: streetViewImage,
+          satelliteImage: satelliteImage
         }
       });
-      document.dispatchEvent(jobEvent);
-      
-      return true;
-    } else {
-      console.error("No job ID in response");
-      return false;
+
+      if (error) {
+        console.error("Error calling process-map-image function:", error);
+      } else if (data?.jobId) {
+        console.log("Successfully initiated 3D model generation, job ID:", data.jobId);
+        
+        // Dispatch event with job ID
+        const jobEvent = new CustomEvent('modelJobCreated', {
+          detail: { 
+            jobId: data.jobId,
+            address: address
+          }
+        });
+        document.dispatchEvent(jobEvent);
+      }
+    } catch (edgeFunctionError) {
+      console.error("Error with edge function:", edgeFunctionError);
     }
+    
+    return true;
   } catch (error) {
-    console.error("Error sending images to webhook:", error);
+    console.error("Error sending images to Make.com webhook:", error);
     return false;
   }
 };

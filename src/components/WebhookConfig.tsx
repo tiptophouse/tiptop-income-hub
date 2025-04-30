@@ -34,10 +34,10 @@ const WebhookConfig: React.FC = () => {
 
       toast({
         title: "Webhook Configured",
-        description: "Property screenshots will be sent to this webhook",
+        description: "Property screenshots will be sent to this Make.com webhook",
       });
 
-      console.log("Webhook URL saved:", url);
+      console.log("Make.com webhook URL saved:", url);
       setIsConfiguring(false);
       
       // Test the webhook connection
@@ -65,12 +65,12 @@ const WebhookConfig: React.FC = () => {
     
     toast({
       title: "Testing Connection",
-      description: "Sending test data to webhook"
+      description: "Sending test data to Make.com webhook"
     });
     
     try {
       // Try with standard fetch
-      console.log("Testing webhook connection to:", url);
+      console.log("Testing Make.com webhook connection to:", url);
       
       try {
         // First try with standard fetch
@@ -85,12 +85,12 @@ const WebhookConfig: React.FC = () => {
           })
         });
         
-        console.log("Webhook test response:", response);
+        console.log("Make.com webhook test response:", response);
         
         if (response.ok) {
           toast({
             title: "Test Successful",
-            description: "Webhook connection is working properly"
+            description: "Make.com webhook connection is working properly"
           });
         } else {
           throw new Error(`Status: ${response.status}`);
@@ -132,8 +132,8 @@ const WebhookConfig: React.FC = () => {
       <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-medium text-gray-800">Webhook Configuration</h3>
-            <p className="text-sm text-gray-600">Property screenshots will be sent to your webhook</p>
+            <h3 className="font-medium text-gray-800">Make.com Webhook</h3>
+            <p className="text-sm text-gray-600">Property data will be sent to your Make.com webhook</p>
             <p className="text-xs text-gray-500 mt-1 break-all">{url}</p>
           </div>
           <div className="flex gap-2">
@@ -156,9 +156,9 @@ const WebhookConfig: React.FC = () => {
 
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-4">
-      <h3 className="font-medium text-gray-800 mb-2">Webhook Configuration</h3>
+      <h3 className="font-medium text-gray-800 mb-2">Make.com Webhook Configuration</h3>
       <p className="text-sm text-gray-600 mb-4">
-        Enter your Make.com or other webhook URL to receive property screenshots
+        Enter your Make.com webhook URL to receive property analysis data and images
       </p>
       
       <div className="flex flex-col gap-3">
