@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import DashboardHeader from './components/DashboardHeader';
 import StatisticsCards from './components/StatisticsCards';
 import { DashboardCharts } from './components/DashboardCharts';
@@ -7,6 +8,8 @@ import { EarningsSection } from './components/EarningsSection';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Property3DModelCard from './components/Property3DModelCard';
 import PropertyOverviewCard from './components/PropertyOverviewCard';
+import { useDatabaseSchemaVerification } from '@/utils/schemaVerification';
+
 interface DashboardOverviewProps {
   userName: string;
   propertyAddress: string;
@@ -20,6 +23,7 @@ interface DashboardOverviewProps {
   pendingActions: number;
   aiRevenueDescription: string;
 }
+
 const DashboardOverview = ({
   userName,
   propertyAddress,
@@ -29,7 +33,15 @@ const DashboardOverview = ({
   pendingActions,
   aiRevenueDescription
 }: DashboardOverviewProps) => {
-  return <div className="space-y-4 sm:space-y-6">
+  const { verifySchema } = useDatabaseSchemaVerification();
+  
+  // Verify database schema on component mount
+  useEffect(() => {
+    verifySchema();
+  }, []);
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
       <DashboardHeader userName={userName} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-6">
@@ -37,7 +49,12 @@ const DashboardOverview = ({
         <PropertyOverviewCard propertyAddress={propertyAddress} />
       </div>
       
-      <StatisticsCards earnings={earnings} activeAssets={activeAssets} totalPotentialAssets={totalPotentialAssets} pendingActions={pendingActions} />
+      <StatisticsCards 
+        earnings={earnings} 
+        activeAssets={activeAssets} 
+        totalPotentialAssets={totalPotentialAssets} 
+        pendingActions={pendingActions} 
+      />
       
       <DashboardCharts earnings={earnings} aiRevenueDescription={aiRevenueDescription} />
       
@@ -50,6 +67,8 @@ const DashboardOverview = ({
         </div>
         <EarningsSection />
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default DashboardOverview;
