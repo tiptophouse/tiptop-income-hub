@@ -13,6 +13,7 @@ interface AssetSearchProps {
 const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
   const [address, setAddress] = useState('');
   const [isLocating, setIsLocating] = useState(false);
+  const [showMonetizationOptions, setShowMonetizationOptions] = useState(true);
 
   const handleSubmit = (e: React.FormEvent, propertyData?: any) => {
     e.preventDefault();
@@ -25,8 +26,16 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
       return;
     }
     
-    // Pass both the address and property data to the parent component
-    onAddressSubmit(address, propertyData);
+    // Only pass both the address and property data to the parent component 
+    // when we have property data from the webhook
+    if (propertyData) {
+      // Hide monetization options when data is received (analytics will be shown instead)
+      setShowMonetizationOptions(false);
+      onAddressSubmit(address, propertyData);
+    } else {
+      // If no property data yet, don't call onAddressSubmit
+      console.log("Waiting for webhook data before showing analysis");
+    }
   };
 
   const handleDetectLocation = () => {
@@ -51,18 +60,20 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
         onDetectLocation={handleDetectLocation}
       />
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-        {monetizationOptions.map((option) => (
-          <AssetCard
-            key={option.id}
-            icon={<option.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />}
-            title={option.title}
-            description={option.description}
-            earnings={option.earnings}
-            onClick={() => {}} // Add click handler if needed
-          />
-        ))}
-      </div>
+      {showMonetizationOptions && (
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          {monetizationOptions.map((option) => (
+            <AssetCard
+              key={option.id}
+              icon={<option.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />}
+              title={option.title}
+              description={option.description}
+              earnings={option.earnings}
+              onClick={() => {}} // Add click handler if needed
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

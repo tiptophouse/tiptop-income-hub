@@ -22,6 +22,9 @@ export const useAddressSearch = (
       return;
     }
 
+    // Initially hide any existing analysis
+    setShowAnalysis(false);
+    
     toast({
       title: "Processing",
       description: "Sending address to webhook and waiting for response...",

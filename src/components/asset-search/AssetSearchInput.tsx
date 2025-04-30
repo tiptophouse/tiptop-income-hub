@@ -54,15 +54,22 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
       const result = await sendAddressToWebhook(address);
       
       if (result.success) {
-        toast({
-          title: "Request Processed",
-          description: result.data 
-            ? "Analysis completed successfully" 
-            : "Address sent successfully. Waiting for response...",
-        });
-        
-        // Only call the original onSubmit with the response data if the webhook was successful
-        onSubmit(e, result.data);
+        if (result.data) {
+          toast({
+            title: "Analysis Complete",
+            description: "Analysis completed successfully",
+          });
+          
+          // Only call the original onSubmit with the response data if we have actual data
+          onSubmit(e, result.data);
+        } else {
+          toast({
+            title: "Pending",
+            description: "Address sent successfully but no data returned yet.",
+            variant: "default"
+          });
+          // Don't call onSubmit without data
+        }
       } else {
         toast({
           title: "Error",
