@@ -21,47 +21,37 @@ export async function verifyDatabaseSchema() {
     ];
     
     // Check if the tables exist
+    // Using a raw query to check table existence in PostgreSQL
     const { data: tables, error: tablesError } = await supabase
-      .from('pg_catalog.pg_tables')
-      .select('tablename')
-      .eq('schemaname', 'public');
+      .rpc('get_tables', {}, { count: 'exact' });
     
     if (tablesError) {
       console.error("Error fetching tables:", tablesError);
-      toast({
-        title: "Database Schema Verification Failed",
-        description: "Could not verify database schema. Please ensure you have the correct permissions.",
-        variant: "destructive"
-      });
-      return false;
+      
+      // Try alternative approach with direct SQL query
+      const { data: pgTables, error: pgTablesError } = await supabase
+        .from('information_schema.tables')
+        .select('table_name')
+        .eq('table_schema', 'public');
+      
+      if (pgTablesError) {
+        console.error("Error with alternative table fetch:", pgTablesError);
+        toast({
+          title: "Database Schema Verification Failed",
+          description: "Could not verify database schema. Please ensure you have the correct permissions.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      // Get table names from information_schema
+      const existingTableNames = pgTables?.map(t => t.table_name) || [];
+      return checkTables(existingTableNames, expectedTables);
     }
     
-    // Get table names
-    const existingTableNames = tables?.map(t => t.tablename) || [];
-    console.log("Existing tables:", existingTableNames);
-    
-    // Check for missing tables
-    const missingTables = expectedTables.filter(
-      table => !existingTableNames.includes(table)
-    );
-    
-    if (missingTables.length > 0) {
-      console.warn("Missing tables:", missingTables);
-      toast({
-        title: "Database Schema Mismatch",
-        description: `Your Supabase database is missing required tables: ${missingTables.join(', ')}`,
-        variant: "destructive"
-      });
-      return false;
-    }
-    
-    console.log("All required tables exist in the database");
-    toast({
-      title: "Database Schema Verification",
-      description: "Your Supabase database schema appears to be correctly set up.",
-      variant: "default"
-    });
-    return true;
+    // Get table names from the RPC call
+    const existingTableNames = tables || [];
+    return checkTables(existingTableNames, expectedTables);
   } catch (error) {
     console.error("Error verifying database schema:", error);
     toast({
@@ -71,6 +61,36 @@ export async function verifyDatabaseSchema() {
     });
     return false;
   }
+}
+
+/**
+ * Helper function to check if expected tables exist
+ */
+function checkTables(existingTableNames, expectedTables) {
+  console.log("Existing tables:", existingTableNames);
+  
+  // Check for missing tables
+  const missingTables = expectedTables.filter(
+    table => !existingTableNames.includes(table)
+  );
+  
+  if (missingTables.length > 0) {
+    console.warn("Missing tables:", missingTables);
+    toast({
+      title: "Database Schema Mismatch",
+      description: `Your Supabase database is missing required tables: ${missingTables.join(', ')}`,
+      variant: "destructive"
+    });
+    return false;
+  }
+  
+  console.log("All required tables exist in the database");
+  toast({
+    title: "Database Schema Verification",
+    description: "Your Supabase database schema appears to be correctly set up.",
+    variant: "default"
+  });
+  return true;
 }
 
 /**
