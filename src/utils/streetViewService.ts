@@ -1,14 +1,13 @@
-
 import { getGoogleMapsApiKey } from './api/meshyConfig';
 import html2canvas from 'html2canvas';
 
 /**
- * Gets a static Street View image for the specified address as base64
+ * Gets a Street View image URL for the specified address
  * 
  * @param address The address to get the Street View for
- * @returns Base64 encoded image or null if not available
+ * @returns URL to the Street View image or null if not available
  */
-export const getStreetViewImageAsBase64 = async (address: string): Promise<string | null> => {
+export const getStreetViewImageUrl = async (address: string): Promise<string | null> => {
   try {
     if (!window.google?.maps) {
       console.error("Google Maps API not loaded");
@@ -51,14 +50,9 @@ export const getStreetViewImageAsBase64 = async (address: string): Promise<strin
             });
           });
 
-          // Street View is available, get the image directly via Static API
+          // Street View is available, return the URL
           const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${lat},${lng}&key=${apiKey}`;
-          
-          // Fetch the image and convert to base64
-          const response = await fetch(imageUrl);
-          const blob = await response.blob();
-          const base64 = await blobToBase64(blob);
-          resolve(base64);
+          resolve(imageUrl);
         } catch (err) {
           console.log("Street View not available for this location");
           resolve(null);
@@ -66,7 +60,113 @@ export const getStreetViewImageAsBase64 = async (address: string): Promise<strin
       });
     });
   } catch (error) {
-    console.error("Error getting Street View image:", error);
+    console.error("Error getting Street View image URL:", error);
+    return null;
+  }
+};
+
+/**
+ * Gets a satellite image URL for the specified address
+ * 
+ * @param address The address to get the satellite view for
+ * @returns URL to the satellite image or null if not available
+ */
+export const getSatelliteImageUrl = async (address: string): Promise<string | null> => {
+  try {
+    if (!window.google?.maps) {
+      console.error("Google Maps API not loaded");
+      return null;
+    }
+
+    // Get API key
+    const apiKey = await getGoogleMapsApiKey();
+    
+    // First geocode the address
+    const geocoder = new window.google.maps.Geocoder();
+    
+    return new Promise((resolve, reject) => {
+      geocoder.geocode({ address }, async (results, status) => {
+        if (status !== "OK" || !results || !results[0]) {
+          console.error("Geocoding failed:", status);
+          resolve(null);
+          return;
+        }
+
+        const location = results[0].geometry.location;
+        const lat = location.lat();
+        const lng = location.lng();
+
+        // Return satellite image URL
+        const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=18&size=600x400&maptype=satellite&key=${apiKey}`;
+        resolve(imageUrl);
+      });
+    });
+  } catch (error) {
+    console.error("Error getting satellite image URL:", error);
+    return null;
+  }
+};
+
+/**
+ * Gets an aerial image URL at zoom level 12 for the specified address
+ * 
+ * @param address The address to get the aerial view for
+ * @returns URL to the aerial image or null if not available
+ */
+export const getAerialImageZoom12Url = async (address: string): Promise<string | null> => {
+  try {
+    if (!window.google?.maps) {
+      console.error("Google Maps API not loaded");
+      return null;
+    }
+
+    // Get API key
+    const apiKey = await getGoogleMapsApiKey();
+    
+    // First geocode the address
+    const geocoder = new window.google.maps.Geocoder();
+    
+    return new Promise((resolve, reject) => {
+      geocoder.geocode({ address }, async (results, status) => {
+        if (status !== "OK" || !results || !results[0]) {
+          console.error("Geocoding failed:", status);
+          resolve(null);
+          return;
+        }
+
+        const location = results[0].geometry.location;
+        const lat = location.lat();
+        const lng = location.lng();
+
+        // Return aerial image URL at zoom level 12
+        const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=12&size=600x400&maptype=satellite&key=${apiKey}`;
+        resolve(imageUrl);
+      });
+    });
+  } catch (error) {
+    console.error("Error getting aerial image URL:", error);
+    return null;
+  }
+};
+
+/**
+ * Gets a static Street View image for the specified address as base64
+ * 
+ * @param address The address to get the Street View for
+ * @returns Base64 encoded image or null if not available
+ */
+export const getStreetViewImageAsBase64 = async (address: string): Promise<string | null> => {
+  try {
+    const imageUrl = await getStreetViewImageUrl(address);
+    if (!imageUrl) return null;
+    
+    // Fetch the image and convert to base64
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const base64 = await blobToBase64(blob);
+    return base64;
+  } catch (error) {
+    console.error("Error getting Street View image as base64:", error);
     return null;
   }
 };
@@ -79,46 +179,16 @@ export const getStreetViewImageAsBase64 = async (address: string): Promise<strin
  */
 export const getSatelliteImageAsBase64 = async (address: string): Promise<string | null> => {
   try {
-    if (!window.google?.maps) {
-      console.error("Google Maps API not loaded");
-      return null;
-    }
-
-    // Get API key
-    const apiKey = await getGoogleMapsApiKey();
+    const imageUrl = await getSatelliteImageUrl(address);
+    if (!imageUrl) return null;
     
-    // First geocode the address
-    const geocoder = new window.google.maps.Geocoder();
-    
-    return new Promise((resolve, reject) => {
-      geocoder.geocode({ address }, async (results, status) => {
-        if (status !== "OK" || !results || !results[0]) {
-          console.error("Geocoding failed:", status);
-          resolve(null);
-          return;
-        }
-
-        const location = results[0].geometry.location;
-        const lat = location.lat();
-        const lng = location.lng();
-
-        // Get satellite image via Static API
-        const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=18&size=600x400&maptype=satellite&key=${apiKey}`;
-        
-        // Fetch the image and convert to base64
-        try {
-          const response = await fetch(imageUrl);
-          const blob = await response.blob();
-          const base64 = await blobToBase64(blob);
-          resolve(base64);
-        } catch (err) {
-          console.error("Error fetching satellite image:", err);
-          resolve(null);
-        }
-      });
-    });
+    // Fetch the image and convert to base64
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const base64 = await blobToBase64(blob);
+    return base64;
   } catch (error) {
-    console.error("Error getting satellite image:", error);
+    console.error("Error getting satellite image as base64:", error);
     return null;
   }
 };
@@ -131,46 +201,16 @@ export const getSatelliteImageAsBase64 = async (address: string): Promise<string
  */
 export const getAerialImageZoom12AsBase64 = async (address: string): Promise<string | null> => {
   try {
-    if (!window.google?.maps) {
-      console.error("Google Maps API not loaded");
-      return null;
-    }
-
-    // Get API key
-    const apiKey = await getGoogleMapsApiKey();
+    const imageUrl = await getAerialImageZoom12Url(address);
+    if (!imageUrl) return null;
     
-    // First geocode the address
-    const geocoder = new window.google.maps.Geocoder();
-    
-    return new Promise((resolve, reject) => {
-      geocoder.geocode({ address }, async (results, status) => {
-        if (status !== "OK" || !results || !results[0]) {
-          console.error("Geocoding failed:", status);
-          resolve(null);
-          return;
-        }
-
-        const location = results[0].geometry.location;
-        const lat = location.lat();
-        const lng = location.lng();
-
-        // Get aerial image via Static API at zoom level 12
-        const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=12&size=600x400&maptype=satellite&key=${apiKey}`;
-        
-        // Fetch the image and convert to base64
-        try {
-          const response = await fetch(imageUrl);
-          const blob = await response.blob();
-          const base64 = await blobToBase64(blob);
-          resolve(base64);
-        } catch (err) {
-          console.error("Error fetching aerial image:", err);
-          resolve(null);
-        }
-      });
-    });
+    // Fetch the image and convert to base64
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const base64 = await blobToBase64(blob);
+    return base64;
   } catch (error) {
-    console.error("Error getting aerial image:", error);
+    console.error("Error getting aerial image as base64:", error);
     return null;
   }
 };

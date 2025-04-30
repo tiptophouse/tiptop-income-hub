@@ -1,37 +1,37 @@
 
 import { toast } from '@/components/ui/use-toast';
-import { getStreetViewImageAsBase64, getSatelliteImageAsBase64, captureMapScreenshot, getAerialImageZoom12AsBase64 } from '@/utils/streetViewService';
+import { getStreetViewImageUrl, getSatelliteImageUrl, captureMapScreenshot, getAerialImageZoom12Url } from '@/utils/streetViewService';
 import { sendImagesWebhook } from '@/utils/webhookConfig';
 
 export const useImageCapture = () => {
   const captureAndSendImages = async (address: string, mapRef: React.RefObject<HTMLDivElement>) => {
     try {
-      console.log("Starting image capture process for address:", address);
+      console.log("Starting image URL capture process for address:", address);
       
-      // Capture all images in parallel to improve performance
-      const [streetViewImage, satelliteImage, aerialImageZoom12] = await Promise.all([
-        getStreetViewImageAsBase64(address).catch(err => {
-          console.error("Error capturing Street View:", err);
+      // Get all image URLs in parallel to improve performance
+      const [streetViewImageUrl, satelliteImageUrl, aerialImageZoom12Url] = await Promise.all([
+        getStreetViewImageUrl(address).catch(err => {
+          console.error("Error getting Street View URL:", err);
           return null;
         }),
-        getSatelliteImageAsBase64(address).catch(err => {
-          console.error("Error capturing Satellite View:", err);
+        getSatelliteImageUrl(address).catch(err => {
+          console.error("Error getting Satellite View URL:", err);
           return null;
         }),
-        getAerialImageZoom12AsBase64(address).catch(err => {
-          console.error("Error capturing Aerial View at zoom 12:", err);
+        getAerialImageZoom12Url(address).catch(err => {
+          console.error("Error getting Aerial View at zoom 12 URL:", err);
           return null;
         })
       ]);
       
-      console.log("Images captured:", {
-        streetView: streetViewImage ? "✓" : "✗",
-        satellite: satelliteImage ? "✓" : "✗",
-        aerialZoom12: aerialImageZoom12 ? "✓" : "✗"
+      console.log("Image URLs captured:", {
+        streetView: streetViewImageUrl ? "✓" : "✗",
+        satellite: satelliteImageUrl ? "✓" : "✗",
+        aerialZoom12: aerialImageZoom12Url ? "✓" : "✗"
       });
       
-      if (!streetViewImage && !satelliteImage && !aerialImageZoom12) {
-        console.error("Failed to capture any images");
+      if (!streetViewImageUrl && !satelliteImageUrl && !aerialImageZoom12Url) {
+        console.error("Failed to capture any image URLs");
         toast({
           title: "Warning",
           description: "Could not capture property images for this address",
@@ -49,7 +49,7 @@ export const useImageCapture = () => {
         attempts++;
         console.log(`Attempt ${attempts}/${maxAttempts} sending to Make.com webhook...`);
         
-        success = await sendImagesWebhook(address, satelliteImage, streetViewImage, aerialImageZoom12);
+        success = await sendImagesWebhook(address, satelliteImageUrl, streetViewImageUrl, aerialImageZoom12Url);
         
         if (!success && attempts < maxAttempts) {
           console.log(`Retrying in 1 second...`);
@@ -74,7 +74,7 @@ export const useImageCapture = () => {
         return false;
       }
     } catch (error) {
-      console.error("Error capturing and sending images:", error);
+      console.error("Error capturing and sending image URLs:", error);
       toast({
         title: "Error",
         description: "Failed to process property images",

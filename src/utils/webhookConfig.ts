@@ -1,7 +1,7 @@
 
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { getStreetViewImageAsBase64, getSatelliteImageAsBase64, getAerialImageZoom12AsBase64 } from '@/utils/streetViewService';
+import { getStreetViewImageUrl, getSatelliteImageUrl, getAerialImageZoom12Url } from '@/utils/streetViewService';
 
 // Store the webhook URL in localStorage
 export const setWebhookUrl = (url: string): void => {
@@ -29,39 +29,39 @@ export const sendAddressToWebhook = async (address: string): Promise<{success: b
     const webhookUrl = getWebhookUrl();
     console.log("Sending address to Make.com webhook:", address);
 
-    // Get images first - this is the key part for adding images to the payload
-    console.log("Capturing Google Maps images for address:", address);
-    const [streetViewImage, satelliteImage, aerialImageZoom12] = await Promise.all([
-      getStreetViewImageAsBase64(address).catch(err => {
-        console.error("Error capturing Street View:", err);
+    // Get image URLs instead of base64 data
+    console.log("Getting Google Maps image URLs for address:", address);
+    const [streetViewImageUrl, satelliteImageUrl, aerialImageZoom12Url] = await Promise.all([
+      getStreetViewImageUrl(address).catch(err => {
+        console.error("Error getting Street View URL:", err);
         return null;
       }),
-      getSatelliteImageAsBase64(address).catch(err => {
-        console.error("Error capturing Satellite View:", err);
+      getSatelliteImageUrl(address).catch(err => {
+        console.error("Error getting Satellite View URL:", err);
         return null;
       }),
-      getAerialImageZoom12AsBase64(address).catch(err => {
-        console.error("Error capturing Aerial View at zoom 12:", err);
+      getAerialImageZoom12Url(address).catch(err => {
+        console.error("Error getting Aerial View at zoom 12 URL:", err);
         return null;
       })
     ]);
 
-    console.log("Images captured:", {
-      streetView: streetViewImage ? "✓" : "✗",
-      satellite: satelliteImage ? "✓" : "✗",
-      aerialZoom12: aerialImageZoom12 ? "✓" : "✗"
+    console.log("Image URLs obtained:", {
+      streetView: streetViewImageUrl ? "✓" : "✗",
+      satellite: satelliteImageUrl ? "✓" : "✗",
+      aerialZoom12: aerialImageZoom12Url ? "✓" : "✗"
     });
 
-    // Include the images in the payload
+    // Include the image URLs in the payload
     const payload = {
       address,
       timestamp: new Date().toISOString(),
       source: window.location.origin,
       action: "address_submission",
       images: {
-        streetView: streetViewImage,
-        satellite: satelliteImage,
-        aerialZoom12: aerialImageZoom12
+        streetView: streetViewImageUrl,
+        satellite: satelliteImageUrl,
+        aerialZoom12: aerialImageZoom12Url
       }
     };
 
@@ -74,7 +74,7 @@ export const sendAddressToWebhook = async (address: string): Promise<{success: b
       });
       
       if (response.ok) {
-        console.log("Successfully sent address and images to Make.com webhook");
+        console.log("Successfully sent address and image URLs to Make.com webhook");
         
         try {
           // Try to parse the response body
@@ -124,7 +124,7 @@ export const sendAddressToWebhook = async (address: string): Promise<{success: b
       body: JSON.stringify(payload)
     });
     
-    console.log("Address and images sent to Make.com webhook with no-cors mode");
+    console.log("Address and image URLs sent to Make.com webhook with no-cors mode");
     
     // Since no-cors mode doesn't allow us to check the response body,
     // we'll assume success for now but don't have actual response data
@@ -136,19 +136,19 @@ export const sendAddressToWebhook = async (address: string): Promise<{success: b
 };
 
 /**
- * Sends captured property images to the Make.com webhook
+ * Sends property image URLs to the Make.com webhook
  * 
  * @param address The property address
- * @param satelliteImage Base64 satellite image (if available)
- * @param streetViewImage Base64 street view image (if available)
- * @param aerialImageZoom12 Base64 aerial image at zoom level 12 (if available)
+ * @param satelliteImageUrl URL to satellite image (if available)
+ * @param streetViewImageUrl URL to street view image (if available)
+ * @param aerialImageZoom12Url URL to aerial image at zoom level 12 (if available)
  * @returns Success status
  */
 export const sendImagesWebhook = async (
   address: string,
-  satelliteImage: string | null, 
-  streetViewImage: string | null,
-  aerialImageZoom12: string | null = null
+  satelliteImageUrl: string | null, 
+  streetViewImageUrl: string | null,
+  aerialImageZoom12Url: string | null = null
 ): Promise<boolean> => {
   try {
     if (!address) {
@@ -163,8 +163,8 @@ export const sendImagesWebhook = async (
     }
 
     // Ensure we have at least one image
-    if (!satelliteImage && !streetViewImage && !aerialImageZoom12) {
-      console.error("No images available to send to Make.com");
+    if (!satelliteImageUrl && !streetViewImageUrl && !aerialImageZoom12Url) {
+      console.error("No image URLs available to send to Make.com");
       return false;
     }
 
@@ -175,9 +175,9 @@ export const sendImagesWebhook = async (
       timestamp: new Date().toISOString(),
       source: window.location.origin,
       images: {
-        satelliteView: satelliteImage,
-        streetView: streetViewImage,
-        aerialZoom12: aerialImageZoom12
+        satelliteView: satelliteImageUrl,
+        streetView: streetViewImageUrl,
+        aerialZoom12: aerialImageZoom12Url
       },
       analyzeRequest: true
     };
@@ -216,9 +216,9 @@ export const sendImagesWebhook = async (
       const { data, error } = await supabase.functions.invoke('process-map-image', {
         body: {
           address,
-          mapImage: streetViewImage,
-          satelliteImage: satelliteImage,
-          aerialImage: aerialImageZoom12
+          mapImageUrl: streetViewImageUrl,
+          satelliteImageUrl: satelliteImageUrl,
+          aerialImageUrl: aerialImageZoom12Url
         }
       });
 
@@ -246,3 +246,4 @@ export const sendImagesWebhook = async (
     return false;
   }
 };
+
