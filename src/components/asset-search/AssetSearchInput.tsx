@@ -27,6 +27,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
   const autocompleteRef = useRef<any>(null);
   const isMobile = useIsMobile();
   const [autocompleteInitialized, setAutocompleteInitialized] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Modified submit handler to send address to webhook
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,11 +42,29 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
       return;
     }
 
-    // Send address to webhook before calling the original onSubmit
-    await sendAddressToWebhook(address);
-    
-    // Call the original onSubmit function
-    onSubmit(e);
+    // Show loading state while images are being captured
+    setIsSubmitting(true);
+    toast({
+      title: "Processing",
+      description: "Capturing property images...",
+    });
+
+    try {
+      // Send address to webhook before calling the original onSubmit
+      await sendAddressToWebhook(address);
+      
+      // Call the original onSubmit function
+      onSubmit(e);
+    } catch (error) {
+      console.error("Error processing address submission:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process address. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -131,6 +150,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
           aria-label="Property address"
           autoComplete="street-address"
           spellCheck="false"
+          disabled={isSubmitting}
         />
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
           <Button 
@@ -139,7 +159,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
             size="icon" 
             className="p-1 h-9 w-9 rounded-full hover:bg-[#9b87f5]/10 text-[#9b87f5]"
             onClick={onDetectLocation}
-            disabled={isLocating}
+            disabled={isLocating || isSubmitting}
             aria-label="Detect current location"
           >
             {isLocating ? (
@@ -155,8 +175,19 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
             type="submit" 
             className="bg-[#9b87f5] hover:bg-[#8B5CF6] px-4 sm:px-6 py-3 h-auto rounded-full text-xs sm:text-sm font-semibold shadow-lg transition-all duration-300 hover:shadow-xl text-white whitespace-nowrap"
             aria-label="Analyze address"
+            disabled={isSubmitting}
           >
-            Analyze Now
+            {isSubmitting ? (
+              <div className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4}></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Processing...</span>
+              </div>
+            ) : (
+              "Analyze Now"
+            )}
           </Button>
         </div>
       </div>

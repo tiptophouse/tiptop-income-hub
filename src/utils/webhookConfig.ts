@@ -1,6 +1,6 @@
-
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { getStreetViewImageAsBase64, getSatelliteImageAsBase64, getAerialImageZoom12AsBase64 } from '@/utils/streetViewService';
 
 // Store the webhook URL in localStorage
 export const setWebhookUrl = (url: string): void => {
@@ -28,11 +28,39 @@ export const sendAddressToWebhook = async (address: string): Promise<boolean> =>
     const webhookUrl = getWebhookUrl();
     console.log("Sending address to Make.com webhook:", address);
 
+    // Get images first
+    console.log("Capturing Google Maps images for address:", address);
+    const [streetViewImage, satelliteImage, aerialImageZoom12] = await Promise.all([
+      getStreetViewImageAsBase64(address).catch(err => {
+        console.error("Error capturing Street View:", err);
+        return null;
+      }),
+      getSatelliteImageAsBase64(address).catch(err => {
+        console.error("Error capturing Satellite View:", err);
+        return null;
+      }),
+      getAerialImageZoom12AsBase64(address).catch(err => {
+        console.error("Error capturing Aerial View at zoom 12:", err);
+        return null;
+      })
+    ]);
+
+    console.log("Images captured:", {
+      streetView: streetViewImage ? "✓" : "✗",
+      satellite: satelliteImage ? "✓" : "✗",
+      aerialZoom12: aerialImageZoom12 ? "✓" : "✗"
+    });
+
     const payload = {
       address,
       timestamp: new Date().toISOString(),
       source: window.location.origin,
-      action: "address_submission"
+      action: "address_submission",
+      images: {
+        streetView: streetViewImage,
+        satellite: satelliteImage,
+        aerialZoom12: aerialImageZoom12
+      }
     };
 
     // Try to send with regular fetch first
@@ -44,7 +72,7 @@ export const sendAddressToWebhook = async (address: string): Promise<boolean> =>
       });
       
       if (response.ok) {
-        console.log("Successfully sent address to Make.com webhook, response:", response);
+        console.log("Successfully sent address and images to Make.com webhook, response:", response);
         return true;
       }
       
@@ -62,7 +90,7 @@ export const sendAddressToWebhook = async (address: string): Promise<boolean> =>
       body: JSON.stringify(payload)
     });
     
-    console.log("Address sent to Make.com webhook with no-cors mode");
+    console.log("Address and images sent to Make.com webhook with no-cors mode");
     return true;
   } catch (error) {
     console.error("Error sending address to Make.com webhook:", error);
