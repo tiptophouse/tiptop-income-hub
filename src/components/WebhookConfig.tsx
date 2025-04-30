@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { toast } from './ui/use-toast';
-import { getWebhookUrl, setWebhookUrl } from '@/utils/webhookConfig';
+import { getWebhookUrl, setWebhookUrl } from '@/utils/webhook';
 
 const WebhookConfig: React.FC = () => {
   const [url, setUrl] = useState('');

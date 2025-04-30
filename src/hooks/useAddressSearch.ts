@@ -1,7 +1,7 @@
 
 import { FormEvent } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { sendAddressToWebhook } from '@/utils/webhookConfig';
+import { sendAddressToWebhook } from '@/utils/webhook';
 
 export const useAddressSearch = (
   address: string,

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { sendAddressToWebhook } from '@/utils/webhookConfig';
+import { sendAddressToWebhook } from '@/utils/webhook';
 
 interface AssetSearchInputProps {
   address: string;

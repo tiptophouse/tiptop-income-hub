@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import { geocodeAddress, reverseGeocode, getCurrentLocation } from '@/utils/geocodingService';
 import { usePropertyData } from '@/hooks/usePropertyData';
 import { useImageCapture } from '@/hooks/useImageCapture';
-import { sendAddressToWebhook } from '@/utils/webhookConfig';
+import { sendAddressToWebhook } from '@/utils/webhook';
 
 export const useLocationHandler = (
   setMapCenter: (location: { lat: number; lng: number }) => void,
