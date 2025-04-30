@@ -1,3 +1,4 @@
+
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getStreetViewImageAsBase64, getSatelliteImageAsBase64, getAerialImageZoom12AsBase64 } from '@/utils/streetViewService';
@@ -28,7 +29,7 @@ export const sendAddressToWebhook = async (address: string): Promise<boolean> =>
     const webhookUrl = getWebhookUrl();
     console.log("Sending address to Make.com webhook:", address);
 
-    // Get images first
+    // Get images first - this is the key part for adding images to the payload
     console.log("Capturing Google Maps images for address:", address);
     const [streetViewImage, satelliteImage, aerialImageZoom12] = await Promise.all([
       getStreetViewImageAsBase64(address).catch(err => {
@@ -51,6 +52,7 @@ export const sendAddressToWebhook = async (address: string): Promise<boolean> =>
       aerialZoom12: aerialImageZoom12 ? "✓" : "✗"
     });
 
+    // Include the images in the payload
     const payload = {
       address,
       timestamp: new Date().toISOString(),
