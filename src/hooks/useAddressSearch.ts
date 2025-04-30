@@ -23,29 +23,31 @@ export const useAddressSearch = (
 
     toast({
       title: "Processing",
-      description: "Capturing property images and analyzing your address...",
+      description: "Sending address to webhook and waiting for response...",
     });
     
-    // Send to webhook including images
+    // Send to webhook including images - wait for actual webhook response
     const result = await sendAddressToWebhook(address);
     if (result) {
       console.log("Address analysis webhook completed successfully");
       
-      // Confirm to user that Google Maps images were included
       toast({
         title: "Analysis Started",
-        description: "Property images captured and sent for analysis",
+        description: "Property data sent for analysis. Waiting for webhook response...",
       });
+      
+      // Only show analysis when we get confirmation back
+      setShowAnalysis(true);
     } else {
-      console.warn("Address analysis webhook had issues - continuing with analysis");
+      console.warn("Address analysis webhook had issues");
       toast({
-        title: "Warning",
-        description: "Some issues occurred when processing images",
+        title: "Error",
+        description: "Unable to process address. Please try again.",
         variant: "destructive"
       });
+      // Don't show analysis if webhook failed
+      setShowAnalysis(false);
     }
-    
-    setShowAnalysis(true);
   };
 
   const handleLocationDetection = () => {

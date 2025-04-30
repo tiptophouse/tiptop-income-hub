@@ -42,11 +42,11 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
       return;
     }
 
-    // Show loading state while images are being captured
+    // Show loading state while processing the webhook request
     setIsSubmitting(true);
     toast({
       title: "Processing",
-      description: "Capturing property images and analyzing address...",
+      description: "Sending address to webhook and waiting for response...",
     });
 
     try {
@@ -55,19 +55,19 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
       
       if (result) {
         toast({
-          title: "Images Captured",
-          description: "Property images have been sent to Make.com",
+          title: "Request Processed",
+          description: "Address successfully sent. Waiting for webhook response...",
         });
+        
+        // Only call the original onSubmit if the webhook was successful
+        onSubmit(e);
       } else {
         toast({
-          title: "Warning",
-          description: "There was an issue capturing property images",
+          title: "Error",
+          description: "Failed to process address. Please check your webhook configuration.",
           variant: "destructive"
         });
       }
-      
-      // Call the original onSubmit function
-      onSubmit(e);
     } catch (error) {
       console.error("Error processing address submission:", error);
       toast({
