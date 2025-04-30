@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -33,7 +32,7 @@ serve(async (req) => {
       console.error("OPENAI_API_KEY is not set in environment variables");
       return new Response(
         JSON.stringify({ 
-          error: "OpenAI API key is not configured", 
+          error: "OpenAI API key is not configured in the new Supabase environment", 
           defaultData: generateMockData(address)
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -49,7 +48,8 @@ serve(async (req) => {
       );
     }
     
-    // Make a real call to OpenAI API
+    // Log the API key status (not the actual key)
+    console.log("OpenAI API key status:", openAIApiKey ? "Present" : "Missing");
     console.log("Making OpenAI API call for address:", address);
     
     // System prompt for property monetization analysis
@@ -138,10 +138,7 @@ Make realistic estimates based on typical properties at this address.`;
 
     try {
       console.log("Sending request to OpenAI API...");
-      
-      // Log the API key status (not the actual key)
-      console.log("OpenAI API key status:", openAIApiKey ? "Present" : "Missing");
-      
+            
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {

@@ -3,6 +3,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+// Update these values to match your new Supabase instance
 const SUPABASE_URL = "https://xudrepoheooqwymnsduu.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1ZHJlcG9oZW9vcXd5bW5zZHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTMzNjAxNTgsImV4cCI6MjAyODkzNjE1OH0.euFul-GSALrXnjDu6ScAx7rruxP_CCWBJ4sj_puC4nE";
 

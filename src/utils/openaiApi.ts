@@ -38,7 +38,9 @@ export async function getPropertyInsightsFromAI(address: string) {
       console.error("Function error:", data.error);
       toast({
         title: "OpenAI Analysis Error",
-        description: "Could not generate AI analysis. Using estimated data instead.",
+        description: data.error.includes("API key") 
+          ? "OpenAI API key not configured in new Supabase environment. Using estimated data instead." 
+          : "Could not generate AI analysis. Using estimated data instead.",
         variant: "destructive"
       });
       return data.defaultData; // Return fallback data if provided
