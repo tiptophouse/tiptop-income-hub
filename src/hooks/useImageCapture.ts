@@ -3,6 +3,20 @@ import { toast } from '@/components/ui/use-toast';
 import { getStreetViewImageUrl, getSatelliteImageUrl, captureMapScreenshot, getAerialImageZoom12Url } from '@/utils/streetViewService';
 import { sendImagesWebhook } from '@/utils/webhookConfig';
 
+// Check if a URL points to a supported image format
+const isSupportedImageFormat = (url: string | null): boolean => {
+  if (!url) return false;
+  
+  const supportedFormats = ['png', 'jpeg', 'jpg', 'gif', 'webp'];
+  const urlLower = url.toLowerCase();
+  
+  return supportedFormats.some(format => 
+    urlLower.includes(`.${format}`) || 
+    urlLower.includes(`format=${format}`) || 
+    urlLower.includes(`&maptype=`) // Google Maps static images are always valid
+  );
+};
+
 export const useImageCapture = () => {
   const captureAndSendImages = async (address: string, mapRef: React.RefObject<HTMLDivElement>) => {
     try {
@@ -30,11 +44,22 @@ export const useImageCapture = () => {
         aerialZoom12: aerialImageZoom12Url ? "✓" : "✗"
       });
       
-      if (!streetViewImageUrl && !satelliteImageUrl && !aerialImageZoom12Url) {
-        console.error("Failed to capture any image URLs");
+      // Validate image formats
+      const validatedStreetViewUrl = isSupportedImageFormat(streetViewImageUrl) ? streetViewImageUrl : null;
+      const validatedSatelliteUrl = isSupportedImageFormat(satelliteImageUrl) ? satelliteImageUrl : null;
+      const validatedAerialUrl = isSupportedImageFormat(aerialImageZoom12Url) ? aerialImageZoom12Url : null;
+      
+      console.log("Validated image URLs:", {
+        streetView: validatedStreetViewUrl ? "✓" : "✗",
+        satellite: validatedSatelliteUrl ? "✓" : "✗",
+        aerialZoom12: validatedAerialUrl ? "✓" : "✗"
+      });
+      
+      if (!validatedStreetViewUrl && !validatedSatelliteUrl && !validatedAerialUrl) {
+        console.error("Failed to capture any valid image URLs");
         toast({
           title: "Warning",
-          description: "Could not capture property images for this address",
+          description: "Could not capture valid property images for this address",
           variant: "destructive",
         });
         return false;
@@ -49,7 +74,7 @@ export const useImageCapture = () => {
         attempts++;
         console.log(`Attempt ${attempts}/${maxAttempts} sending to Make.com webhook...`);
         
-        success = await sendImagesWebhook(address, satelliteImageUrl, streetViewImageUrl, aerialImageZoom12Url);
+        success = await sendImagesWebhook(address, validatedSatelliteUrl, validatedStreetViewUrl, validatedAerialUrl);
         
         if (!success && attempts < maxAttempts) {
           console.log(`Retrying in 1 second...`);

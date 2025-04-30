@@ -1,4 +1,3 @@
-
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getStreetViewImageUrl, getSatelliteImageUrl, getAerialImageZoom12Url } from '@/utils/streetViewService';
@@ -11,6 +10,21 @@ export const setWebhookUrl = (url: string): void => {
 // Get the webhook URL from localStorage or use the provided default
 export const getWebhookUrl = (): string => {
   return localStorage.getItem('webhook_url') || 'https://hook.eu1.make.com/cweboprf3sf4bjd66lobyzdt8d325b1v';
+};
+
+// Check if image URL has a supported format
+const isValidImageFormat = (url: string | null): boolean => {
+  if (!url) return false;
+  
+  const supportedFormats = ['png', 'jpeg', 'jpg', 'gif', 'webp'];
+  const urlLower = url.toLowerCase();
+  
+  // Check if the URL ends with any of the supported formats
+  return supportedFormats.some(format => 
+    urlLower.includes(`.${format}`) || // Check file extension
+    urlLower.includes(`format=${format}`) || // Check query param format
+    urlLower.includes(`&maptype=`) // Special case for Google Maps static images which are always valid
+  );
 };
 
 /**
@@ -52,17 +66,26 @@ export const sendAddressToWebhook = async (address: string): Promise<{success: b
       aerialZoom12: aerialImageZoom12Url ? "✓" : "✗"
     });
 
-    // Include the image URLs in the payload
+    // Validate image formats
+    const validatedImages = {
+      streetView: isValidImageFormat(streetViewImageUrl) ? streetViewImageUrl : null,
+      satellite: isValidImageFormat(satelliteImageUrl) ? satelliteImageUrl : null,
+      aerialZoom12: isValidImageFormat(aerialImageZoom12Url) ? aerialImageZoom12Url : null
+    };
+    
+    console.log("Validated image URLs:", {
+      streetView: validatedImages.streetView ? "✓" : "✗",
+      satellite: validatedImages.satellite ? "✓" : "✗",
+      aerialZoom12: validatedImages.aerialZoom12 ? "✓" : "✗"
+    });
+
+    // Include the validated image URLs in the payload
     const payload = {
       address,
       timestamp: new Date().toISOString(),
       source: window.location.origin,
       action: "address_submission",
-      images: {
-        streetView: streetViewImageUrl,
-        satellite: satelliteImageUrl,
-        aerialZoom12: aerialImageZoom12Url
-      }
+      images: validatedImages
     };
 
     // Try to send with regular fetch first
@@ -161,10 +184,28 @@ export const sendImagesWebhook = async (
       console.log("No Make.com webhook URL configured, skipping webhook send");
       return false;
     }
+    
+    // Validate image formats
+    const validatedImages = {
+      satelliteView: isValidImageFormat(satelliteImageUrl) ? satelliteImageUrl : null,
+      streetView: isValidImageFormat(streetViewImageUrl) ? streetViewImageUrl : null,
+      aerialZoom12: isValidImageFormat(aerialImageZoom12Url) ? aerialImageZoom12Url : null
+    };
+    
+    console.log("Validated image URLs for webhook:", {
+      streetView: validatedImages.streetView ? "✓" : "✗",
+      satellite: validatedImages.satelliteView ? "✓" : "✗",
+      aerialZoom12: validatedImages.aerialZoom12 ? "✓" : "✗"
+    });
 
-    // Ensure we have at least one image
-    if (!satelliteImageUrl && !streetViewImageUrl && !aerialImageZoom12Url) {
-      console.error("No image URLs available to send to Make.com");
+    // Ensure we have at least one valid image
+    if (!validatedImages.satelliteView && !validatedImages.streetView && !validatedImages.aerialZoom12) {
+      console.error("No valid image URLs available to send to Make.com");
+      toast({
+        title: "Warning",
+        description: "No valid images were found for this address. Analysis may be limited.",
+        variant: "destructive",
+      });
       return false;
     }
 
@@ -174,11 +215,7 @@ export const sendImagesWebhook = async (
       address,
       timestamp: new Date().toISOString(),
       source: window.location.origin,
-      images: {
-        satelliteView: satelliteImageUrl,
-        streetView: streetViewImageUrl,
-        aerialZoom12: aerialImageZoom12Url
-      },
+      images: validatedImages,
       analyzeRequest: true
     };
 
@@ -246,4 +283,3 @@ export const sendImagesWebhook = async (
     return false;
   }
 };
-
