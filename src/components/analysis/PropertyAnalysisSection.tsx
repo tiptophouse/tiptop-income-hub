@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import PropertyMap from '../PropertyMap';
 import PropertyInsights from '../PropertyInsights';
 import Property3DModel from '../Property3DModel';
-import { storePropertyData } from '@/utils/modelGeneration';
 import { captureStreetViewForModel } from '@/utils/streetView';
+import { storePropertyData } from '@/utils/meshyApi';
 import { supabase } from '@/integrations/supabase/client';
 
 interface PropertyAnalysisSectionProps {
