@@ -1,97 +1,98 @@
-
 import React, { useState } from 'react';
-import { Building, Home, Plus, MapPin } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { MapPin, Home, Calendar, Award } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogHeader, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
-interface PropertyOverviewCardProps {
+export interface PropertyOverviewCardProps {
   propertyAddress: string;
   onAddressSubmit?: (address: string) => void;
   is3DModelGenerating?: boolean;
+  propertyInsights?: any;
 }
 
-const PropertyOverviewCard: React.FC<PropertyOverviewCardProps> = ({ 
-  propertyAddress, 
+const PropertyOverviewCard: React.FC<PropertyOverviewCardProps> = ({
+  propertyAddress,
   onAddressSubmit,
-  is3DModelGenerating = false
+  is3DModelGenerating = false,
+  propertyInsights = null
 }) => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [address, setAddress] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [address, setAddress] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (address.trim() && onAddressSubmit) {
-      onAddressSubmit(address.trim());
-      setDialogOpen(false);
+    if (address && onAddressSubmit) {
+      onAddressSubmit(address);
+      setIsDialogOpen(false);
     }
   };
 
+  const getPropertyType = () => {
+    if (propertyInsights?.property_type) {
+      return propertyInsights.property_type.charAt(0).toUpperCase() + propertyInsights.property_type.slice(1);
+    }
+    return "Residential Building";
+  };
+
   return (
-    <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <CardHeader className="pb-2">
-        <div className="flex items-center text-violet-400 mb-1">
-          <Home className="h-5 w-5 mr-2" />
-          <CardTitle className="text-lg font-medium">Property Overview</CardTitle>
-        </div>
-        <CardDescription className="text-gray-600">
-          Property details and features
-        </CardDescription>
+    <Card className="glass shadow-md">
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+          <Home className="h-5 w-5" /> Property Overview
+        </CardTitle>
+        <CardDescription>Quick snapshot of your property details.</CardDescription>
       </CardHeader>
-      <CardContent className="pt-0">
-        {propertyAddress ? (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-violet-400" />
-              <p className="font-medium text-gray-800">{propertyAddress}</p>
+      <CardContent className="grid gap-4">
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-gray-500" />
+          <span>{propertyAddress || "No address set"}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-gray-500" />
+          <span>Type: {getPropertyType()}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Award className="h-4 w-4 text-gray-500" />
+          <span>Potential Assets: {propertyInsights ? propertyInsights.amenities?.length : 'Loading...'}</span>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="w-full justify-center">
+              Update Address
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Update Property Address</DialogTitle>
+              <DialogDescription>
+                Enter the new address for your property.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="address" className="text-right">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="col-span-3 rounded-md border border-gray-200 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                />
+              </div>
             </div>
-            <p className="text-gray-600">
-              The property features a rooftop with good solar exposure, a rentable garden area, 
-              stable internet for bandwidth sharing, and available parking space. Nearby, neighbors 
-              are actively renting parking and garden spaces, showing strong local demand.
-            </p>
-          </div>
-        ) : (
-          <div className="text-center py-6">
-            <p className="text-gray-500 mb-4">Add your property address to get started</p>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="border-violet-300 text-violet-600 hover:bg-violet-50"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Address
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Your Property Address</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="address">Property Address</Label>
-                    <Input 
-                      id="address"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="Enter your full property address"
-                      required
-                    />
-                  </div>
-                  <DialogFooter>
-                    <Button 
-                      type="submit" 
-                      disabled={is3DModelGenerating || !address.trim()}
-                    >
-                      {is3DModelGenerating ? "Processing..." : "Submit Address"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <form onSubmit={handleSubmit}>
+              <Button type="submit" className="w-full justify-center">
+                Update Address
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+        {is3DModelGenerating && (
+          <div className="text-center text-sm text-gray-500">
+            Generating 3D Model... This may take a few minutes.
           </div>
         )}
       </CardContent>

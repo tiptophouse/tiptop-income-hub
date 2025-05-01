@@ -1,9 +1,8 @@
-
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { ArrowUp, Coins, BoxIcon, Clock } from 'lucide-react';
+import { AreaChart, DollarSign, Users, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface StatisticsCardsProps {
+export interface StatisticsCardsProps {
   earnings: {
     daily: number;
     monthly: number;
@@ -12,62 +11,60 @@ interface StatisticsCardsProps {
   activeAssets: number;
   totalPotentialAssets: number;
   pendingActions: number;
+  propertyInsights?: any;
 }
 
 const StatisticsCards: React.FC<StatisticsCardsProps> = ({
   earnings,
   activeAssets,
   totalPotentialAssets,
-  pendingActions
+  pendingActions,
+  propertyInsights
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card className="bg-white border border-gray-100 shadow-sm">
-        <CardContent className="p-6">
-          <div className="space-y-2">
-            <h3 className="text-violet-400 font-medium text-lg flex items-center">
-              <Coins className="h-5 w-5 mr-2" />
-              Total Earnings
-            </h3>
-            <p className="text-gray-600 text-sm">Monthly passive income</p>
-            <p className="font-bold text-2xl text-gray-800">${earnings.monthly.toFixed(2)}</p>
-            <div className="flex items-center text-green-600 text-sm">
-              <ArrowUp className="h-4 w-4 mr-1" />
-              <span>3.2% from last month</span>
-            </div>
-          </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <Card className="bg-white shadow">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Daily Earnings</CardTitle>
+          <DollarSign className="h-4 w-4 text-gray-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">${earnings.daily}</div>
+          <p className="text-sm text-gray-500">
+            {propertyInsights ? "Based on property analysis" : "Estimated average"}
+          </p>
         </CardContent>
       </Card>
-      
-      <Card className="bg-white border border-gray-100 shadow-sm">
-        <CardContent className="p-6">
-          <div className="space-y-2">
-            <h3 className="text-violet-400 font-medium text-lg flex items-center">
-              <BoxIcon className="h-5 w-5 mr-2" />
-              Active Assets
-            </h3>
-            <p className="text-gray-600 text-sm">Currently monetized</p>
-            <p className="font-bold text-2xl text-gray-800">{activeAssets} / {totalPotentialAssets}</p>
-            <div className="text-sm text-gray-500">
-              {((activeAssets / totalPotentialAssets) * 100).toFixed(0)}% utilization
-            </div>
-          </div>
+      <Card className="bg-white shadow">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Monthly Earnings</CardTitle>
+          <AreaChart className="h-4 w-4 text-gray-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">${earnings.monthly}</div>
+          <p className="text-sm text-gray-500">
+            {propertyInsights ? "From active assets" : "Projected income"}
+          </p>
         </CardContent>
       </Card>
-      
-      <Card className="bg-white border border-gray-100 shadow-sm">
-        <CardContent className="p-6">
-          <div className="space-y-2">
-            <h3 className="text-violet-400 font-medium text-lg flex items-center">
-              <Clock className="h-5 w-5 mr-2" />
-              Pending Actions
-            </h3>
-            <p className="text-gray-600 text-sm">Tasks requiring attention</p>
-            <p className="font-bold text-2xl text-gray-800">{pendingActions}</p>
-            <div className="text-sm text-gray-500">
-              Review in your dashboard
-            </div>
-          </div>
+      <Card className="bg-white shadow">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Active Assets</CardTitle>
+          <Users className="h-4 w-4 text-gray-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{activeAssets}</div>
+          <p className="text-sm text-gray-500">Out of {totalPotentialAssets} potential</p>
+        </CardContent>
+      </Card>
+      <Card className="bg-white shadow">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Pending Actions</CardTitle>
+          <Clock className="h-4 w-4 text-gray-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{pendingActions}</div>
+          <p className="text-sm text-gray-500">Tasks to improve property value</p>
         </CardContent>
       </Card>
     </div>
