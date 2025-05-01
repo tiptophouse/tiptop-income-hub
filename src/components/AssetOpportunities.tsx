@@ -78,37 +78,47 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({
     
     // Calculate from solar
     if (insights.estimated_solar_capacity_kw) {
-      total += Math.round(insights.estimated_solar_capacity_kw * 0.4);
+      total += insights.estimated_solar_capacity_kw * 15;
     } else if (insights.rooftop_area_m2) {
-      total += Math.round(insights.rooftop_area_m2 / 10);
+      total += Math.round(insights.rooftop_area_m2 * 2);
     } else {
       total += 120;
     }
     
     // Calculate from bandwidth
     if (insights.unused_bandwidth_mbps) {
-      total += Math.round(insights.unused_bandwidth_mbps * 0.8 / 10);
+      total += insights.unused_bandwidth_mbps * 5;
     } else {
       total += 200;
     }
     
     // Calculate from parking
     if (insights.parking_spaces && insights.avg_parking_rate_usd_per_day) {
-      total += Math.round(insights.parking_spaces * insights.avg_parking_rate_usd_per_day * 30 * 0.1);
+      total += Math.round(insights.parking_spaces * insights.avg_parking_rate_usd_per_day * 6);
     } else if (insights.parking_spaces) {
-      total += Math.round(insights.parking_spaces * 15);
+      total += Math.round(insights.parking_spaces * 15 * 6);
     } else {
       total += 50;
     }
     
     // Add storage if available
     if (insights.storage_volume_m3) {
-      total += Math.round(insights.storage_volume_m3 * 0.05);
+      total += Math.round(insights.storage_volume_m3 * 8);
+    }
+    
+    // Add garden if available
+    if (insights.garden_area_m2) {
+      total += Math.round(insights.garden_area_m2 * 3);
     }
     
     // Add 5G if available
     if (insights.rooftop_area_5g_m2) {
       total += Math.round(insights.rooftop_area_5g_m2 * 15);
+    }
+    
+    // Add pool if available
+    if (insights.pool && insights.pool.present && insights.pool.area_m2) {
+      total += Math.round(insights.pool.area_m2 * 10);
     }
     
     return total;
@@ -118,37 +128,35 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({
     if (!address) return;
     setIsLoading(true);
     
-    // Simulating webhook data retrieval
-    const simulateWebhookData = () => {
-      // This would be replaced by actual webhook data in production
-      return {
-        property_type: "commercial property",
-        coordinates: { lat: 40.749567, lng: -73.98795 },
-        amenities: ["solar", "rooftop_5G", "parking", "storage", "bandwidth"],
-        rooftop_area_m2: 1200,
-        estimated_solar_capacity_kw: 180,
-        rooftop_area_5g_m2: 300,
-        garden_area_m2: 0,
-        garden_rarity: "Low",
-        parking_spaces: 18,
-        avg_parking_rate_usd_per_day: 70,
-        ev_charger: { present: false, type: null, power_kw: 0 },
-        pool: { present: false, area_m2: 0, type: null },
-        storage_volume_m3: 2000,
-        unused_bandwidth_mbps: 250,
-        short_term_rent_usd_per_night: 0,
-        projected_monthly_rental_usd: 0,
-        required_permits: ["solar_permit", "zoning_variance", "billboard_permit"],
-        advertising_restrictions: "Billboard and commercial advertising subject to NYC municipal buffer zones",
-        regulatory_summary: "NYC zoning allows solar and 5G rooftop installations with standard permits."
-      };
+    // This webhook data would be received from Make.com in production
+    const webhookData = {
+      property_type: "multi-unit residential building",
+      coordinates: { lat: 32.081911, lng: 34.787396 },
+      amenities: ["solar", "garden", "parking"],
+      rooftop_area_m2: 170,
+      estimated_solar_capacity_kw: 25,
+      rooftop_area_5g_m2: 50,
+      garden_area_m2: 120,
+      garden_rarity: "Low",
+      parking_spaces: 8,
+      avg_parking_rate_usd_per_day: 18,
+      ev_charger: { present: false, type: null, power_kw: 0 },
+      pool: { present: false, area_m2: 0, type: null },
+      storage_volume_m3: 45,
+      unused_bandwidth_mbps: 20,
+      short_term_rent_usd_per_night: 160,
+      projected_monthly_rental_usd: 2950,
+      required_permits: ["solar_permit", "municipal_building_permit"],
+      advertising_restrictions: "Billboards and rooftop ads not permitted in this zone; temporary window/banner ads possible with municipal approval.",
+      regulatory_summary: "Rooftop solar installations are encouraged by city incentives; 5G rooftop leasing requires municipal engineering review and tenant/HOA notification. Permanent advertising is prohibited; public-facing amenities must comply with city and National Building Code. No short-term let limitations. No garden exclusivity advantages in this neighborhood."
     };
     
-    // In production, this would fetch data from the webhook or API
-    const webhookData = simulateWebhookData();
+    // Use webhook data directly
     setInsights(webhookData);
+    setIsLoading(false);
     
     // For development purposes, we're also calling the getPropertyInsightsFromAI as a backup
+    // This would be removed in production when webhook data is reliable
     getPropertyInsightsFromAI(address).then(data => {
       if (!webhookData) {
         console.log("Using AI-generated insights as fallback");
@@ -163,8 +171,6 @@ const AssetOpportunities: React.FC<AssetOpportunitiesProps> = ({
           variant: "destructive"
         });
       }
-    }).finally(() => {
-      setIsLoading(false);
     });
   }, [address]);
   

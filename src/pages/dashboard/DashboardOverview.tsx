@@ -24,6 +24,7 @@ interface DashboardOverviewProps {
   aiRevenueDescription: string;
   onAddressSubmit?: (address: string) => void;
   is3DModelGenerating?: boolean;
+  propertyInsights?: any;
 }
 
 const DashboardOverview = ({
@@ -35,7 +36,8 @@ const DashboardOverview = ({
   pendingActions,
   aiRevenueDescription,
   onAddressSubmit,
-  is3DModelGenerating = false
+  is3DModelGenerating = false,
+  propertyInsights = null
 }: DashboardOverviewProps) => {
   const { verifySchema } = useDatabaseSchemaVerification();
   
@@ -57,6 +59,7 @@ const DashboardOverview = ({
           propertyAddress={propertyAddress}
           onAddressSubmit={onAddressSubmit}
           is3DModelGenerating={is3DModelGenerating}
+          propertyInsights={propertyInsights}
         />
       </div>
       
@@ -65,13 +68,14 @@ const DashboardOverview = ({
         activeAssets={activeAssets} 
         totalPotentialAssets={totalPotentialAssets} 
         pendingActions={pendingActions} 
+        propertyInsights={propertyInsights}
       />
       
       <div className="space-y-6">
         <h2 className="text-xl font-medium text-violet-400">Manage your assets</h2>
         <div className="overflow-x-auto -mx-2 sm:mx-0">
           <div className="min-w-full px-2 sm:px-0">
-            <AssetTable />
+            <AssetTable propertyInsights={propertyInsights} />
           </div>
         </div>
         <EarningsSection />

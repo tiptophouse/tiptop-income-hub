@@ -40,6 +40,8 @@ const isOpportunityViable = (insights, type) => {
       return insights.storage_volume_m3 > 0;
     case 'antenna5g':
       return insights.rooftop_area_5g_m2 > 0;
+    case 'pool':
+      return insights.pool && insights.pool.present;
     default:
       return false;
   }
@@ -54,6 +56,7 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
     gardenSpace: isOpportunityViable(insights, 'gardenSpace'),
     storage: isOpportunityViable(insights, 'storage'),
     antenna5g: isOpportunityViable(insights, 'antenna5g'),
+    pool: isOpportunityViable(insights, 'pool'),
   };
 
   // Get the data for viable opportunities
@@ -61,13 +64,9 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
     const cards = [];
 
     if (viableOpportunities.rooftopSolar) {
-      const solarValue = insights.estimated_solar_capacity_kw 
-        ? Math.round(insights.estimated_solar_capacity_kw * 0.4) 
-        : Math.round(insights.rooftop_area_m2 / 10);
+      const solarValue = insights.estimated_solar_capacity_kw * 15;
       
-      const solarDescription = insights.estimated_solar_capacity_kw
-        ? `${insights.estimated_solar_capacity_kw}kW potential`
-        : "Solar potential";
+      const solarDescription = `${Math.round(insights.rooftop_area_m2 * 10.764)} sq ft with ${insights.estimated_solar_capacity_kw}kW potential`;
       
       cards.push(
         <AssetCard
@@ -85,7 +84,7 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
     }
 
     if (viableOpportunities.internetBandwidth) {
-      const internetValue = Math.round(insights.unused_bandwidth_mbps * 0.8 / 10);
+      const internetValue = insights.unused_bandwidth_mbps * 5;
       
       cards.push(
         <AssetCard
@@ -103,9 +102,8 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
     }
 
     if (viableOpportunities.parkingSpace) {
-      const parkingValue = insights.avg_parking_rate_usd_per_day 
-        ? Math.round(insights.avg_parking_rate_usd_per_day * 30 * 0.7) 
-        : insights.parking_spaces * 15;
+      const dailyRate = insights.avg_parking_rate_usd_per_day || 15;
+      const parkingValue = Math.round(insights.parking_spaces * dailyRate * 6);
       
       cards.push(
         <AssetCard
@@ -123,7 +121,7 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
     }
     
     if (viableOpportunities.gardenSpace) {
-      const gardenValue = Math.round(insights.garden_area_m2 * 0.2);
+      const gardenValue = Math.round(insights.garden_area_m2 * 3);
       
       cards.push(
         <AssetCard
@@ -132,7 +130,7 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
           title="Garden"
           main={`${Math.round(insights.garden_area_m2 * 10.764)} sq ft`}
           details="Garden space for community or commercial use"
-          value={`$${gardenValue || 80}/mo`}
+          value={`$${gardenValue}/mo`}
           icon={assetIcons.gardenSpace}
           glassStyle={glassStyle}
           accentText={accentText}
@@ -141,7 +139,7 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
     }
     
     if (viableOpportunities.storage) {
-      const storageValue = Math.round(insights.storage_volume_m3 * 0.05);
+      const storageValue = Math.round(insights.storage_volume_m3 * 8);
       
       cards.push(
         <AssetCard
@@ -170,6 +168,24 @@ const InsightsTabs: React.FC<InsightsTabsProps> = ({ insights, activeTab, setAct
           details="Rooftop space for 5G antenna installation"
           value={`$${antennaValue}/mo`}
           icon={assetIcons.antenna5g}
+          glassStyle={glassStyle}
+          accentText={accentText}
+        />
+      );
+    }
+    
+    if (viableOpportunities.pool) {
+      const poolValue = Math.round(insights.pool.area_m2 * 10);
+      
+      cards.push(
+        <AssetCard
+          key="pool"
+          color="border-l-blue-600"
+          title="Swimming Pool"
+          main={`${Math.round(insights.pool.area_m2 * 10.764)} sq ft`}
+          details="Pool access for rental or community use"
+          value={`$${poolValue}/mo`}
+          icon={assetIcons.gardenSpace} // Using garden icon for pool as a substitute
           glassStyle={glassStyle}
           accentText={accentText}
         />

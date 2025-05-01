@@ -29,12 +29,10 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
       
       // Solar panels (available if rooftop area exists)
       if (insights.rooftop_area_m2 > 0 || insights.estimated_solar_capacity_kw > 0) {
-        const solarIncome = insights.estimated_solar_capacity_kw 
-          ? `$${Math.round(insights.estimated_solar_capacity_kw * 0.4)}/month`
-          : "$120/month";
+        const solarIncome = `$${insights.estimated_solar_capacity_kw * 15}/month`;
         
         const solarDetails = insights.rooftop_area_m2 
-          ? `${Math.round(insights.rooftop_area_m2 * 10.764)} sq ft usable with ${insights.estimated_solar_capacity_kw || 6.5}kW potential`
+          ? `${Math.round(insights.rooftop_area_m2 * 10.764)} sq ft usable with ${insights.estimated_solar_capacity_kw}kW potential`
           : "800 sq ft usable with 6.5kW potential";
         
         opportunities.push({
@@ -48,7 +46,7 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
       
       // Internet bandwidth (available if unused bandwidth exists)
       if (insights.unused_bandwidth_mbps > 0) {
-        const internetIncome = `$${Math.round(insights.unused_bandwidth_mbps * 0.8 / 10)}/month`;
+        const internetIncome = `$${insights.unused_bandwidth_mbps * 5}/month`;
         const internetDetails = `${insights.unused_bandwidth_mbps} Mbps available for sharing`;
         
         opportunities.push({
@@ -62,8 +60,8 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
       
       // Parking space (available if parking spaces exist)
       if (insights.parking_spaces > 0) {
-        const dailyRate = insights.avg_parking_rate_usd_per_day || 0;
-        const parkingIncome = `$${Math.round(dailyRate * 30 * 0.7)}/month`;
+        const dailyRate = insights.avg_parking_rate_usd_per_day || 15;
+        const parkingIncome = `$${Math.round(insights.parking_spaces * dailyRate * 6)}/month`;
         const parkingDetails = `${insights.parking_spaces} spaces available for rent`;
         
         opportunities.push({
@@ -77,8 +75,8 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
       
       // Garden space (available if garden area exists)
       if (insights.garden_area_m2 > 0) {
-        const gardenIncome = "$80/month";
-        const gardenDetails = `${Math.round(insights.garden_area_m2 * 10.764 / 10)} sq ft available`;
+        const gardenIncome = `$${Math.round(insights.garden_area_m2 * 3)}/month`;
+        const gardenDetails = `${Math.round(insights.garden_area_m2 * 10.764)} sq ft available`;
         
         opportunities.push({
           id: "garden",
@@ -91,7 +89,7 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
       
       // Storage space (if storage volume exists)
       if (insights.storage_volume_m3 > 0) {
-        const storageIncome = `$${Math.round(insights.storage_volume_m3 * 0.05)}/month`;
+        const storageIncome = `$${Math.round(insights.storage_volume_m3 * 8)}/month`;
         const storageDetails = `${Math.round(insights.storage_volume_m3)} cubic meters available`;
         
         opportunities.push({
@@ -114,6 +112,20 @@ const AssetOpportunitiesList: React.FC<AssetOpportunitiesListProps> = ({
           icon: <Antenna className="h-8 w-8 text-indigo-500" />,
           estimatedIncome: antennaIncome,
           details: antennaDetails
+        });
+      }
+      
+      // Swimming pool (if pool exists)
+      if (insights.pool && insights.pool.present) {
+        const poolIncome = `$${Math.round(insights.pool.area_m2 * 10)}/month`;
+        const poolDetails = `${Math.round(insights.pool.area_m2 * 10.764)} sq ft pool available`;
+        
+        opportunities.push({
+          id: "pool",
+          title: "Swimming Pool",
+          icon: <Flower className="h-8 w-8 text-blue-500" />,
+          estimatedIncome: poolIncome,
+          details: poolDetails
         });
       }
       
