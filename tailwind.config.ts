@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -12,25 +11,21 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'],
         'fahkwang': ['Fahkwang', 'sans-serif'],
         'work-sans': ['Work Sans', 'sans-serif'],
       },
       colors: {
-        'tiptop-purple': '#7E69AB',
-        'tiptop-dark-purple': '#6E59A5',
-        'tiptop-light-purple': '#9b87f5',
-        'tiptop-cream': '#F8F6F0',
-        'tiptop-dark': '#2D2D2D',
-        'tiptop-accent': '#7E69AB',
+        'tiptop-accent': '#AA94E2',
+        'tiptop-dark': '#552B1B',
+        'tiptop-light': '#FFFDED',
         'tiptop-secondary': '#6E59A5',
         'tiptop-tertiary': '#E5DEFF',
         'tiptop-hover': '#9b87f5',
-        'tiptop-background': '#F8F6F0',
+        'tiptop-background': '#FFFDED',
         custom: {
-          background: '#F8F6F0',
-          text: '#2D2D2D',
-          title: '#7E69AB'
+          background: '#FFFDED',
+          text: '#552B1B',
+          title: '#AA94E2'
         },
         'sidebar': {
           DEFAULT: '#6E59A5',
@@ -39,12 +34,7 @@ export default {
           'accent': '#9b87f5',
           'accent-foreground': '#FFFFFF'
         }
-      },
-      borderRadius: {
-        'xl': '1rem',
-        '2xl': '1.5rem',
-        '3xl': '2rem',
-      },
+      }
     }
   },
   plugins: [require("tailwindcss-animate")],
