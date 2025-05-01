@@ -150,6 +150,26 @@ export const getGoogleMapsApiKey = async (): Promise<string> => {
   }
 };
 
+// Get Google Sunroof API Key for solar API
+export const getGoogleSunroofApiKey = async (): Promise<string | null> => {
+  try {
+    // Try to get the sunroof-specific API key
+    const { data, error } = await supabase.functions.invoke('get-api-tokens', {
+      body: { tokenType: 'google_sunroof' }
+    });
+    
+    if (error) {
+      console.error('Error fetching Google Sunroof API key:', error);
+      return null;
+    }
+    
+    return data?.token || null;
+  } catch (error) {
+    console.error('Error getting Google Sunroof API key:', error);
+    return null;
+  }
+};
+
 // Get OpenAI API Key securely
 export const getOpenAIApiKey = async (): Promise<string | null> => {
   try {
