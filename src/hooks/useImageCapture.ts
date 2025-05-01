@@ -1,6 +1,11 @@
 
 import { toast } from '@/components/ui/use-toast';
-import { getStreetViewImageUrl, getSatelliteImageUrl, captureMapScreenshot, getAerialImageZoom12Url } from '@/utils/streetViewService';
+import { 
+  getStreetViewImageUrl, 
+  getSatelliteImageUrl, 
+  getAerialImageZoom12Url, 
+  captureMapScreenshot 
+} from '@/utils/streetView';
 import { sendImagesWebhook } from '@/utils/webhook';
 
 // Check if a URL points to a supported image format

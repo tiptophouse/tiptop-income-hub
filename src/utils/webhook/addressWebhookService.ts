@@ -1,7 +1,7 @@
 
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { getStreetViewImageUrl, getSatelliteImageUrl, getAerialImageZoom12Url } from '@/utils/streetViewService';
+import { getStreetViewImageUrl, getSatelliteImageUrl, getAerialImageZoom12Url } from '@/utils/streetView';
 import { getWebhookUrl } from './webhookUrlManager';
 import { isValidImageFormat } from './imageValidation';
 

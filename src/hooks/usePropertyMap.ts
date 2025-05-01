@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { generateModelFromImage } from '@/utils/meshyApi';
-import { captureStreetViewForModel } from '@/utils/streetViewService';
+import { captureStreetViewForModel } from '@/utils/streetView';
 import html2canvas from 'html2canvas';
 
 export const usePropertyMap = (address: string) => {
