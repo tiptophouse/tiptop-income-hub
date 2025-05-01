@@ -41,10 +41,13 @@ const DashboardOverview = ({
   }, []);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <DashboardHeader userName={userName} />
+    <div className="space-y-6">
+      <div className="pb-4">
+        <h1 className="text-2xl font-medium text-violet-400">Dashboard</h1>
+        <p className="text-gray-700">Hello, {userName}! Here's your property summary.</p>
+      </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Property3DModelCard />
         <PropertyOverviewCard propertyAddress={propertyAddress} />
       </div>
@@ -56,10 +59,8 @@ const DashboardOverview = ({
         pendingActions={pendingActions} 
       />
       
-      <DashboardCharts earnings={earnings} aiRevenueDescription={aiRevenueDescription} />
-      
-      <div className="space-y-4 sm:space-y-6">
-        <h2 className="text-2xl font-normal text-violet-400">Manage your assets</h2>
+      <div className="space-y-6">
+        <h2 className="text-xl font-medium text-violet-400">Manage your assets</h2>
         <div className="overflow-x-auto -mx-2 sm:mx-0">
           <div className="min-w-full px-2 sm:px-0">
             <AssetTable />
