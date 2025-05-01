@@ -1,4 +1,3 @@
-
 /**
  * Configuration and authentication utilities for Meshy API and other services
  */
@@ -30,8 +29,8 @@ export const getMeshyApiToken = async (): Promise<string> => {
     throw new Error('No token returned from edge function');
   } catch (error) {
     console.warn('Using fallback Meshy API token for development:', error);
-    // Fallback for development only - this token should be invalid in production
-    return "msy_vALRkb1IEjapXADnwnXqLQSxlkMgkYFCH6o1"; 
+    // Set the provided token as fallback for development
+    return "msy_VCpuL3jqR4WSuz9hCwsQljlQ2NCWFBa2OZQZ"; 
   }
 };
 

@@ -130,7 +130,8 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
       };
     }
     
-    const MESHY_API_TOKEN = getMeshyApiToken();
+    // Use the direct token value
+    const MESHY_API_TOKEN = "msy_VCpuL3jqR4WSuz9hCwsQljlQ2NCWFBa2OZQZ";
     
     const response = await fetch(`${MESHY_API_URL}/tasks/${jobId}`, {
       method: 'GET',

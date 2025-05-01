@@ -49,8 +49,8 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     
     enhancedPrompt += `\nMaintain precise scale and proportions.`;
     
-    // Get Meshy API token asynchronously
-    const MESHY_API_TOKEN = await getMeshyApiToken();
+    // Use the direct token value for API call
+    const MESHY_API_TOKEN = "msy_VCpuL3jqR4WSuz9hCwsQljlQ2NCWFBa2OZQZ";
     console.log("Using Meshy API with enhanced prompt:", enhancedPrompt);
     
     // Make API call to Meshy.ai

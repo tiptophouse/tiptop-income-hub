@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
@@ -33,15 +32,8 @@ serve(async (req) => {
 
     console.log(`Processing images for address: ${address}`)
     
-    // Get Meshy API token from environment
-    const MESHY_API_TOKEN = Deno.env.get('MESHY_API_TOKEN')
-    if (!MESHY_API_TOKEN) {
-      console.error('Meshy API token not found in environment')
-      return new Response(
-        JSON.stringify({ error: 'API configuration error' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-      )
-    }
+    // Use the provided Meshy API token directly
+    const MESHY_API_TOKEN = "msy_VCpuL3jqR4WSuz9hCwsQljlQ2NCWFBa2OZQZ"
 
     // Use the first available image (prefer satellite if available)
     const imageToProcess = satelliteImage || mapImage
