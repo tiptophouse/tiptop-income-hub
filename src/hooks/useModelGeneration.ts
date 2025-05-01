@@ -5,6 +5,7 @@ import { generateModelFromImage } from '@/utils/api/modelGeneration';
 import { captureStreetViewForModel } from '@/utils/streetView';
 import html2canvas from 'html2canvas';
 import { supabase } from '@/integrations/supabase/client';
+import { canMakeModelApiCall } from '@/utils/api/meshyConfig';
 
 export const useModelGeneration = () => {
   const [is3DModelGenerating, setIs3DModelGenerating] = useState(false);
@@ -31,12 +32,43 @@ export const useModelGeneration = () => {
       
       toast({
         title: "Processing",
-        description: "Capturing property view...",
+        description: "Preparing to generate 3D model...",
       });
       
       if (!address) {
         throw new Error("Address is required for model generation");
       }
+      
+      // Check if we should proceed with actual API call or use demo model
+      const shouldUseRealApi = canMakeModelApiCall();
+      if (!shouldUseRealApi) {
+        console.log("Using demo model instead of calling Meshy API");
+        
+        // Create a demo job ID
+        const demoJobId = "demo-model-" + Math.random().toString(36).substring(2, 8);
+        
+        // Dispatch event to notify components about the new model job
+        const modelEvent = new CustomEvent('modelJobCreated', {
+          detail: { 
+            jobId: demoJobId,
+            hasSatelliteImage: true,
+            demo: true
+          }
+        });
+        document.dispatchEvent(modelEvent);
+        
+        toast({
+          title: "Demo Mode",
+          description: "Using demo 3D model to avoid API charges.",
+        });
+        
+        return;
+      }
+      
+      toast({
+        title: "Processing",
+        description: "Capturing property view...",
+      });
       
       // Get both Street View and satellite images
       const imageData = await captureStreetViewForModel(address);
@@ -106,7 +138,8 @@ export const useModelGeneration = () => {
         const modelEvent = new CustomEvent('modelJobCreated', {
           detail: { 
             jobId: demoJobId,
-            hasSatelliteImage: !!imageData.satellite 
+            hasSatelliteImage: !!imageData.satellite,
+            demo: true 
           }
         });
         document.dispatchEvent(modelEvent);
@@ -127,16 +160,17 @@ export const useModelGeneration = () => {
       document.dispatchEvent(errorEvent);
       
       toast({
-        title: "Error",
-        description: "Failed to generate 3D model. Using demo model instead.",
-        variant: "destructive"
+        title: "Using Demo Model",
+        description: "Using a demo 3D model instead of making API calls.",
+        variant: "default"
       });
       
       const fallbackId = "demo-3d-model-" + Math.random().toString(36).substring(2, 8);
       const modelEvent = new CustomEvent('modelJobCreated', {
         detail: { 
           jobId: fallbackId,
-          hasSatelliteImage: false 
+          hasSatelliteImage: false,
+          demo: true
         }
       });
       document.dispatchEvent(modelEvent);

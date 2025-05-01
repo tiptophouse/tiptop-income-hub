@@ -2,11 +2,23 @@
 /**
  * 3D model generation utilities using Meshy API
  */
-import { MESHY_API_URL, getMeshyApiToken, SAMPLE_MODEL_URL } from './meshyConfig';
+import { MESHY_API_URL, getMeshyApiToken, SAMPLE_MODEL_URL, canMakeModelApiCall, trackApiCall } from './meshyConfig';
 
 export const generateModelFromImage = async (imageData: string, propertyFeatures?: any): Promise<string> => {
   try {
     console.log("Generating 3D model from image using Meshy OpenAPI");
+    
+    // Check if we should use the actual API or return a demo model
+    if (!canMakeModelApiCall()) {
+      console.log("Using demo model instead of calling Meshy API");
+      // Generate a demo model ID for fallback
+      const demoId = "demo-model-" + Math.random().toString(36).substring(2, 8);
+      localStorage.setItem('meshy_latest_job_id', demoId);
+      localStorage.setItem('meshy_job_created_at', new Date().toString());
+      localStorage.setItem('meshy_last_status_' + demoId, 'SUCCEEDED');
+      localStorage.setItem('meshy_demo_model', 'true');
+      return demoId;
+    }
     
     // Remove data URL prefix if it exists
     const base64Image = imageData.includes('base64,') 
@@ -56,7 +68,8 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     // Format the image data as required by the OpenAPI
     const imageUrl = `data:image/png;base64,${base64Image}`;
     
-    // Make API call to Meshy OpenAPI
+    // Make API call to Meshy OpenAPI - COMMENTED OUT TO PREVENT ACTUAL API CALLS
+    /*
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
       method: 'POST',
       headers: {
@@ -91,13 +104,29 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     localStorage.setItem('meshy_latest_job_id', taskId);
     localStorage.setItem('meshy_job_created_at', new Date().toString());
     
+    // Track this successful API call
+    trackApiCall();
+    
     return taskId;
+    */
+    
+    // For now, return a demo model to prevent API calls
+    console.log("DEMO MODE: Returning demo model instead of calling actual API");
+    // Generate a demo model ID for fallback
+    const demoId = "demo-model-" + Math.random().toString(36).substring(2, 8);
+    localStorage.setItem('meshy_latest_job_id', demoId);
+    localStorage.setItem('meshy_job_created_at', new Date().toString());
+    localStorage.setItem('meshy_last_status_' + demoId, 'SUCCEEDED');
+    localStorage.setItem('meshy_demo_model', 'true');
+    
+    return demoId;
   } catch (error) {
     console.error("Error in model generation:", error);
     // Generate a demo model ID for fallback
     const demoId = "demo-model-" + Math.random().toString(36).substring(2, 8);
     localStorage.setItem('meshy_latest_job_id', demoId);
     localStorage.setItem('meshy_job_created_at', new Date().toString());
+    localStorage.setItem('meshy_demo_model', 'true');
     return demoId;
   }
 };

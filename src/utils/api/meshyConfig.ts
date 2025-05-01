@@ -3,12 +3,90 @@
  * Configuration and authentication utilities for Meshy API and other services
  */
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 const MESHY_API_URL = "https://api.meshy.ai/openapi/v1";
 const SAMPLE_MODEL_URL = "https://storage.googleapis.com/realestate-3d-models/demo-property.glb";
 
 // Default Google Maps API key for development (non-sensitive)
 const GOOGLE_MAPS_API_KEY = "AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE";
+
+// Track API usage locally to prevent excessive calls
+let apiCallsTracking = {
+  lastCallTimestamp: 0,
+  dailyCallCount: 0,
+  modelGenerationEnabled: true
+};
+
+// Reset tracking at the start of each day
+const resetApiTrackingIfNeeded = () => {
+  const now = new Date();
+  const lastCall = new Date(apiCallsTracking.lastCallTimestamp);
+  
+  // Reset if it's a new day
+  if (now.getDate() !== lastCall.getDate() || 
+      now.getMonth() !== lastCall.getMonth() || 
+      now.getFullYear() !== lastCall.getFullYear()) {
+    apiCallsTracking.dailyCallCount = 0;
+  }
+};
+
+// Check if we should allow a new API call
+export const canMakeModelApiCall = (forceCheck = false): boolean => {
+  // Always allow in demo mode
+  if (!forceCheck && (window.location.hostname.includes('localhost') || 
+      window.location.hostname.includes('lovable'))) {
+    return false; // Use demo models in development/demo environments
+  }
+  
+  resetApiTrackingIfNeeded();
+  
+  // Check if we've exceeded daily limit
+  const DAILY_LIMIT = 5;
+  if (apiCallsTracking.dailyCallCount >= DAILY_LIMIT) {
+    toast({
+      title: "API Limit Reached",
+      description: "Daily limit for 3D model generation reached. Using demo model instead.",
+      variant: "destructive"
+    });
+    return false;
+  }
+  
+  // Check if we've made a call recently
+  const now = Date.now();
+  const MIN_INTERVAL = 2 * 60 * 1000; // 2 minutes
+  if (now - apiCallsTracking.lastCallTimestamp < MIN_INTERVAL) {
+    toast({
+      title: "Please Wait",
+      description: "Please wait a few minutes before generating another 3D model.",
+      variant: "destructive"
+    });
+    return false;
+  }
+  
+  // Check if model generation is enabled globally
+  if (!apiCallsTracking.modelGenerationEnabled) {
+    toast({
+      title: "3D Models Disabled",
+      description: "3D model generation is currently disabled. Using demo model instead.",
+      variant: "default"
+    });
+    return false;
+  }
+  
+  return true;
+};
+
+// Track successful API call
+export const trackApiCall = () => {
+  apiCallsTracking.lastCallTimestamp = Date.now();
+  apiCallsTracking.dailyCallCount += 1;
+};
+
+// Set model generation enabled/disabled
+export const setModelGenerationEnabled = (enabled: boolean) => {
+  apiCallsTracking.modelGenerationEnabled = enabled;
+};
 
 // Get the API token from Supabase Edge Function or fallback to development value
 export const getMeshyApiToken = async (): Promise<string> => {

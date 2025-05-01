@@ -41,8 +41,9 @@ const checkPendingJobs = async () => {
     const latestJobId = localStorage.getItem('meshy_latest_job_id');
     const jobCreatedAt = localStorage.getItem('meshy_job_created_at');
     const lastCheckedStatus = localStorage.getItem('meshy_last_status_' + latestJobId);
+    const isDemo = localStorage.getItem('meshy_demo_model') === 'true';
     
-    if (!latestJobId || latestJobId.startsWith('demo-') || lastCheckedStatus === 'SUCCEEDED') {
+    if (!latestJobId || latestJobId.startsWith('demo-') || isDemo || lastCheckedStatus === 'SUCCEEDED') {
       return;
     }
     
@@ -120,19 +121,41 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
     console.log("Checking status for job:", jobId);
     
     // Check if this is a demo job ID (fallback)
-    if (jobId.startsWith('demo-')) {
+    const isDemo = localStorage.getItem('meshy_demo_model') === 'true' ||
+                   jobId.startsWith('demo-');
+                   
+    if (isDemo) {
+      console.log("Using demo model status - no API call made");
       return {
         state: 'completed',
         status: 'SUCCEEDED',
         model_urls: {
           glb: SAMPLE_MODEL_URL
-        }
+        },
+        isDemo: true
+      };
+    }
+    
+    // For development environments, always return demo model
+    if (window.location.hostname.includes('localhost') || 
+        window.location.hostname.includes('lovable')) {
+      console.log("Development environment detected - using demo model status");
+      return {
+        state: 'completed',
+        status: 'SUCCEEDED',
+        model_urls: {
+          glb: SAMPLE_MODEL_URL
+        },
+        isDemo: true
       };
     }
     
     // Use the direct token value
     const MESHY_API_TOKEN = "msy_VCpuL3jqR4WSuz9hCwsQljlQ2NCWFBa2OZQZ";
     
+    // IMPORTANT: API calls are disabled to prevent credit usage
+    console.log("DEMO MODE: Not making actual API call to check status");
+    /*
     const response = await fetch(`${MESHY_API_URL}/image-to-3d/${jobId}`, {
       method: 'GET',
       headers: {
@@ -151,6 +174,17 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
     localStorage.setItem('meshy_last_status_' + jobId, data.status);
     
     return data;
+    */
+    
+    // Return demo status instead
+    return {
+      state: 'completed',
+      status: 'SUCCEEDED',
+      model_urls: {
+        glb: SAMPLE_MODEL_URL
+      },
+      isDemo: true
+    };
   } catch (error) {
     console.error("Error checking model status:", error);
     return {
@@ -158,7 +192,8 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
       status: 'SUCCEEDED',
       model_urls: {
         glb: SAMPLE_MODEL_URL
-      }
+      },
+      isDemo: true
     };
   }
 };
@@ -166,7 +201,16 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
 export const getModelDownloadUrl = async (jobId: string): Promise<string> => {
   try {
     // For demo job IDs, immediately return sample model
-    if (jobId.startsWith('demo-')) {
+    const isDemo = localStorage.getItem('meshy_demo_model') === 'true' ||
+                   jobId.startsWith('demo-');
+    
+    if (isDemo) {
+      return SAMPLE_MODEL_URL;
+    }
+    
+    // For development environments, always return demo model
+    if (window.location.hostname.includes('localhost') || 
+        window.location.hostname.includes('lovable')) {
       return SAMPLE_MODEL_URL;
     }
     
