@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
@@ -38,27 +39,28 @@ serve(async (req) => {
     // Use the first available image (prefer satellite if available)
     const imageToProcess = satelliteImage || mapImage
     
-    // Remove data:image prefix if present
-    const base64Image = imageToProcess.includes('base64,') 
-      ? imageToProcess.split('base64,')[1] 
-      : imageToProcess
+    // Format the image data as required by the OpenAPI
+    const imageUrl = imageToProcess.includes('base64,') 
+      ? imageToProcess  // Keep the full data URI if it already has the proper format
+      : `data:image/png;base64,${imageToProcess}`
     
-    // Call Meshy API to generate 3D model from image
-    const response = await fetch("https://api.meshy.ai/v1/image-to-3d", {
+    // Call Meshy API to generate 3D model from image using OpenAPI
+    const response = await fetch("https://api.meshy.ai/openapi/v1/image-to-3d", {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${MESHY_API_TOKEN}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        image: base64Image,
-        mode: "geometry",
-        background_removal: true,
-        generate_material: true,
-        prompt: `Create a photorealistic 3D model of this residential property`, 
-        reference_model_id: "house",
-        preserve_topology: true,
-        mesh_quality: "high"
+        image_url: imageUrl,
+        ai_model: "meshy-5",
+        topology: "quad", 
+        target_polycount: 100000,
+        symmetry_mode: "auto",
+        should_remesh: true,
+        should_texture: true,
+        enable_pbr: true,
+        texture_prompt: `Create a photorealistic 3D model of this residential property`
       })
     })
 
@@ -72,7 +74,7 @@ serve(async (req) => {
     }
 
     const result = await response.json()
-    console.log("Successfully initiated 3D model generation, job ID:", result.id)
+    console.log("Successfully initiated 3D model generation, job ID:", result.result)
 
     // Store the job details in the database (optional)
     try {
@@ -84,7 +86,7 @@ serve(async (req) => {
       const { error } = await supabase
         .from('model_jobs')
         .insert({
-          job_id: result.id,
+          job_id: result.result,
           address: address,
           status: 'processing',
           created_at: new Date().toISOString()
@@ -99,7 +101,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, jobId: result.id }),
+      JSON.stringify({ success: true, jobId: result.result }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {

@@ -22,6 +22,8 @@ interface DashboardOverviewProps {
   totalPotentialAssets: number;
   pendingActions: number;
   aiRevenueDescription: string;
+  onAddressSubmit?: (address: string) => void;
+  is3DModelGenerating?: boolean;
 }
 
 const DashboardOverview = ({
@@ -31,7 +33,9 @@ const DashboardOverview = ({
   activeAssets,
   totalPotentialAssets,
   pendingActions,
-  aiRevenueDescription
+  aiRevenueDescription,
+  onAddressSubmit,
+  is3DModelGenerating = false
 }: DashboardOverviewProps) => {
   const { verifySchema } = useDatabaseSchemaVerification();
   
@@ -49,7 +53,11 @@ const DashboardOverview = ({
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Property3DModelCard />
-        <PropertyOverviewCard propertyAddress={propertyAddress} />
+        <PropertyOverviewCard 
+          propertyAddress={propertyAddress}
+          onAddressSubmit={onAddressSubmit}
+          is3DModelGenerating={is3DModelGenerating}
+        />
       </div>
       
       <StatisticsCards 

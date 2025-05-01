@@ -6,7 +6,7 @@ import { MESHY_API_URL, getMeshyApiToken, SAMPLE_MODEL_URL } from './meshyConfig
 
 export const generateModelFromImage = async (imageData: string, propertyFeatures?: any): Promise<string> => {
   try {
-    console.log("Generating 3D model from image using Meshy API");
+    console.log("Generating 3D model from image using Meshy OpenAPI");
     
     // Remove data URL prefix if it exists
     const base64Image = imageData.includes('base64,') 
@@ -53,7 +53,10 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     const MESHY_API_TOKEN = "msy_VCpuL3jqR4WSuz9hCwsQljlQ2NCWFBa2OZQZ";
     console.log("Using Meshy API with enhanced prompt:", enhancedPrompt);
     
-    // Make API call to Meshy.ai
+    // Format the image data as required by the OpenAPI
+    const imageUrl = `data:image/png;base64,${base64Image}`;
+    
+    // Make API call to Meshy OpenAPI
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
       method: 'POST',
       headers: {
@@ -61,32 +64,34 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        image: base64Image,
-        mode: "geometry",
-        background_removal: true,
-        generate_material: true,
-        prompt: enhancedPrompt, 
-        reference_model_id: "house",
-        preserve_topology: true,
-        mesh_quality: "high",
-        callback_url: window.location.origin + "/api/meshy-webhook" // Optional webhook for completion notification
+        image_url: imageUrl,
+        ai_model: "meshy-5",
+        topology: "quad",
+        target_polycount: 100000,
+        symmetry_mode: "auto",
+        should_remesh: true,
+        should_texture: true,
+        enable_pbr: true,
+        texture_prompt: enhancedPrompt
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Meshy API error response:", errorText);
+      console.error("Meshy OpenAPI error response:", errorText);
       throw new Error(`Meshy API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("Meshy API response:", data);
+    console.log("Meshy OpenAPI response:", data);
     
     // Store the job ID in localStorage for status checking
-    localStorage.setItem('meshy_latest_job_id', data.id);
+    // Note: result property contains the task id in the OpenAPI
+    const taskId = data.result;
+    localStorage.setItem('meshy_latest_job_id', taskId);
     localStorage.setItem('meshy_job_created_at', new Date().toString());
     
-    return data.id;
+    return taskId;
   } catch (error) {
     console.error("Error in model generation:", error);
     // Generate a demo model ID for fallback

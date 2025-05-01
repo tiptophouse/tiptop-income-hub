@@ -42,7 +42,7 @@ const checkPendingJobs = async () => {
     const jobCreatedAt = localStorage.getItem('meshy_job_created_at');
     const lastCheckedStatus = localStorage.getItem('meshy_last_status_' + latestJobId);
     
-    if (!latestJobId || latestJobId.startsWith('demo-') || lastCheckedStatus === 'completed') {
+    if (!latestJobId || latestJobId.startsWith('demo-') || lastCheckedStatus === 'SUCCEEDED') {
       return;
     }
     
@@ -50,11 +50,11 @@ const checkPendingJobs = async () => {
     const status = await checkModelStatus(latestJobId);
     
     // Store the latest status
-    localStorage.setItem('meshy_last_status_' + latestJobId, status.state);
+    localStorage.setItem('meshy_last_status_' + latestJobId, status.status);
     
-    if (status.state === 'completed') {
+    if (status.status === 'SUCCEEDED') {
       // Model is complete, trigger notification
-      notifyModelComplete(latestJobId, status.output?.model_url);
+      notifyModelComplete(latestJobId, status.model_urls?.glb);
     }
   } catch (error) {
     console.error("Error in periodic status check:", error);
@@ -123,9 +123,9 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
     if (jobId.startsWith('demo-')) {
       return {
         state: 'completed',
-        status: 'completed',
-        output: {
-          model_url: SAMPLE_MODEL_URL
+        status: 'SUCCEEDED',
+        model_urls: {
+          glb: SAMPLE_MODEL_URL
         }
       };
     }
@@ -133,7 +133,7 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
     // Use the direct token value
     const MESHY_API_TOKEN = "msy_VCpuL3jqR4WSuz9hCwsQljlQ2NCWFBa2OZQZ";
     
-    const response = await fetch(`${MESHY_API_URL}/tasks/${jobId}`, {
+    const response = await fetch(`${MESHY_API_URL}/image-to-3d/${jobId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${MESHY_API_TOKEN}`
@@ -148,16 +148,16 @@ export const checkModelStatus = async (jobId: string): Promise<any> => {
     console.log("Job status response:", data);
     
     // Store the most recent status
-    localStorage.setItem('meshy_last_status_' + jobId, data.state);
+    localStorage.setItem('meshy_last_status_' + jobId, data.status);
     
     return data;
   } catch (error) {
     console.error("Error checking model status:", error);
     return {
       state: 'completed',
-      status: 'completed',
-      output: {
-        model_url: SAMPLE_MODEL_URL
+      status: 'SUCCEEDED',
+      model_urls: {
+        glb: SAMPLE_MODEL_URL
       }
     };
   }
@@ -172,8 +172,8 @@ export const getModelDownloadUrl = async (jobId: string): Promise<string> => {
     
     const status = await checkModelStatus(jobId);
     
-    if (status.state === 'completed' && status.output?.model_url) {
-      return status.output.model_url;
+    if (status.status === 'SUCCEEDED' && status.model_urls?.glb) {
+      return status.model_urls.glb;
     }
     
     throw new Error('Model not ready yet or no model URL available');

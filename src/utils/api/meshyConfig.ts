@@ -1,9 +1,10 @@
+
 /**
  * Configuration and authentication utilities for Meshy API and other services
  */
 import { supabase } from '@/integrations/supabase/client';
 
-const MESHY_API_URL = "https://api.meshy.ai/v1";
+const MESHY_API_URL = "https://api.meshy.ai/openapi/v1";
 const SAMPLE_MODEL_URL = "https://storage.googleapis.com/realestate-3d-models/demo-property.glb";
 
 // Default Google Maps API key for development (non-sensitive)

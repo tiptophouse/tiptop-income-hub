@@ -4,12 +4,13 @@ import { toast } from '@/components/ui/use-toast';
 import { generateModelFromImage } from '@/utils/api/modelGeneration';
 import { captureStreetViewForModel } from '@/utils/streetView';
 import html2canvas from 'html2canvas';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useModelGeneration = () => {
   const [is3DModelGenerating, setIs3DModelGenerating] = useState(false);
 
   const captureMapImage = async (mapContainerRef: React.RefObject<HTMLDivElement>): Promise<string> => {
-    if (!mapContainerRef.current) {
+    if (!mapContainerRef?.current) {
       throw new Error("Map container not found");
     }
     const canvas = await html2canvas(mapContainerRef.current);
@@ -19,7 +20,7 @@ export const useModelGeneration = () => {
   };
 
   const handleModelGeneration = async (
-    mapContainerRef: React.RefObject<HTMLDivElement>,
+    mapContainerRef: React.RefObject<HTMLDivElement> | null,
     address?: string,
     webhookUrl?: string
   ) => {
@@ -46,8 +47,8 @@ export const useModelGeneration = () => {
         primaryImage = imageData.satellite;
       }
       
-      // If both failed, try to capture the map view as a last resort
-      if (!primaryImage && mapContainerRef.current) {
+      // If both failed and map container ref exists, try to capture the map view as a last resort
+      if (!primaryImage && mapContainerRef?.current) {
         console.log("Falling back to map screenshot");
         primaryImage = await captureMapImage(mapContainerRef);
       }
@@ -56,10 +57,29 @@ export const useModelGeneration = () => {
         throw new Error("Failed to capture property image");
       }
 
+      // Save the image data to user metadata for future use
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const metadata = user.user_metadata || {};
+          await supabase.auth.updateUser({
+            data: { 
+              ...metadata,
+              propertySatelliteImage: imageData.satellite ? true : false,
+              propertyStreetView: imageData.streetView ? true : false
+            }
+          });
+        }
+      } catch (metadataError) {
+        console.error("Error updating user metadata with image info:", metadataError);
+      }
+
+      try {
+        // Generate 3D model using the new OpenAPI endpoint
         const jobId = await generateModelFromImage(primaryImage);
         console.log("3D model generation job created:", jobId);
         
+        // Dispatch event to notify components about the new model job
         const modelEvent = new CustomEvent('modelJobCreated', {
           detail: { 
             jobId,
