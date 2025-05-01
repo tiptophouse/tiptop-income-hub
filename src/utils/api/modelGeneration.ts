@@ -61,15 +61,14 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     
     enhancedPrompt += `\nMaintain precise scale and proportions.`;
     
-    // Use the direct token value for API call
-    const MESHY_API_TOKEN = "msy_VCpuL3jqR4WSuz9hCwsQljlQ2NCWFBa2OZQZ";
+    // Get the Meshy API token
+    const MESHY_API_TOKEN = "msy_avpp46RPVW7UlyUSsEez6fTuqYvIJgQDg0nM"; // Using the provided token
     console.log("Using Meshy API with enhanced prompt:", enhancedPrompt);
     
     // Format the image data as required by the OpenAPI
     const imageUrl = `data:image/png;base64,${base64Image}`;
     
-    // Make API call to Meshy OpenAPI - COMMENTED OUT TO PREVENT ACTUAL API CALLS
-    /*
+    // Make API call to Meshy OpenAPI
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
       method: 'POST',
       headers: {
@@ -103,23 +102,12 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     const taskId = data.result;
     localStorage.setItem('meshy_latest_job_id', taskId);
     localStorage.setItem('meshy_job_created_at', new Date().toString());
+    localStorage.setItem('meshy_demo_model', 'false');
     
     // Track this successful API call
     trackApiCall();
     
     return taskId;
-    */
-    
-    // For now, return a demo model to prevent API calls
-    console.log("DEMO MODE: Returning demo model instead of calling actual API");
-    // Generate a demo model ID for fallback
-    const demoId = "demo-model-" + Math.random().toString(36).substring(2, 8);
-    localStorage.setItem('meshy_latest_job_id', demoId);
-    localStorage.setItem('meshy_job_created_at', new Date().toString());
-    localStorage.setItem('meshy_last_status_' + demoId, 'SUCCEEDED');
-    localStorage.setItem('meshy_demo_model', 'true');
-    
-    return demoId;
   } catch (error) {
     console.error("Error in model generation:", error);
     // Generate a demo model ID for fallback

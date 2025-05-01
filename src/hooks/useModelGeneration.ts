@@ -41,33 +41,12 @@ export const useModelGeneration = () => {
       
       // Check if we should proceed with actual API call or use demo model
       const shouldUseRealApi = canMakeModelApiCall();
-      if (!shouldUseRealApi) {
-        console.log("Using demo model instead of calling Meshy API");
-        
-        // Create a demo job ID
-        const demoJobId = "demo-model-" + Math.random().toString(36).substring(2, 8);
-        
-        // Dispatch event to notify components about the new model job
-        const modelEvent = new CustomEvent('modelJobCreated', {
-          detail: { 
-            jobId: demoJobId,
-            hasSatelliteImage: true,
-            demo: true
-          }
-        });
-        document.dispatchEvent(modelEvent);
-        
-        toast({
-          title: "Demo Mode",
-          description: "Using demo 3D model to avoid API charges.",
-        });
-        
-        return;
-      }
       
       toast({
         title: "Processing",
-        description: "Capturing property view...",
+        description: shouldUseRealApi ? 
+          "Capturing property images for 3D model generation..." : 
+          "Using demo mode for 3D model generation.",
       });
       
       // Get both Street View and satellite images
@@ -89,6 +68,8 @@ export const useModelGeneration = () => {
         throw new Error("Failed to capture property image");
       }
 
+      console.log("Captured primary image for 3D model generation");
+      
       // Save the image data to user metadata for future use
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -98,7 +79,8 @@ export const useModelGeneration = () => {
             data: { 
               ...metadata,
               propertySatelliteImage: imageData.satellite ? true : false,
-              propertyStreetView: imageData.streetView ? true : false
+              propertyStreetView: imageData.streetView ? true : false,
+              propertyAddress: address
             }
           });
         }
@@ -107,7 +89,12 @@ export const useModelGeneration = () => {
       }
 
       try {
-        // Generate 3D model using the new OpenAPI endpoint
+        toast({
+          title: "Processing",
+          description: "Generating 3D model with Meshy API...",
+        });
+        
+        // Generate 3D model using the Meshy API
         const jobId = await generateModelFromImage(primaryImage);
         console.log("3D model generation job created:", jobId);
         
@@ -115,14 +102,19 @@ export const useModelGeneration = () => {
         const modelEvent = new CustomEvent('modelJobCreated', {
           detail: { 
             jobId,
-            hasSatelliteImage: !!imageData.satellite
+            hasSatelliteImage: !!imageData.satellite,
+            hasAerialImage: !!imageData.aerialView
           }
         });
         document.dispatchEvent(modelEvent);
         
+        const isDemoModel = localStorage.getItem('meshy_demo_model') === 'true';
+        
         toast({
-          title: "Success",
-          description: "3D model generation started! It may take a few minutes to complete.",
+          title: isDemoModel ? "Demo Mode" : "Success",
+          description: isDemoModel
+            ? "Using a demo 3D model. To use the actual Meshy API, ensure API access is enabled."
+            : "3D model generation started! It may take a few minutes to complete.",
         });
       } catch (error) {
         console.error("Error calling Meshy API:", error);
@@ -139,6 +131,7 @@ export const useModelGeneration = () => {
           detail: { 
             jobId: demoJobId,
             hasSatelliteImage: !!imageData.satellite,
+            hasAerialImage: !!imageData.aerialView,
             demo: true 
           }
         });
@@ -161,7 +154,7 @@ export const useModelGeneration = () => {
       
       toast({
         title: "Using Demo Model",
-        description: "Using a demo 3D model instead of making API calls.",
+        description: "Using a demo 3D model due to an error during processing.",
         variant: "default"
       });
       
@@ -170,6 +163,7 @@ export const useModelGeneration = () => {
         detail: { 
           jobId: fallbackId,
           hasSatelliteImage: false,
+          hasAerialImage: false,
           demo: true
         }
       });
