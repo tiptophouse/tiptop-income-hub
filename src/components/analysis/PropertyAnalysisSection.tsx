@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -5,7 +6,7 @@ import PropertyMap from '../PropertyMap';
 import PropertyInsights from '../PropertyInsights';
 import Property3DModel from '../Property3DModel';
 import { storePropertyData } from '@/utils/modelGeneration';
-import { captureStreetViewForModel } from '@/utils/streetViewService';
+import { captureStreetViewForModel } from '@/utils/streetView';
 import { supabase } from '@/integrations/supabase/client';
 
 interface PropertyAnalysisSectionProps {

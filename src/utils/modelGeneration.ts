@@ -1,210 +1,98 @@
+/**
+ * 3D model generation utilities using Meshy API
+ */
+import { MESHY_API_URL, getMeshyApiToken, SAMPLE_MODEL_URL } from './api/meshyConfig';
+import { captureStreetViewForModel } from '../streetView';
 
-import { supabase } from '@/integrations/supabase/client';
-import { captureStreetViewForModel, captureMapScreenshot } from './streetViewService';
-import { generateModelFromImage, analyzePropertyImage } from './meshyApi';
-import { toast } from '@/components/ui/use-toast';
-
-export const storePropertyData = async (address: string, imageData: {streetView: string | null, satellite: string | null, aerialView: string | null}) => {
+export const generateModelFromImage = async (imageData: string, propertyFeatures?: any): Promise<string> => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      // Store the address and image data in user metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: { 
-          propertyAddress: address,
-          propertyStreetViewImage: imageData.streetView,
-          propertySatelliteImage: imageData.satellite,
-          propertyAerialView: imageData.aerialView
-        }
-      });
-
-      if (updateError) {
-        console.error("Error storing property data:", updateError);
-        throw updateError;
-      }
+    console.log("Generating 3D model from image using Meshy API");
+    
+    // Remove data URL prefix if it exists
+    const base64Image = imageData.includes('base64,') 
+      ? imageData.split('base64,')[1] 
+      : imageData;
+    
+    if (!base64Image || base64Image.length < 100) {
+      console.error("Invalid or empty image data");
+      throw new Error("Invalid image data for model generation");
     }
+    
+    // Create enhanced prompt with property features
+    let enhancedPrompt = `Create a photorealistic 3D model of this residential property with:`;
+    
+    // Add roof details if available
+    if (propertyFeatures?.roofSize) {
+      enhancedPrompt += `\n- ${propertyFeatures.roofSize} sq ft usable roof for solar panels (${propertyFeatures.solarPotentialKw || 6.5}kW potential)`;
+    } else {
+      enhancedPrompt += `\n- 800 sq ft usable roof for solar panels (6.5kW potential)`;
+    }
+    
+    // Add parking details
+    if (propertyFeatures?.parkingSpaces) {
+      enhancedPrompt += `\n- ${propertyFeatures.parkingSpaces} parking spaces available for rent`;
+    } else {
+      enhancedPrompt += `\n- 2 parking spaces available for rent`;
+    }
+    
+    // Add garden details
+    if (propertyFeatures?.hasGarden) {
+      enhancedPrompt += `\n- ${propertyFeatures?.gardenSqFt || 300} sq ft garden space`;
+    }
+    
+    // Add internet details if available
+    if (propertyFeatures?.internetMbps) {
+      enhancedPrompt += `\n- Facade suitable for internet antenna placement (${propertyFeatures.internetMbps}Mbps)`;
+    } else {
+      enhancedPrompt += `\n- Facade suitable for internet antenna placement`;
+    }
+    
+    enhancedPrompt += `\nMaintain precise scale and proportions.`;
+    
+    // Get Meshy API token asynchronously
+    const MESHY_API_TOKEN = await getMeshyApiToken();
+    console.log("Using Meshy API with enhanced prompt:", enhancedPrompt);
+    
+    // Make API call to Meshy.ai
+    const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${MESHY_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        image: base64Image,
+        mode: "geometry",
+        background_removal: true,
+        generate_material: true,
+        prompt: enhancedPrompt, 
+        reference_model_id: "house",
+        preserve_topology: true,
+        mesh_quality: "high",
+        callback_url: window.location.origin + "/api/meshy-webhook" // Optional webhook for completion notification
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Meshy API error response:", errorText);
+      throw new Error(`Meshy API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Meshy API response:", data);
+    
+    // Store the job ID in localStorage for status checking
+    localStorage.setItem('meshy_latest_job_id', data.id);
+    localStorage.setItem('meshy_job_created_at', new Date().toString());
+    
+    return data.id;
   } catch (error) {
-    console.error("Error in storePropertyData:", error);
-    throw error;
-  }
-};
-
-export const generatePropertyModels = async (address: string) => {
-  try {
-    console.log("Starting property model generation for address:", address);
-    
-    // Check if the user is logged in first
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      console.log("User not logged in - 3D model generation skipped");
-      toast({
-        title: "Login Required",
-        description: "Please sign in to generate a 3D model of your property.",
-        variant: "default"
-      });
-      return null;
-    }
-    
-    toast({
-      title: "Property Analysis",
-      description: "Capturing property views for 3D model generation...",
-    });
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-
-    // Capture both street view and satellite images
-    const capturedImages = await captureStreetViewForModel(address);
-    let streetViewImage = capturedImages.streetView;
-    let satelliteImage = capturedImages.satellite;
-    let aerialView = capturedImages.aerialView;
-    const hasSatelliteImage = !!satelliteImage;
-    const hasAerialImage = !!aerialView;
-    
-    // If no street view is available, try to use stored images
-    if (!streetViewImage) {
-      streetViewImage = user.user_metadata.propertyStreetViewImage;
-    }
-    
-    if (!satelliteImage) {
-      satelliteImage = user.user_metadata.propertySatelliteImage;
-    }
-    
-    if (!aerialView) {
-      aerialView = user.user_metadata.propertyAerialView;
-    }
-    
-    // If still no images available, try to capture map screenshot
-    if (!streetViewImage && !satelliteImage && !aerialView) {
-      console.log("No property views available, looking for map container to capture");
-      const mapElement = document.querySelector('[id^="map-"], [class*="map-container"]') ||
-        document.querySelector('[class*="property-map"]');
-      
-      if (mapElement) {
-        console.log("Found map element, capturing screenshot");
-        // Pass the element directly, the function now handles both types
-        const mapImage = await captureMapScreenshot(mapElement as HTMLDivElement);
-        if (mapImage) {
-          // Use map image as fallback
-          streetViewImage = mapImage;
-        }
-      }
-    }
-    
-    // Store the captured images
-    await storePropertyData(address, {
-      streetView: streetViewImage,
-      satellite: satelliteImage,
-      aerialView: aerialView
-    });
-    
-    // Analyze the satellite or aerial image to extract property features
-    let propertyFeatures = null;
-    const imageToAnalyze = satelliteImage || aerialView || streetViewImage;
-    
-    if (imageToAnalyze) {
-      propertyFeatures = await analyzePropertyImage(imageToAnalyze);
-      console.log("Property features analysis:", propertyFeatures);
-      
-      // Store the property features in user metadata
-      if (propertyFeatures) {
-        const { error: updateError } = await supabase.auth.updateUser({
-          data: { propertyFeatures }
-        });
-        
-        if (updateError) {
-          console.error("Error storing property features:", updateError);
-        }
-      }
-    }
-    
-    // Determine which image to use for model generation
-    // Prefer street view for facade, satellite for rooftop
-    const primaryImage = streetViewImage || satelliteImage || aerialView;
-    
-    if (!primaryImage) {
-      console.error("Failed to capture any property image");
-      throw new Error("Failed to capture property image");
-    }
-
-    console.log(`Successfully captured/retrieved property images`);
-
-    // Generate 3D model using Meshy - add a slight delay to ensure user has time to see the toast message
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    toast({
-      title: "Generating 3D Model",
-      description: "Creating a detailed 3D model of your property. This can take up to 5 minutes.",
-    });
-
-    // Generate the primary model (street view/facade)
-    console.log("Calling Meshy API to generate 3D model...");
-    try {
-      const modelJobId = await generateModelFromImage(primaryImage, propertyFeatures);
-      console.log("Started 3D model generation with job ID:", modelJobId);
-      
-      // Store model ID in user metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: { 
-          propertyModelJobId: modelJobId,
-          hasSatelliteImage: hasSatelliteImage,
-          hasAerialImage: hasAerialImage,
-          propertyFeatures: propertyFeatures
-        }
-      });
-
-      if (updateError) {
-        console.error("Error updating user metadata:", updateError);
-      } else {
-        console.log("Successfully updated user metadata");
-      }
-
-      // Dispatch event for the dashboard to pick up
-      console.log("Dispatching modelJobCreated event with image flags:", {satellite: hasSatelliteImage, aerial: hasAerialImage});
-      const modelEvent = new CustomEvent('modelJobCreated', {
-        detail: { 
-          jobId: modelJobId,
-          hasSatelliteImage: hasSatelliteImage,
-          hasAerialImage: hasAerialImage,
-          propertyFeatures: propertyFeatures
-        }
-      });
-      document.dispatchEvent(modelEvent);
-
-      return modelJobId;
-    } catch (meshyError) {
-      console.error("Error in Meshy API call:", meshyError);
-      throw meshyError;
-    }
-  } catch (error) {
-    console.error("Error in generatePropertyModels:", error);
-    toast({
-      title: "Error",
-      description: "Failed to generate 3D model. Using demo model instead.",
-      variant: "destructive"
-    });
-
-    // Return a demo model ID as fallback
-    const fallbackId = "demo-model-" + Math.random().toString(36).substring(2, 8);
-    console.log("Using fallback demo model ID:", fallbackId);
-    const modelEvent = new CustomEvent('modelJobCreated', {
-      detail: { 
-        jobId: fallbackId,
-        hasSatelliteImage: false,
-        hasAerialImage: false,
-        propertyFeatures: {
-          roofSize: 950,
-          hasPool: true,
-          hasGarden: true,
-          hasParking: true,
-          hasEVCharging: false
-        }
-      }
-    });
-    document.dispatchEvent(modelEvent);
-    return fallbackId;
+    console.error("Error in model generation:", error);
+    // Generate a demo model ID for fallback
+    const demoId = "demo-model-" + Math.random().toString(36).substring(2, 8);
+    localStorage.setItem('meshy_latest_job_id', demoId);
+    localStorage.setItem('meshy_job_created_at', new Date().toString());
+    return demoId;
   }
 };

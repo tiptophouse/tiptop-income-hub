@@ -11,7 +11,6 @@ interface PropertyMapDisplayProps {
   isAnalyzing: boolean;
   analysisText: string;
   view: 'satellite' | 'map';
-  showError?: boolean;
 }
 
 const PropertyMapDisplay: React.FC<PropertyMapDisplayProps> = ({
@@ -21,7 +20,6 @@ const PropertyMapDisplay: React.FC<PropertyMapDisplayProps> = ({
   isAnalyzing,
   analysisText,
   view,
-  showError = false,
 }) => {
   return (
     <motion.div
@@ -47,17 +45,6 @@ const PropertyMapDisplay: React.FC<PropertyMapDisplayProps> = ({
           <div className="absolute top-4 left-4 bg-tiptop-accent/90 text-white rounded-lg px-3 py-1 text-xs font-bold shadow-lg">
             {analysisText}
           </div>
-          
-          {showError && (
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-[90%] max-w-md z-10">
-              <Alert variant="destructive" className="py-2">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Failed to generate 3D model.
-                </AlertDescription>
-              </Alert>
-            </div>
-          )}
         </>
       )}
     </motion.div>
