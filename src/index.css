@@ -1,4 +1,5 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fahkwang:wght@400;500;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -7,17 +8,18 @@
 
 @layer base {
   :root {
-    --background: 255 253 237; /* #FFFDED */
-    --foreground: 85 43 27; /* #552B1B */
-    --title: 170 148 226; /* #AA94E2 */
+    --background: 42 33% 97%; /* #F8F6F0 */
+    --foreground: 0 0% 18%; /* #2D2D2D */
+    --title: 260 27% 54%; /* #7E69AB */
+    --accent: 260 33% 67%; /* #9b87f5 */
   }
 
   body {
-    @apply bg-[#FFFDED] text-[#552B1B] font-work-sans;
+    @apply bg-[#F8F6F0] text-[#2D2D2D] font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-fahkwang text-[#AA94E2];
+    @apply font-sans text-[#2D2D2D];
   }
   
   /* Fix for Google Places Autocomplete dropdown */
@@ -30,7 +32,7 @@
 
 /* Improve form input appearance */
 input, textarea, select {
-  @apply font-work-sans;
+  @apply font-sans;
 }
 
 /* Add smooth transitions for all interactive elements */
@@ -42,4 +44,12 @@ button, a {
 .pac-container {
   z-index: 9999 !important;
   position: absolute !important;
+}
+
+.btn-primary {
+  @apply bg-[#7E69AB] hover:bg-[#6E59A5] text-white font-semibold py-3 px-6 rounded-full;
+}
+
+.section-padding {
+  @apply py-16 px-4 sm:px-6 md:px-8;
 }
