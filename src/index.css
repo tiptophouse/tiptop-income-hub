@@ -60,7 +60,7 @@ button, a {
 
 /* Custom map controls */
 .map-control-button {
-  @apply bg-[#2A2A2A]/90 hover:bg-[#3A3A3A] shadow-md rounded-full p-2 text-white;
+  @apply bg-[#2A2A2A]/90 hover:bg-[#3A3A3A] shadow-md rounded-full p-1.5 sm:p-2 text-white;
 }
 
 /* Brand color */
@@ -91,24 +91,43 @@ button, a {
 
 /* Asset cards in carousel */
 .asset-icon-card {
-  @apply rounded-2xl bg-[#3A3A3A]/80 backdrop-blur-sm p-4 flex items-center justify-center;
+  @apply rounded-2xl bg-[#3A3A3A]/80 backdrop-blur-sm p-2 sm:p-4 flex items-center justify-center;
 }
 
 /* Analytics section */
 .analytics-card {
-  @apply rounded-xl p-5 bg-[#2A2A2A]/90 backdrop-blur-sm border border-[#3A3A3A]/50;
+  @apply rounded-xl p-3 sm:p-5 bg-[#2A2A2A]/90 backdrop-blur-sm border border-[#3A3A3A]/50;
 }
 
 /* Bottom info section */
 .info-section {
-  @apply bg-[#2A2A2A]/95 rounded-t-3xl mt-8 p-6 pb-20;
+  @apply bg-[#2A2A2A]/95 rounded-t-3xl mt-4 sm:mt-8 p-4 sm:p-6;
 }
 
 /* Custom zoom controls */
 .zoom-controls {
-  @apply absolute right-4 bottom-24 bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden;
+  @apply absolute right-2 sm:right-4 bottom-16 sm:bottom-24 bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden;
 }
 
 .zoom-button {
-  @apply p-2 text-white hover:bg-white/20 flex items-center justify-center w-10 h-10;
+  @apply p-1.5 sm:p-2 text-white hover:bg-white/20 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10;
+}
+
+/* Responsive padding utilities */
+@layer utilities {
+  .p-responsive {
+    @apply p-2 sm:p-4;
+  }
+  
+  .px-responsive {
+    @apply px-2 sm:px-4;
+  }
+  
+  .py-responsive {
+    @apply py-2 sm:py-4;
+  }
+  
+  .gap-responsive {
+    @apply gap-2 sm:gap-4;
+  }
 }
