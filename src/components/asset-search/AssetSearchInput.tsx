@@ -46,7 +46,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
     setIsSubmitting(true);
     toast({
       title: "Processing",
-      description: "Analyzing your property...",
+      description: "Sending address to webhook and waiting for response...",
     });
 
     try {
@@ -57,7 +57,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
         if (result.data) {
           toast({
             title: "Analysis Complete",
-            description: "Property analysis completed successfully",
+            description: "Analysis completed successfully",
           });
           
           // Only call the original onSubmit with the response data if we have actual data
@@ -65,7 +65,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
         } else {
           toast({
             title: "Pending",
-            description: "Property information sent for analysis. Results coming soon.",
+            description: "Address sent successfully but no data returned yet.",
             variant: "default"
           });
           // Don't call onSubmit without data
@@ -152,15 +152,15 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
       onSubmit={handleSubmit}
       style={{ overflow: 'visible' }}
     >
-      <div className="relative glass-card rounded-full shadow-xl" style={{ overflow: 'visible' }}>
+      <div className="relative" style={{ overflow: 'visible' }}>
         <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-[#8B5CF6]" />
+          <Search className="h-5 w-5 text-muted-foreground" />
         </div>
         <Input 
           ref={inputRef}
           type="text" 
           placeholder="Enter your property address..." 
-          className="pl-12 pr-32 py-6 w-full rounded-full text-base sm:text-lg border-none bg-transparent focus:ring-2 focus:ring-[#8B5CF6]/30 transition-all duration-300 placeholder:text-gray-400"
+          className="pl-12 pr-28 py-5 w-full rounded-full text-base sm:text-lg shadow-lg border-none bg-white/95 backdrop-blur-sm focus:ring-4 focus:ring-[#9b87f5]/50 transition-all duration-300 placeholder:text-gray-400"
           value={address}
           onChange={(e) => onAddressChange(e.target.value)}
           onKeyDown={(e) => {
@@ -179,23 +179,23 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
             type="button" 
             variant="ghost" 
             size="icon" 
-            className="p-1 h-9 w-9 rounded-full hover:bg-[#8B5CF6]/20 text-[#8B5CF6]"
+            className="p-1 h-9 w-9 rounded-full hover:bg-[#9b87f5]/10 text-[#9b87f5]"
             onClick={onDetectLocation}
             disabled={isLocating || isSubmitting}
             aria-label="Detect current location"
           >
             {isLocating ? (
-              <svg className="animate-spin h-4 w-4 text-[#8B5CF6]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-4 w-4 text-[#9b87f5]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4}></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             ) : (
-              <MapPin className="h-4 w-4 text-[#8B5CF6]" />
+              <MapPin className="h-4 w-4 text-[#9b87f5]" />
             )}
           </Button>
           <Button 
             type="submit" 
-            className="bg-[#8B5CF6] hover:bg-[#7C3AED] px-4 sm:px-6 py-3 h-auto rounded-full text-xs sm:text-sm font-semibold shadow-lg transition-all duration-300 hover:shadow-xl text-white whitespace-nowrap"
+            className="bg-[#9b87f5] hover:bg-[#8B5CF6] px-4 sm:px-6 py-3 h-auto rounded-full text-xs sm:text-sm font-semibold shadow-lg transition-all duration-300 hover:shadow-xl text-white whitespace-nowrap"
             aria-label="Analyze address"
             disabled={isSubmitting}
           >
@@ -205,7 +205,7 @@ const AssetSearchInput: React.FC<AssetSearchInputProps> = ({
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4}></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Analyzing...</span>
+                <span>Processing...</span>
               </div>
             ) : (
               "Analyze Now"

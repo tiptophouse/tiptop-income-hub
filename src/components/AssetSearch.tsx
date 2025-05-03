@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { motion } from 'framer-motion';
 import { monetizationOptions } from './asset-search/constants';
 import AssetSearchHeader from './asset-search/AssetSearchHeader';
 import AssetSearchInput from './asset-search/AssetSearchInput';
@@ -50,12 +49,7 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
   };
 
   return (
-    <motion.div 
-      className="w-full max-w-5xl mx-auto px-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="w-full max-w-4xl mx-auto">
       <AssetSearchHeader />
       
       <AssetSearchInput
@@ -67,41 +61,20 @@ const AssetSearch: React.FC<AssetSearchProps> = ({ onAddressSubmit }) => {
       />
 
       {showMonetizationOptions && (
-        <div className="mt-8 mb-12">
-          <motion.h3 
-            className="text-xl font-semibold text-[#6E59A5] mb-4 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-          >
-            Discover How to Monetize Your Property
-          </motion.h3>
-          <motion.div 
-            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            {monetizationOptions.map((option, index) => (
-              <motion.div
-                key={option.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index, duration: 0.5 }}
-              >
-                <AssetCard
-                  icon={<option.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />}
-                  title={option.title}
-                  description={option.description}
-                  earnings={option.earnings}
-                  onClick={() => {}} // Add click handler if needed
-                />
-              </motion.div>
-            ))}
-          </motion.div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          {monetizationOptions.map((option) => (
+            <AssetCard
+              key={option.id}
+              icon={<option.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />}
+              title={option.title}
+              description={option.description}
+              earnings={option.earnings}
+              onClick={() => {}} // Add click handler if needed
+            />
+          ))}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 

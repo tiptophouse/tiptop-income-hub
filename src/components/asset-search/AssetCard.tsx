@@ -19,18 +19,18 @@ const AssetCard: React.FC<AssetCardProps> = ({
   onClick,
 }) => (
   <Card 
-    className="asset-card border-[#3A3A3A] hover:border-[#8B5CF6] bg-[#2A2A2A]/90 backdrop-blur-sm h-full" 
+    className="border border-[#B993FE]/60 hover:border-[#8B5CF6] transition-colors duration-300" 
     onClick={onClick}
   >
-    <CardContent className="p-1.5 sm:p-2 md:p-3 lg:p-4 flex flex-col items-center text-center space-y-0.5 sm:space-y-1 md:space-y-2 lg:space-y-3 h-full">
-      <div className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 rounded-full bg-[#333] flex items-center justify-center mt-1 sm:mt-2">
+    <CardContent className="p-2 sm:p-3 md:p-4 flex flex-col items-center text-center space-y-1 sm:space-y-2 md:space-y-3 h-full">
+      <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#F3ECFF] flex items-center justify-center mt-2 sm:mt-3">
         {icon}
       </div>
-      <h3 className="text-[10px] xs:text-xs sm:text-sm md:text-base font-medium text-white truncate max-w-full">{title}</h3>
-      <p className="text-[8px] xs:text-[10px] sm:text-xs md:text-sm text-gray-400 line-clamp-2">
+      <h3 className="text-xs sm:text-sm md:text-base font-medium">{title}</h3>
+      <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground line-clamp-2">
         {description}
       </p>
-      <p className="text-[8px] xs:text-[10px] sm:text-xs md:text-sm font-semibold text-[#8B5CF6]">
+      <p className="text-[10px] sm:text-xs md:text-sm text-[#8B5CF6] font-medium">
         {earnings}
       </p>
     </CardContent>

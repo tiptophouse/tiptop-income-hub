@@ -2,10 +2,10 @@
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+import MobileAddressForm from './MobileAddressForm';
+import DesktopAddressForm from './DesktopAddressForm';
 import { useAddressAutocomplete } from '@/hooks/useAddressAutocomplete';
 import { useAddressSearch } from '@/hooks/useAddressSearch';
-import { Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface AddressSearchFormProps {
   address: string;
@@ -38,34 +38,31 @@ const AddressSearchForm = ({
 
   return (
     <motion.form 
-      className="w-full"
+      className="w-full max-w-xl mb-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7 }}
+      transition={{ duration: 0.7, delay: 0.4 }}
       onSubmit={handleSearch}
+      style={{ overflow: 'visible' }}
     >
-      <div className="relative flex flex-col gap-4">
-        <div className="glass-card rounded-xl relative">
-          <div className="absolute inset-y-0 left-4 flex items-center">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Search your address"
-            className="w-full bg-transparent text-white pl-12 pr-4 py-3 rounded-xl focus:outline-none"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+      <div className="relative" style={{ overflow: 'visible' }}>
+        {isMobile ? (
+          <MobileAddressForm
+            inputRef={inputRef}
+            address={address}
+            setAddress={setAddress}
+            isLocating={isLocating}
+            handleLocationDetection={handleLocationDetection}
           />
-        </div>
-        
-        <Button
-          type="submit"
-          className="bg-tiptop-accent hover:bg-tiptop-accent/90 text-white font-semibold py-3 px-6 rounded-xl"
-          disabled={isLocating}
-        >
-          {isLocating ? 'Locating...' : 'Analyze now'}
-        </Button>
+        ) : (
+          <DesktopAddressForm
+            inputRef={inputRef}
+            address={address}
+            setAddress={setAddress}
+            isLocating={isLocating}
+            handleLocationDetection={handleLocationDetection}
+          />
+        )}
       </div>
     </motion.form>
   );

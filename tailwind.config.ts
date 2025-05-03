@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -11,9 +10,6 @@ export default {
   ],
   theme: {
     extend: {
-      screens: {
-        'xs': '480px',
-      },
       fontFamily: {
         'fahkwang': ['Fahkwang', 'sans-serif'],
         'work-sans': ['Work Sans', 'sans-serif'],

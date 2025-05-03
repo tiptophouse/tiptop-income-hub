@@ -1,57 +1,74 @@
-
 import React from 'react';
-import { Layers, Activity, AlertCircle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { AreaChart, DollarSign, Users, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export interface StatisticsCardsProps {
-  activeAssets: number;
-  totalPotentialAssets: number;
-  pendingActions: number;
   earnings: {
     daily: number;
     monthly: number;
     yearly: number;
   };
+  activeAssets: number;
+  totalPotentialAssets: number;
+  pendingActions: number;
+  propertyInsights?: any;
 }
 
-export const StatisticsCards: React.FC<StatisticsCardsProps> = ({
+const StatisticsCards: React.FC<StatisticsCardsProps> = ({
+  earnings,
   activeAssets,
   totalPotentialAssets,
   pendingActions,
-  earnings
+  propertyInsights
 }) => {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="flex flex-col">
-            <div className="flex items-center mb-1">
-              <Layers className="text-blue-500 h-4 w-4 mr-1" />
-              <span className="text-sm font-medium text-muted-foreground">Active Assets</span>
-            </div>
-            <div className="text-xl font-medium">{activeAssets}</div>
-            <div className="text-xs text-muted-foreground">of {totalPotentialAssets} potential</div>
-          </div>
-
-          <div className="flex flex-col">
-            <div className="flex items-center mb-1">
-              <Activity className="text-green-500 h-4 w-4 mr-1" />
-              <span className="text-sm font-medium text-muted-foreground">Monthly</span>
-            </div>
-            <div className="text-xl font-medium">${earnings.monthly}</div>
-            <div className="text-xs text-muted-foreground">${earnings.yearly} annual</div>
-          </div>
-          
-          <div className="flex flex-col">
-            <div className="flex items-center mb-1">
-              <AlertCircle className="text-amber-500 h-4 w-4 mr-1" />
-              <span className="text-sm font-medium text-muted-foreground">Actions</span>
-            </div>
-            <div className="text-xl font-medium">{pendingActions}</div>
-            <div className="text-xs text-muted-foreground">items need attention</div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <Card className="bg-white shadow">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Daily Earnings</CardTitle>
+          <DollarSign className="h-4 w-4 text-gray-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">${earnings.daily}</div>
+          <p className="text-sm text-gray-500">
+            {propertyInsights ? "Based on property analysis" : "Estimated average"}
+          </p>
+        </CardContent>
+      </Card>
+      <Card className="bg-white shadow">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Monthly Earnings</CardTitle>
+          <AreaChart className="h-4 w-4 text-gray-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">${earnings.monthly}</div>
+          <p className="text-sm text-gray-500">
+            {propertyInsights ? "From active assets" : "Projected income"}
+          </p>
+        </CardContent>
+      </Card>
+      <Card className="bg-white shadow">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Active Assets</CardTitle>
+          <Users className="h-4 w-4 text-gray-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{activeAssets}</div>
+          <p className="text-sm text-gray-500">Out of {totalPotentialAssets} potential</p>
+        </CardContent>
+      </Card>
+      <Card className="bg-white shadow">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Pending Actions</CardTitle>
+          <Clock className="h-4 w-4 text-gray-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{pendingActions}</div>
+          <p className="text-sm text-gray-500">Tasks to improve property value</p>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
+
+export default StatisticsCards;

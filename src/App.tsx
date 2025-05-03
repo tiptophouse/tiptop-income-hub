@@ -39,14 +39,6 @@ function App() {
     };
   }, []);
 
-  // Apply dark theme to body
-  React.useEffect(() => {
-    document.body.classList.add('bg-black', 'text-white');
-    return () => {
-      document.body.classList.remove('bg-black', 'text-white');
-    };
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

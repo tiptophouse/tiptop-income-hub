@@ -9,16 +9,6 @@ import { renderStatusBadge } from '../utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-interface EarningsSectionProps {
-  userName: string;
-  earnings: {
-    daily: number;
-    monthly: number;
-    yearly: number;
-  };
-  aiRevenueDescription?: string;
-}
-
 // Sample data for the earnings chart
 const earningsChartData = [
   { month: 'Nov', revenue: 320 },
@@ -29,11 +19,7 @@ const earningsChartData = [
   { month: 'Apr', revenue: 380 },
 ];
 
-export const EarningsSection: React.FC<EarningsSectionProps> = ({ 
-  userName, 
-  earnings, 
-  aiRevenueDescription 
-}) => {
+export const EarningsSection = () => {
   const isMobile = useIsMobile();
 
   const renderEarningsTable = () => {
