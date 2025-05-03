@@ -89,7 +89,7 @@ button, a {
   @apply bg-gradient-to-r from-[#8B5CF6] to-[#AA94E2] bg-clip-text text-transparent;
 }
 
-/* Asset cards in carousel */
+/* Asset icons in carousel */
 .asset-icon-card {
   @apply rounded-xl sm:rounded-2xl bg-[#3A3A3A]/80 backdrop-blur-sm p-1 sm:p-2 md:p-4 flex items-center justify-center;
 }
