@@ -9,7 +9,7 @@ const corsHeaders = {
 
 // Define the Meshy API endpoint and token
 const MESHY_API_URL = "https://api.meshy.ai/openapi/v1";
-const MESHY_API_TOKEN = "msy_avpp46RPVW7UlyUSsEez6fTuqYvIJgQDg0nM"; // Using the provided token
+const MESHY_API_TOKEN = "msy_2TwuQStaRCKe6TdrF1ByMD8bUqGoWaEgdzzc"; // Using the provided token
 
 serve(async (req) => {
   // Handle CORS preflight requests

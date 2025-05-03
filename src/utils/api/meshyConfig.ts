@@ -12,7 +12,7 @@ const SAMPLE_MODEL_URL = "https://storage.googleapis.com/realestate-3d-models/de
 const GOOGLE_MAPS_API_KEY = "AIzaSyBVn7lLjUZ1_bZXGwdqXFC11fNM8Pax4SE";
 
 // Use the provided token
-const MESHY_API_TOKEN = "msy_avpp46RPVW7UlyUSsEez6fTuqYvIJgQDg0nM";
+const MESHY_API_TOKEN = "msy_2TwuQStaRCKe6TdrF1ByMD8bUqGoWaEgdzzc";
 
 // Track API usage locally to prevent excessive calls
 let apiCallsTracking = {

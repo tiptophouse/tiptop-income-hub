@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 
 interface ModelViewerProps {
@@ -157,7 +158,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
       </model-viewer>
       
       {showHotspots && (
-        <style jsx>{`
+        <style dangerouslySetInnerHTML={{__html: `
           .hotspot {
             display: block;
             width: 24px;
@@ -199,7 +200,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
           .hotspot:hover .annotation {
             display: block;
           }
-        `}</style>
+        `}} />
       )}
     </div>
   );
