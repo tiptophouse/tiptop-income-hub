@@ -45,7 +45,8 @@ export const generatePropertyModels = async (address: string, webhookUrl?: strin
           jobId: demoId,
           hasSatelliteImage: false,
           hasAerialImage: false,
-          demo: true
+          demo: true,
+          address: address
         }
       });
       document.dispatchEvent(modelEvent);
@@ -66,7 +67,8 @@ export const generatePropertyModels = async (address: string, webhookUrl?: strin
       detail: { 
         jobId,
         hasSatelliteImage: !!imageData.satellite,
-        hasAerialImage: !!imageData.aerialView
+        hasAerialImage: !!imageData.aerialView,
+        address: address
       }
     });
     document.dispatchEvent(modelEvent);
@@ -87,7 +89,8 @@ export const generatePropertyModels = async (address: string, webhookUrl?: strin
         jobId: fallbackId,
         hasSatelliteImage: false,
         hasAerialImage: false,
-        demo: true
+        demo: true,
+        address: address
       }
     });
     document.dispatchEvent(modelEvent);

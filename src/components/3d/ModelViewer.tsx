@@ -1,89 +1,109 @@
 
-import React, { useEffect, useRef } from 'react';
-import ModelHotspots from './ModelHotspots';
+import React, { useEffect, useState } from 'react';
 
 interface ModelViewerProps {
   modelUrl: string;
-  isModelViewerLoaded: boolean;
-  rotateModel: boolean;
-  modelRotation: number;
-  zoomLevel: number;
-  backgroundColor: string;
-  showHotspots: boolean;
-  hotspots: Array<{
-    id: string;
-    position: string;
-    normal: string;
-    label: string;
-    active?: boolean;
-  }>;
+  autoRotate?: boolean;
+  zoomLevel?: number;
+  aspectRatio?: string;
+  className?: string;
+  onLoad?: () => void;
 }
 
 const ModelViewer: React.FC<ModelViewerProps> = ({
   modelUrl,
-  isModelViewerLoaded,
-  rotateModel,
-  modelRotation,
-  zoomLevel,
-  backgroundColor,
-  showHotspots,
-  hotspots
+  autoRotate = false,
+  zoomLevel = 100,
+  aspectRatio = "aspect-video",
+  className = "",
+  onLoad
 }) => {
-  const modelViewerRef = useRef<HTMLElement | null>(null);
+  const [isModelViewerDefined, setIsModelViewerDefined] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    const modelViewer = modelViewerRef.current as any;
-    if (!modelViewer || !isModelViewerLoaded) return;
-
-    try {
-      modelViewer.src = modelUrl;
-      modelViewer.cameraControls = true;
-      modelViewer.autoRotate = false;
-      modelViewer.exposure = 1;
-      modelViewer.shadowIntensity = 1;
-      modelViewer.skyboxImage = null;
-      modelViewer.environmentImage = null;
-      modelViewer.setAttribute("camera-orbit", `0deg 75deg ${zoomLevel}%`);
-    } catch (error) {
-      console.error("[ModelViewer] Error configuring 3D model viewer:", error);
+    // Check if model-viewer is already defined
+    if (customElements.get('model-viewer')) {
+      setIsModelViewerDefined(true);
+      return;
     }
-  }, [modelUrl, isModelViewerLoaded, zoomLevel]);
+    
+    // Load the model-viewer script
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
+    script.type = 'module';
+    
+    script.onload = () => {
+      console.log("model-viewer script loaded successfully");
+      setIsModelViewerDefined(true);
+    };
+    
+    script.onerror = () => {
+      console.error("Failed to load model-viewer script");
+      setIsError(true);
+    };
+    
+    document.head.appendChild(script);
+    
+    // Clean up - but don't remove the script as it should be available globally
+    return () => {
+      // We don't remove the script to avoid conflicts with other components
+    };
+  }, []);
 
-  useEffect(() => {
-    const modelViewer = modelViewerRef.current as any;
-    if (!rotateModel || !modelViewer) return;
+  const handleModelLoad = () => {
+    console.log("Model loaded successfully");
+    setIsLoaded(true);
+    if (onLoad) onLoad();
+  };
 
-    try {
-      const rotation = `${modelRotation}deg 75deg ${zoomLevel}%`;
-      modelViewer.setAttribute("camera-orbit", rotation);
-    } catch (error) {
-      console.log("[ModelViewer] Error applying camera rotation:", error);
-    }
-  }, [modelRotation, rotateModel, zoomLevel]);
+  const handleModelError = () => {
+    console.error("Error loading 3D model");
+    setIsError(true);
+  };
 
-  if (!isModelViewerLoaded) {
+  if (!isModelViewerDefined) {
     return (
-      <div className="w-full aspect-video bg-gray-100 rounded-md flex items-center justify-center">
-        <p className="text-gray-500">Loading 3D viewer...</p>
+      <div className={`w-full ${aspectRatio} bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-violet-400 mx-auto mb-2"></div>
+          <p className="text-sm text-gray-500">Loading 3D viewer...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className={`w-full ${aspectRatio} bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
+        <div className="text-center text-red-500">
+          <p className="font-semibold">Failed to load 3D model</p>
+          <p className="text-sm mt-1">Please try refreshing the page</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full aspect-video bg-gray-100 rounded-md overflow-hidden">
+    <div className={`relative w-full ${aspectRatio} ${className}`}>
       <model-viewer
-        ref={modelViewerRef}
-        camera-controls
-        auto-rotate={rotateModel}
-        exposure="1"
+        src={modelUrl}
+        alt="3D model of property"
         shadow-intensity="1"
-        autoplay
-        ar
-        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        auto-rotate={autoRotate}
         camera-orbit={`0deg 75deg ${zoomLevel}%`}
-        style={{ width: "100%", height: "100%", backgroundColor }}
+        style={{ width: "100%", height: "100%" }}
+        className="w-full h-full rounded-lg bg-gray-50"
+        onLoad={handleModelLoad}
+        onError={handleModelError}
       >
-        {showHotspots && <ModelHotspots hotspots={hotspots} />}
+        {!isLoaded && (
+          <div slot="poster" className="w-full h-full flex items-center justify-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-violet-400"></div>
+          </div>
+        )}
       </model-viewer>
     </div>
   );

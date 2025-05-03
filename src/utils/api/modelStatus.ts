@@ -2,7 +2,7 @@
 /**
  * Model status checking and URL retrieval utilities
  */
-import { MESHY_API_URL } from './meshyConfig';
+import { MESHY_API_URL, getMeshyApiToken } from './meshyConfig';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -51,152 +51,107 @@ const checkPendingJobs = async () => {
     const status = await checkModelStatus(latestJobId);
     
     // Store the latest status
-    localStorage.setItem('meshy_last_status_' + latestJobId, status.status);
+    localStorage.setItem('meshy_last_status_' + latestJobId, status.state || 'unknown');
     
-    if (status.status === 'SUCCEEDED') {
-      // Model is complete, trigger notification
-      notifyModelComplete(latestJobId, status.model_urls?.glb);
+    if (status.state === 'completed') {
+      // Get the model URL
+      const modelUrl = await getModelDownloadUrl(latestJobId);
+      
+      // Dispatch event for any listening components
+      const event = new CustomEvent('modelCompleted', {
+        detail: {
+          jobId: latestJobId,
+          modelUrl: modelUrl
+        }
+      });
+      document.dispatchEvent(event);
+      
+      console.log(`Model ${latestJobId} is completed with URL: ${modelUrl}`);
+      
+      // Show notification
+      toast({
+        title: "3D Model Ready",
+        description: "Your property's 3D model is ready to view"
+      });
     }
   } catch (error) {
-    console.error("Error in periodic status check:", error);
+    console.error("Error checking pending jobs:", error);
   }
 };
 
-// Function to send notification when model is complete
-const notifyModelComplete = async (jobId: string, modelUrl?: string) => {
+export const checkModelStatus = async (jobId: string) => {
   try {
-    // Show toast notification
-    toast({
-      title: "3D Model Complete",
-      description: "Your property 3D model is now ready to view.",
-    });
+    console.log(`Checking status for model job ${jobId}`);
     
-    // Dispatch event for the UI to update
-    const modelCompleteEvent = new CustomEvent('modelCompleted', {
-      detail: { 
-        jobId,
-        modelUrl
-      }
-    });
-    document.dispatchEvent(modelCompleteEvent);
-    
-    // Try to send email notification if user is authenticated
-    await sendModelCompleteEmail(jobId, modelUrl);
-    
-  } catch (notifyError) {
-    console.error("Error in model complete notification:", notifyError);
-  }
-};
-
-// Function to send email notification
-const sendModelCompleteEmail = async (jobId: string, modelUrl?: string) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user?.email) return;
-    
-    // Get the property address from user metadata
-    const propertyAddress = user.user_metadata?.propertyAddress || "your property";
-    
-    // In a production app, this would call a supabase edge function to send an email
-    console.log(`Would send email to ${user.email} about completed model ${jobId} for address: ${propertyAddress}`);
-  } catch (error) {
-    console.error("Error sending model complete email:", error);
-  }
-};
-
-export const checkModelStatus = async (jobId: string): Promise<any> => {
-  try {
-    console.log("Checking status for job:", jobId);
-    
-    // Check if this is a demo job ID
-    if (jobId.startsWith('demo-') || localStorage.getItem('meshy_demo_model') === 'true') {
-      console.log("Using demo model status - no API call made");
-      return {
+    // For demo models, return a fake "completed" status
+    if (jobId.startsWith('demo-')) {
+      console.log(`Demo model ${jobId} - returning fake completed status`);
+      return { 
         state: 'completed',
         status: 'SUCCEEDED',
-        model_urls: {
-          glb: SAMPLE_MODEL_URL
-        },
-        isDemo: true
+        output: { 
+          model_url: SAMPLE_MODEL_URL 
+        } 
       };
     }
     
-    // For development environments, check if we should use demo model
-    if (window.location.hostname.includes('localhost') || 
-        window.location.hostname.includes('lovable')) {
-      // For testing in development, randomly decide if model is ready
-      const randomProgress = Math.random();
-      if (randomProgress > 0.7) {
-        return {
-          state: 'completed',
-          status: 'SUCCEEDED',
-          model_urls: {
-            glb: SAMPLE_MODEL_URL
-          }
-        };
-      } else {
-        return {
-          state: 'processing',
-          status: 'IN_PROGRESS',
-          progress: Math.round(randomProgress * 100)
-        };
-      }
-    }
+    const MESHY_API_TOKEN = "msy_avpp46RPVW7UlyUSsEez6fTuqYvIJgQDg0nM"; // Use the token directly
     
-    // Use the direct token value
-    const MESHY_API_TOKEN = "msy_avpp46RPVW7UlyUSsEez6fTuqYvIJgQDg0nM"; // Using the provided token
-    
-    // Make actual API call to check status
-    const response = await fetch(`${MESHY_API_URL}/image-to-3d/${jobId}`, {
-      method: 'GET',
+    // Check the status using the Meshy API
+    const response = await fetch(`${MESHY_API_URL}/task`, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${MESHY_API_TOKEN}`
-      }
+        'Authorization': `Bearer ${MESHY_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        task_id: jobId
+      })
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to check job status: ${response.status}`);
+      console.error(`Failed to check model status: ${response.status} ${response.statusText}`);
+      throw new Error(`Failed to check model status: ${response.status}`);
     }
-
+    
     const data = await response.json();
-    console.log("Job status response:", data);
+    console.log(`Model status response for ${jobId}:`, data);
     
-    // Store the most recent status
-    localStorage.setItem('meshy_last_status_' + jobId, data.status);
-    
-    return data;
-  } catch (error) {
-    console.error("Error checking model status:", error);
-    
-    // Return demo status as fallback
     return {
-      state: 'completed',
-      status: 'SUCCEEDED',
-      model_urls: {
-        glb: SAMPLE_MODEL_URL
-      },
-      isDemo: true
+      state: data.result?.state?.toLowerCase() || 'processing',
+      status: data.result?.state || 'PROCESSING',
+      output: data.result?.output ? {
+        model_url: data.result.output.model_url || null
+      } : null
     };
+  } catch (error) {
+    console.error(`Error checking status for model ${jobId}:`, error);
+    throw error;
   }
 };
 
-export const getModelDownloadUrl = async (jobId: string): Promise<string> => {
+export const getModelDownloadUrl = async (jobId: string) => {
   try {
-    // For demo job IDs, immediately return sample model
-    if (jobId.startsWith('demo-') || localStorage.getItem('meshy_demo_model') === 'true') {
+    console.log(`Getting download URL for model ${jobId}`);
+    
+    // For demo models, return a sample URL
+    if (jobId.startsWith('demo-')) {
+      console.log(`Demo model ${jobId} - returning sample URL`);
       return SAMPLE_MODEL_URL;
     }
     
-    // For real job IDs, check the status and get model URL
+    // Check the status first to get the URL
     const status = await checkModelStatus(jobId);
     
-    if (status.status === 'SUCCEEDED' && status.model_urls?.glb) {
-      return status.model_urls.glb;
+    if (status.state !== 'completed') {
+      throw new Error(`Model ${jobId} is not completed yet`);
     }
     
-    throw new Error('Model not ready yet or no model URL available');
+    // Return the model URL from the status response
+    return status.output?.model_url || SAMPLE_MODEL_URL;
   } catch (error) {
-    console.error("Error getting model URL:", error);
+    console.error(`Error getting download URL for model ${jobId}:`, error);
+    // Return the sample URL as a fallback
     return SAMPLE_MODEL_URL;
   }
 };
