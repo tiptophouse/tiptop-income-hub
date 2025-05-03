@@ -19,14 +19,14 @@ const AssetInfoCard: React.FC<AssetInfoCardProps> = ({ assetId, title, icon, chi
       transition={{ duration: 0.5 }}
       whileHover={{ y: -5 }}
     >
-      <Card className={`asset-info-card ${assetId} border-[#E5DEFF] hover:shadow-md transition-all duration-300 bg-white/90 backdrop-blur-sm ${className}`}>
+      <Card className={`asset-info-card ${assetId} border-[#3A3A3A] hover:shadow-md transition-all duration-300 bg-[#2A2A2A]/90 backdrop-blur-sm ${className}`}>
         <CardHeader className="flex flex-row items-center gap-3 pb-3">
-          <div className="bg-[#F3ECFF] p-3 rounded-full">
+          <div className="bg-[#333] p-3 rounded-full">
             {icon}
           </div>
-          <CardTitle className="text-xl text-[#6E59A5] font-fahkwang">{title}</CardTitle>
+          <CardTitle className="text-xl text-white font-fahkwang">{title}</CardTitle>
         </CardHeader>
-        <CardContent className="font-work-sans text-[#552B1B]/80">
+        <CardContent className="font-work-sans text-gray-300">
           {children}
         </CardContent>
       </Card>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import GoogleMapsInit from './GoogleMapsInit';
 import AddressSearchForm from './address/AddressSearchForm';
@@ -10,106 +11,129 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
+import { Package, Wifi, Plant, Home } from 'lucide-react';
 
 const Hero = () => {
   const [address, setAddress] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
 
-  const assetLabels = [
-    "Parking Space",
-    "Items",
-    "Unused Bandwidth",
-    "Rooftop",
-    "Swimming Pool",
-    "Garden",
-    "Storage Space",
-    "Car"
+  const assetIcons = [
+    { 
+      id: "storage", 
+      icon: <Package className="h-8 w-8 text-amber-500" /> 
+    },
+    { 
+      id: "garden", 
+      icon: <Plant className="h-8 w-8 text-green-500" /> 
+    },
+    { 
+      id: "internet", 
+      icon: <Wifi className="h-8 w-8 text-blue-500" /> 
+    },
+    { 
+      id: "house", 
+      icon: <Home className="h-8 w-8 text-purple-500" /> 
+    }
   ];
 
   return (
     <GoogleMapsInit>
-      <section className="pt-8 md:pt-14 pb-14 px-2 sm:px-4 lg:px-8 w-full" style={{ overflow: 'visible' }}>
-        <div className="w-full text-center mb-0">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 text-[#AA94E2] font-fahkwang">
-            Monetize Your Home Assets
-          </h1>
-          <p className="text-lg text-[#552B1B] max-w-2xl mx-auto mb-6 font-work-sans">
-            Turn your property's untapped resources into monthly income
-          </p>
-        </div>
-
-        <div className="w-full flex justify-center items-center mb-6" style={{ overflow: 'visible' }}>
-          <div className="w-full max-w-xl" style={{ overflow: 'visible' }}>
-            <AddressSearchForm 
-              address={address} 
-              setAddress={setAddress} 
-              isLocating={isLocating} 
-              setIsLocating={setIsLocating} 
-              setShowAnalysis={setShowAnalysis} 
-            />
-          </div>
-        </div>
-
-        <div className="w-full">
-          {!showAnalysis ? (
-            <div className="w-full relative flex flex-col items-center">
-              <div className="w-full h-96 overflow-hidden bg-[#FFFDED] flex flex-col items-center justify-center relative mb-3 rounded-3xl">
+      <section className="relative flex flex-col min-h-screen bg-black">
+        {!showAnalysis ? (
+          <>
+            <div className="absolute top-0 left-0 w-full h-full z-0 bg-black">
+              <img 
+                src="/lovable-uploads/1a967cb3-75d1-4ef6-b63c-fb935cc58f24.png" 
+                alt="Map background" 
+                className="w-full h-full object-cover opacity-90"
+                style={{ filter: 'brightness(0.9)' }}
+              />
+              
+              <div className="absolute bottom-0 left-0 w-full">
                 <img 
-                  alt="3D House Visualization" 
-                  className="w-auto h-64 object-contain mt-20" 
-                  style={{ zIndex: 1 }} 
                   src="/lovable-uploads/10603114-d9a7-40ea-afe1-229cb7a86511.png" 
+                  alt="3D House" 
+                  className="w-40 h-auto mx-auto" 
                 />
-                <div className="absolute top-0 left-0 w-full h-full z-10">
-                  <div className="absolute top-4 left-4">
-                    <p className="text-lg font-semibold text-[#552B1B] mb-2">Rent your</p>
-                    <div className="hidden md:flex flex-wrap gap-3 max-w-[600px]">
-                      {assetLabels.map((label) => (
-                        <span key={label} className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B]">
-                          {label}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="md:hidden w-[300px]">
-                      <Carousel
-                        opts={{
-                          align: "start",
-                          loop: true,
-                        }}
-                        className="w-full"
-                      >
-                        <CarouselContent>
-                          {assetLabels.map((label) => (
-                            <CarouselItem key={label} className="basis-auto">
-                              <span className="bg-white/80 px-3 py-1 rounded-full text-sm font-medium text-[#552B1B] whitespace-nowrap">
-                                {label}
-                              </span>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                        <CarouselPrevious />
-                        <CarouselNext />
-                      </Carousel>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
-          ) : (
-            <div className="w-full mx-auto">
-              <div className="w-full mb-8">
-                <PropertyMap 
+            
+            <div className="relative z-10 px-5 pt-10 flex-1">
+              <div className="mb-4">
+                <h1 className="text-tiptop text-2xl font-bold mb-2">tiptop</h1>
+                <h2 className="text-4xl sm:text-5xl font-bold mb-5">
+                  Monetize Your Home Assets
+                </h2>
+              </div>
+
+              <div className="w-full max-w-md mx-auto mb-6">
+                <AddressSearchForm 
                   address={address} 
-                  onZoomComplete={() => console.log("Map zoom completed")} 
+                  setAddress={setAddress} 
+                  isLocating={isLocating} 
+                  setIsLocating={setIsLocating} 
+                  setShowAnalysis={setShowAnalysis} 
                 />
               </div>
-              <div className="w-full">
-                <AssetOpportunities address={address} />
+              
+              <div className="mt-auto mb-5 w-full">
+                <Carousel
+                  opts={{
+                    align: "center",
+                    loop: true,
+                  }}
+                  className="w-full"
+                >
+                  <CarouselContent>
+                    {assetIcons.map((asset) => (
+                      <CarouselItem key={asset.id} className="basis-1/4 pl-1 md:pl-2">
+                        <div className="asset-icon-card">
+                          {asset.icon}
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="bg-[#2A2A2A]/80 text-white hover:bg-[#3A3A3A]/80 border-none left-2" />
+                  <CarouselNext className="bg-[#2A2A2A]/80 text-white hover:bg-[#3A3A3A]/80 border-none right-2" />
+                </Carousel>
+              </div>
+              
+              <div className="info-section">
+                <h2 className="text-2xl font-bold text-center mb-4">
+                  Rent Your Assets, Make Passive Income
+                </h2>
+                <div className="bg-[#B5A887]/90 rounded-xl p-4 mb-6">
+                  <h3 className="text-xl font-semibold">Rooftop</h3>
+                  <p className="text-sm text-white/80">Solar panels, gardens</p>
+                </div>
+                <div className="flex justify-between mt-4">
+                  <button className="bg-[#333333]/80 hover:bg-[#444444]/80 rounded-full p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
+                  </button>
+                  <button className="bg-[#333333]/80 hover:bg-[#444444]/80 rounded-full p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
+                </div>
+                <p className="text-center text-white/90 mt-6">
+                  Check which assets you can start monetizing now! Enter your property address.
+                </p>
               </div>
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <div className="w-full">
+            <div className="w-full">
+              <PropertyMap 
+                address={address} 
+                onZoomComplete={() => console.log("Map zoom completed")} 
+              />
+            </div>
+            <div className="w-full mt-4 px-4">
+              <AssetOpportunities address={address} />
+            </div>
+          </div>
+        )}
       </section>
     </GoogleMapsInit>
   );

@@ -19,15 +19,15 @@ const AssetCard: React.FC<AssetCardProps> = ({
   onClick,
 }) => (
   <Card 
-    className="asset-card border border-[#E5DEFF] hover:border-[#8B5CF6] bg-white/90 backdrop-blur-sm" 
+    className="asset-card border-[#3A3A3A] hover:border-[#8B5CF6] bg-[#2A2A2A]/90 backdrop-blur-sm" 
     onClick={onClick}
   >
     <CardContent className="p-3 sm:p-4 flex flex-col items-center text-center space-y-2 sm:space-y-3 h-full">
-      <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#F3ECFF] flex items-center justify-center mt-2 sm:mt-3">
+      <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#333] flex items-center justify-center mt-2 sm:mt-3">
         {icon}
       </div>
-      <h3 className="text-sm md:text-base font-medium text-[#6E59A5]">{title}</h3>
-      <p className="text-xs md:text-sm text-[#552B1B]/70 line-clamp-2">
+      <h3 className="text-sm md:text-base font-medium text-white">{title}</h3>
+      <p className="text-xs md:text-sm text-gray-400 line-clamp-2">
         {description}
       </p>
       <p className="text-xs md:text-sm font-semibold text-[#8B5CF6]">

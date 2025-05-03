@@ -7,22 +7,21 @@
 
 @layer base {
   :root {
-    --background: 255 253 237; /* #FFFDED */
-    --foreground: 85 43 27; /* #552B1B */
-    --title: 170 148 226; /* #AA94E2 */
-    --card: 255 255 255;
-    --card-foreground: 85 43 27;
+    --background: 0 0 0;
+    --foreground: 255 255 255;
+    --card: 38 38 38;
+    --card-foreground: 255 255 255;
     --accent: 139 92 246; /* #8B5CF6 */
     --accent-light: 170 148 226; /* #AA94E2 */
     --accent-dark: 110 89 165; /* #6E59A5 */
   }
 
   body {
-    @apply bg-[#FFFDED] text-[#552B1B] font-work-sans;
+    @apply bg-black text-white font-work-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-fahkwang text-[#AA94E2];
+    @apply font-fahkwang text-white;
   }
   
   /* Fix for Google Places Autocomplete dropdown */
@@ -51,7 +50,7 @@ button, a {
 
 /* Glassmorphism effect for cards */
 .glass-card {
-  @apply bg-white/80 backdrop-blur-sm border border-white/50 shadow-lg;
+  @apply bg-[#2A2A2A]/80 backdrop-blur-sm border border-[#3A3A3A]/50 shadow-lg;
 }
 
 /* Asset card animations */
@@ -61,44 +60,55 @@ button, a {
 
 /* Custom map controls */
 .map-control-button {
-  @apply bg-white/90 hover:bg-white shadow-md rounded-full p-2 text-[#8B5CF6];
+  @apply bg-[#2A2A2A]/90 hover:bg-[#3A3A3A] shadow-md rounded-full p-2 text-white;
 }
 
-/* Custom decorative elements */
-.decorative-dot {
-  @apply w-2 h-2 rounded-full bg-[#AA94E2] opacity-70;
+/* Brand color */
+.text-tiptop {
+  @apply text-[#8B5CF6];
 }
 
+.bg-tiptop {
+  @apply bg-[#8B5CF6];
+}
+
+.border-tiptop {
+  @apply border-[#8B5CF6];
+}
+
+.text-tiptop-accent {
+  @apply text-[#8B5CF6];
+}
+
+.bg-tiptop-accent {
+  @apply bg-[#8B5CF6];
+}
+
+/* Gradient text */
 .gradient-text {
   @apply bg-gradient-to-r from-[#8B5CF6] to-[#AA94E2] bg-clip-text text-transparent;
 }
 
-/* Analysis section styling */
-.analysis-card {
-  @apply rounded-xl p-6 bg-white/90 backdrop-blur-sm border border-[#E5DEFF] shadow-md;
+/* Asset cards in carousel */
+.asset-icon-card {
+  @apply rounded-2xl bg-[#3A3A3A]/80 backdrop-blur-sm p-4 flex items-center justify-center;
 }
 
-/* Assets section */
-.asset-info-card {
-  @apply border-l-4 rounded-lg transition-all hover:border-l-[6px];
+/* Analytics section */
+.analytics-card {
+  @apply rounded-xl p-5 bg-[#2A2A2A]/90 backdrop-blur-sm border border-[#3A3A3A]/50;
 }
 
-.asset-info-card.solar {
-  @apply border-yellow-400;
+/* Bottom info section */
+.info-section {
+  @apply bg-[#2A2A2A]/95 rounded-t-3xl mt-8 p-6 pb-20;
 }
 
-.asset-info-card.internet {
-  @apply border-blue-400;
+/* Custom zoom controls */
+.zoom-controls {
+  @apply absolute right-4 bottom-24 bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden;
 }
 
-.asset-info-card.parking {
-  @apply border-purple-400;
-}
-
-.asset-info-card.garden {
-  @apply border-green-400;
-}
-
-.asset-info-card.storage {
-  @apply border-orange-400;
+.zoom-button {
+  @apply p-2 text-white hover:bg-white/20 flex items-center justify-center w-10 h-10;
 }
