@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AssetTable from './components/AssetTable';
+import { AssetTable } from './components/AssetTable';
 import StatisticsCards from './components/StatisticsCards';
 import DashboardCharts from './components/DashboardCharts';
 import EarningsSection from './components/EarningsSection';

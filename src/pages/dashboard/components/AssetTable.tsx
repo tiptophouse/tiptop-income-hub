@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { renderStatusBadge } from '../utils';
 
@@ -54,3 +55,6 @@ export const AssetTable: React.FC<AssetTableProps> = ({ propertyInsights }) => {
     </div>
   );
 };
+
+// Add a default export that points to the AssetTable component
+export default AssetTable;
