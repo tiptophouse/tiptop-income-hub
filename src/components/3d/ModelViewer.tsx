@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 
 interface ModelViewerProps {
@@ -8,6 +7,18 @@ interface ModelViewerProps {
   aspectRatio?: string;
   className?: string;
   onLoad?: () => void;
+  isModelViewerLoaded?: boolean;
+  rotateModel?: boolean;
+  modelRotation?: number;
+  backgroundColor?: string;
+  showHotspots?: boolean;
+  hotspots?: Array<{
+    id: string;
+    position: string;
+    normal: string;
+    label: string;
+    active?: boolean;
+  }>;
 }
 
 const ModelViewer: React.FC<ModelViewerProps> = ({
@@ -16,14 +27,27 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
   zoomLevel = 100,
   aspectRatio = "aspect-video",
   className = "",
-  onLoad
+  onLoad,
+  isModelViewerLoaded = false,
+  rotateModel = false,
+  modelRotation = 0,
+  backgroundColor = "#f5f5f5",
+  showHotspots = false,
+  hotspots = []
 }) => {
   const [isModelViewerDefined, setIsModelViewerDefined] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const modelViewerRef = React.useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    // Check if model-viewer is already defined
+    // If isModelViewerLoaded is provided, use it
+    if (isModelViewerLoaded) {
+      setIsModelViewerDefined(true);
+      return;
+    }
+    
+    // Otherwise check if model-viewer is already defined
     if (customElements.get('model-viewer')) {
       setIsModelViewerDefined(true);
       return;
@@ -50,7 +74,19 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
     return () => {
       // We don't remove the script to avoid conflicts with other components
     };
-  }, []);
+  }, [isModelViewerLoaded]);
+
+  useEffect(() => {
+    // Apply rotation and other configurations when the model-viewer is defined
+    if (isModelViewerDefined && modelViewerRef.current) {
+      const modelViewer = modelViewerRef.current as any;
+      
+      if (rotateModel) {
+        const rotation = `${modelRotation}deg 75deg ${zoomLevel}%`;
+        modelViewer.setAttribute("camera-orbit", rotation);
+      }
+    }
+  }, [isModelViewerDefined, modelRotation, rotateModel, zoomLevel]);
 
   const handleModelLoad = () => {
     console.log("Model loaded successfully");
@@ -88,13 +124,14 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
   return (
     <div className={`relative w-full ${aspectRatio} ${className}`}>
       <model-viewer
+        ref={modelViewerRef}
         src={modelUrl}
         alt="3D model of property"
         shadow-intensity="1"
         camera-controls
-        auto-rotate={autoRotate}
+        auto-rotate={autoRotate || rotateModel}
         camera-orbit={`0deg 75deg ${zoomLevel}%`}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: "100%", height: "100%", backgroundColor }}
         className="w-full h-full rounded-lg bg-gray-50"
         onLoad={handleModelLoad}
         onError={handleModelError}
@@ -104,7 +141,66 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
             <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-violet-400"></div>
           </div>
         )}
+        
+        {showHotspots && hotspots.map(hotspot => (
+          <button
+            key={hotspot.id}
+            className={`hotspot ${hotspot.active ? 'active' : ''}`}
+            slot={`hotspot-${hotspot.id}`}
+            data-position={hotspot.position}
+            data-normal={hotspot.normal}
+            data-visibility-attribute="visible"
+          >
+            <div className="annotation">{hotspot.label}</div>
+          </button>
+        ))}
       </model-viewer>
+      
+      {showHotspots && (
+        <style jsx>{`
+          .hotspot {
+            display: block;
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            border: none;
+            background-color: #8B5CF6;
+            box-sizing: border-box;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+          }
+          
+          .hotspot.active {
+            background-color: #ef4444;
+            transform: scale(1.2);
+          }
+
+          .hotspot[data-visibility-attribute]:not([visible]) {
+            background-color: transparent;
+            border: 3px solid #8B5CF6;
+          }
+          
+          .annotation {
+            background-color: #ffffff;
+            position: absolute;
+            transform: translate(12px, 12px);
+            border-radius: 10px;
+            padding: 10px;
+            width: max-content;
+            max-width: 250px;
+            color: rgba(0, 0, 0, 0.8);
+            font-size: 12px;
+            display: none;
+            pointer-events: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          }
+          
+          .hotspot:hover .annotation {
+            display: block;
+          }
+        `}</style>
+      )}
     </div>
   );
 };

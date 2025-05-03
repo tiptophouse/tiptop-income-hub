@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ModelViewer from "./ModelViewer";
 import ModelControls from "./ModelControls";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -52,7 +52,7 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
     zoomLevel: currentZoom,
   } = use3DModelControls(false, zoomLevel);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const checkModelViewerLoaded = () => {
       if (customElements.get('model-viewer')) {
         setIsModelViewerLoaded(true);

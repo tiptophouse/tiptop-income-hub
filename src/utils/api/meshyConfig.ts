@@ -160,13 +160,13 @@ export const getGoogleSunroofApiKey = async (): Promise<string | null> => {
     
     if (error) {
       console.error('Error fetching Google Sunroof API key:', error);
-      return null;
+      return getGoogleMapsApiKey(); // Fall back to regular Google Maps API key
     }
     
-    return data?.token || null;
+    return data?.token || (await getGoogleMapsApiKey());
   } catch (error) {
     console.error('Error getting Google Sunroof API key:', error);
-    return null;
+    return getGoogleMapsApiKey(); // Fall back to regular Google Maps API key
   }
 };
 

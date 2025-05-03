@@ -1,5 +1,5 @@
 
-import React, { memo, useEffect } from "react";
+import React, { memo, useEffect, useRef } from "react";
 
 interface ModelViewerDisplayProps {
   modelUrl: string | null;
@@ -31,7 +31,7 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
   showHotspots = true,
   hotspots = []
 }) => {
-  const modelViewerRef = React.useRef<HTMLElement | null>(null);
+  const modelViewerRef = useRef<HTMLElement | null>(null);
   const effectiveModelUrl = modelUrl || DEFAULT_MODEL_URL;
 
   useEffect(() => {

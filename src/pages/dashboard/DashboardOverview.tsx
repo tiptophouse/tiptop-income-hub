@@ -1,18 +1,16 @@
 
-import React, { useEffect } from 'react';
-import DashboardHeader from './components/DashboardHeader';
+import React from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AssetTable from './components/AssetTable';
 import StatisticsCards from './components/StatisticsCards';
-import { DashboardCharts } from './components/DashboardCharts';
-import { AssetTable } from './components/AssetTable';
-import { EarningsSection } from './components/EarningsSection';
-import { useIsMobile } from '@/hooks/use-mobile';
-import Property3DModelCard from './components/Property3DModelCard';
+import DashboardCharts from './components/DashboardCharts';
+import EarningsSection from './components/EarningsSection';
 import PropertyOverviewCard from './components/PropertyOverviewCard';
-import { useDatabaseSchemaVerification } from '@/utils/schemaVerification';
+import Property3DModelDisplay from '@/components/Property3DModelDisplay';
+import Property3DModelCard from './components/Property3DModelCard';
 
 interface DashboardOverviewProps {
   userName: string;
-  propertyAddress: string;
   earnings: {
     daily: number;
     monthly: number;
@@ -21,65 +19,110 @@ interface DashboardOverviewProps {
   activeAssets: number;
   totalPotentialAssets: number;
   pendingActions: number;
-  aiRevenueDescription: string;
-  onAddressSubmit?: (address: string) => void;
+  propertyAddress: string;
+  onAddressSubmit: (address: string) => void;
   is3DModelGenerating?: boolean;
   propertyInsights?: any;
+  aiRevenueDescription?: string;
+  propertyFeatures?: {
+    roofSize?: number;
+    solarPotentialKw?: number;
+    internetMbps?: number;
+    parkingSpaces?: number;
+    gardenSqFt?: number;
+    storageVolume?: number;
+    antenna5gArea?: number;
+    hasPool?: boolean;
+    hasGarden?: boolean;
+    hasParking?: boolean;
+    hasStorage?: boolean;
+    hasEVCharging?: boolean;
+    has5G?: boolean;
+  };
+  modelJobId?: string | null;
 }
 
-const DashboardOverview = ({
+const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   userName,
-  propertyAddress,
   earnings,
   activeAssets,
   totalPotentialAssets,
   pendingActions,
-  aiRevenueDescription,
+  propertyAddress,
   onAddressSubmit,
-  is3DModelGenerating = false,
-  propertyInsights = null
-}: DashboardOverviewProps) => {
-  const { verifySchema } = useDatabaseSchemaVerification();
-  
-  // Verify database schema on component mount
-  useEffect(() => {
-    verifySchema();
-  }, []);
-
+  is3DModelGenerating,
+  propertyInsights,
+  aiRevenueDescription,
+  propertyFeatures,
+  modelJobId
+}) => {
   return (
     <div className="space-y-6">
-      <div className="pb-4">
-        <h1 className="text-2xl font-medium text-violet-400">Dashboard</h1>
-        <p className="text-gray-700">Hello, {userName}! Here's your property summary.</p>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Property3DModelCard />
-        <PropertyOverviewCard 
-          propertyAddress={propertyAddress}
+      {/* Header Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <PropertyOverviewCard
+          address={propertyAddress}
           onAddressSubmit={onAddressSubmit}
           is3DModelGenerating={is3DModelGenerating}
-          propertyInsights={propertyInsights}
+          propertyType={propertyInsights?.property_type || "Residential Property"}
+        />
+        
+        <EarningsSection
+          userName={userName}
+          earnings={earnings}
+          aiRevenueDescription={aiRevenueDescription}
+        />
+        
+        <StatisticsCards
+          activeAssets={activeAssets}
+          totalPotentialAssets={totalPotentialAssets}
+          pendingActions={pendingActions}
         />
       </div>
-      
-      <StatisticsCards 
-        earnings={earnings} 
-        activeAssets={activeAssets} 
-        totalPotentialAssets={totalPotentialAssets} 
-        pendingActions={pendingActions} 
-        propertyInsights={propertyInsights}
-      />
-      
-      <div className="space-y-6">
-        <h2 className="text-xl font-medium text-violet-400">Manage your assets</h2>
-        <div className="overflow-x-auto -mx-2 sm:mx-0">
-          <div className="min-w-full px-2 sm:px-0">
-            <AssetTable propertyInsights={propertyInsights} />
-          </div>
+
+      {/* Property 3D Model for larger screens */}
+      {modelJobId && (
+        <div className="hidden md:block">
+          <Property3DModelDisplay
+            jobId={modelJobId}
+            address={propertyAddress}
+            hasSatelliteImage={propertyInsights?.satellite_image_available}
+            hasAerialImage={propertyInsights?.aerial_image_available}
+            propertyFeatures={propertyFeatures}
+          />
         </div>
-        <EarningsSection />
-      </div>
+      )}
+      
+      {/* Property 3D Model Card for smaller screens */}
+      {modelJobId && (
+        <div className="md:hidden">
+          <Property3DModelCard />
+        </div>
+      )}
+
+      {/* Tabs */}
+      <Tabs defaultValue="assets" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="assets">Property Assets</TabsTrigger>
+          <TabsTrigger value="charts">Revenue Charts</TabsTrigger>
+          <TabsTrigger value="neighbors">Neighborhood Data</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="assets">
+          <AssetTable propertyFeatures={propertyFeatures} />
+        </TabsContent>
+        
+        <TabsContent value="charts">
+          <DashboardCharts />
+        </TabsContent>
+        
+        <TabsContent value="neighbors">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-medium mb-4">Neighborhood Properties</h3>
+            <p className="text-gray-500">Data for neighboring properties will appear here.</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

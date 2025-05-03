@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { DashboardLayout } from '@/pages/dashboard/DashboardLayout';
@@ -7,12 +6,15 @@ import { toast } from '@/components/ui/use-toast';
 import { useModelGeneration } from '@/hooks/useModelGeneration';
 import { startPeriodicStatusCheck } from '@/utils/api/modelStatus';
 import { sendAddressToWebhook } from '@/utils/webhook';
+import Property3DModelDisplay from '@/components/Property3DModelDisplay';
+import ModelViewerScript from '@/components/ModelViewerScript';
 
 const Dashboard: React.FC = () => {
   const [userName, setUserName] = useState<string>('');
   const [propertyAddress, setPropertyAddress] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [propertyInsights, setPropertyInsights] = useState<any | null>(null);
+  const [modelJobId, setModelJobId] = useState<string | null>(null);
   const { is3DModelGenerating, handleModelGeneration } = useModelGeneration();
 
   useEffect(() => {
@@ -26,6 +28,13 @@ const Dashboard: React.FC = () => {
         if (user) {
           setUserName(user.user_metadata?.full_name || user.email || 'User');
           setPropertyAddress(user.user_metadata?.propertyAddress || '');
+          
+          // Check for existing model job ID in local storage
+          const storedJobId = localStorage.getItem('meshy_latest_job_id');
+          if (storedJobId) {
+            setModelJobId(storedJobId);
+            console.log("Found existing model job ID:", storedJobId);
+          }
           
           // Load property insights if address exists
           if (user.user_metadata?.propertyAddress) {
@@ -46,9 +55,20 @@ const Dashboard: React.FC = () => {
 
     fetchUserData();
     
-    // Clean up the interval when component unmounts
+    // Listen for model job creation events
+    const handleModelJobCreated = (event: CustomEvent) => {
+      if (event.detail?.jobId) {
+        setModelJobId(event.detail.jobId);
+        console.log("New model job created:", event.detail.jobId);
+      }
+    };
+    
+    document.addEventListener('modelJobCreated', handleModelJobCreated as EventListener);
+    
+    // Clean up
     return () => {
       stopStatusCheck();
+      document.removeEventListener('modelJobCreated', handleModelJobCreated as EventListener);
     };
   }, []);
   
@@ -211,8 +231,31 @@ const Dashboard: React.FC = () => {
   const earnings = calculateEarnings();
   const assetCounts = calculateAssetCounts();
 
+  // Convert propertyInsights to propertyFeatures format needed by the 3D model component
+  const getPropertyFeatures = () => {
+    if (!propertyInsights) return null;
+    
+    return {
+      roofSize: propertyInsights.rooftop_area_m2 ? Math.round(propertyInsights.rooftop_area_m2 * 10.764) : 800, // Convert m² to sq ft
+      solarPotentialKw: propertyInsights.estimated_solar_capacity_kw || 6.5,
+      internetMbps: propertyInsights.unused_bandwidth_mbps || 100,
+      parkingSpaces: propertyInsights.parking_spaces || 2,
+      gardenSqFt: propertyInsights.garden_area_m2 ? Math.round(propertyInsights.garden_area_m2 * 10.764) : 300, // Convert m² to sq ft
+      storageVolume: propertyInsights.storage_volume_m3 || 0,
+      antenna5gArea: propertyInsights.rooftop_area_5g_m2 || 0,
+      hasPool: propertyInsights.pool?.present || false,
+      hasGarden: propertyInsights.garden_area_m2 > 0 || false,
+      hasParking: propertyInsights.parking_spaces > 0 || false,
+      hasStorage: propertyInsights.storage_volume_m3 > 0 || false,
+      hasEVCharging: propertyInsights.ev_charger?.present || false,
+      has5G: propertyInsights.rooftop_area_5g_m2 > 0 || false
+    };
+  };
+
   return (
     <DashboardLayout onSignOut={() => {}}>
+      {/* Load the ModelViewer Web Component script */}
+      <ModelViewerScript />
       <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <DashboardOverview 
           userName={userName} 
@@ -225,6 +268,8 @@ const Dashboard: React.FC = () => {
           is3DModelGenerating={is3DModelGenerating}
           propertyInsights={propertyInsights}
           aiRevenueDescription="Your assets are generating revenue at optimal levels based on property analysis."
+          propertyFeatures={getPropertyFeatures()}
+          modelJobId={modelJobId}
         />
       </div>
     </DashboardLayout>
