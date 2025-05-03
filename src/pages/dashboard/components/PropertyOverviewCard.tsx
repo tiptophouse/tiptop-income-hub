@@ -1,98 +1,93 @@
-import React, { useState } from 'react';
-import { MapPin, Home, Calendar, Award } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
-export interface PropertyOverviewCardProps {
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Home, Edit2, Loader2 } from 'lucide-react';
+
+interface PropertyOverviewCardProps {
   propertyAddress: string;
-  onAddressSubmit?: (address: string) => void;
+  onAddressSubmit: (address: string) => void;
   is3DModelGenerating?: boolean;
-  propertyInsights?: any;
+  propertyType?: string;
 }
 
 const PropertyOverviewCard: React.FC<PropertyOverviewCardProps> = ({
   propertyAddress,
   onAddressSubmit,
   is3DModelGenerating = false,
-  propertyInsights = null
+  propertyType = "Residential Property"
 }) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [address, setAddress] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(propertyAddress);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (address && onAddressSubmit) {
-      onAddressSubmit(address);
-      setIsDialogOpen(false);
-    }
-  };
-
-  const getPropertyType = () => {
-    if (propertyInsights?.property_type) {
-      return propertyInsights.property_type.charAt(0).toUpperCase() + propertyInsights.property_type.slice(1);
-    }
-    return "Residential Building";
+    onAddressSubmit(editValue);
+    setIsEditing(false);
   };
 
   return (
-    <Card className="glass shadow-md">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <Home className="h-5 w-5" /> Property Overview
-        </CardTitle>
-        <CardDescription>Quick snapshot of your property details.</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-gray-500" />
-          <span>{propertyAddress || "No address set"}</span>
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-center mb-3">
+          <Home className="text-primary h-5 w-5 mr-2" />
+          <h3 className="text-lg font-medium">Property Overview</h3>
         </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-gray-500" />
-          <span>Type: {getPropertyType()}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Award className="h-4 w-4 text-gray-500" />
-          <span>Potential Assets: {propertyInsights ? propertyInsights.amenities?.length : 'Loading...'}</span>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="w-full justify-center">
-              Update Address
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Update Property Address</DialogTitle>
-              <DialogDescription>
-                Enter the new address for your property.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="address" className="text-right">
-                  Address
-                </label>
-                <input
-                  type="text"
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="col-span-3 rounded-md border border-gray-200 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                />
-              </div>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <Button type="submit" className="w-full justify-center">
-                Update Address
+        
+        {isEditing ? (
+          <form onSubmit={handleSubmit} className="space-y-2">
+            <Input 
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              placeholder="Enter new address"
+              className="w-full"
+            />
+            <div className="flex space-x-2">
+              <Button 
+                type="submit" 
+                disabled={is3DModelGenerating}
+                className="w-full"
+              >
+                {is3DModelGenerating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Save
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-        {is3DModelGenerating && (
-          <div className="text-center text-sm text-gray-500">
-            Generating 3D Model... This may take a few minutes.
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditValue(propertyAddress);
+                }}
+                className="w-full"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="font-medium truncate mr-2" title={propertyAddress}>
+                {propertyAddress || "No address set"}
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setIsEditing(true)}
+                disabled={is3DModelGenerating}
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">{propertyType}</div>
+            
+            {is3DModelGenerating && (
+              <div className="mt-3 flex items-center text-xs text-amber-600">
+                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                Generating 3D model...
+              </div>
+            )}
           </div>
         )}
       </CardContent>

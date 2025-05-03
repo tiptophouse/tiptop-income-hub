@@ -104,8 +104,7 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
         ))}
       </model-viewer>
         
-      <style>
-        {`
+      <style dangerouslySetInnerHTML={{__html: `
           .hotspot {
             display: block;
             width: 24px;
@@ -147,8 +146,7 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
           .hotspot:hover .annotation {
             display: block;
           }
-        `}
-      </style>
+        `}} />
     </div>
   );
 });

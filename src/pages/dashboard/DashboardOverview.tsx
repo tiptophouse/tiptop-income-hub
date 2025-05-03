@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AssetTable from './components/AssetTable';
-import StatisticsCards from './components/StatisticsCards';
-import DashboardCharts from './components/DashboardCharts';
-import EarningsSection from './components/EarningsSection';
+import { AssetTable } from './components/AssetTable';
+import { StatisticsCards } from './components/StatisticsCards';
+import { DashboardCharts } from './components/DashboardCharts';
+import { EarningsSection } from './components/EarningsSection';
 import PropertyOverviewCard from './components/PropertyOverviewCard';
 import Property3DModelDisplay from '@/components/Property3DModelDisplay';
 import Property3DModelCard from './components/Property3DModelCard';
@@ -61,7 +61,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* Header Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <PropertyOverviewCard
-          address={propertyAddress}
+          propertyAddress={propertyAddress}
           onAddressSubmit={onAddressSubmit}
           is3DModelGenerating={is3DModelGenerating}
           propertyType={propertyInsights?.property_type || "Residential Property"}
@@ -77,6 +77,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           activeAssets={activeAssets}
           totalPotentialAssets={totalPotentialAssets}
           pendingActions={pendingActions}
+          earnings={earnings}
         />
       </div>
 
@@ -113,7 +114,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </TabsContent>
         
         <TabsContent value="charts">
-          <DashboardCharts />
+          <DashboardCharts earnings={earnings} aiRevenueDescription={aiRevenueDescription || ""} />
         </TabsContent>
         
         <TabsContent value="neighbors">

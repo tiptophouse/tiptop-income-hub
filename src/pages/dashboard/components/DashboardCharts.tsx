@@ -15,7 +15,7 @@ interface DashboardChartsProps {
   aiRevenueDescription: string;
 }
 
-export const DashboardCharts = ({ earnings, aiRevenueDescription }: DashboardChartsProps) => {
+export const DashboardCharts: React.FC<DashboardChartsProps> = ({ earnings, aiRevenueDescription }) => {
   const isMobile = useIsMobile();
   
   return (

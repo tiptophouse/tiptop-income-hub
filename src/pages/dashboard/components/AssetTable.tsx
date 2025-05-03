@@ -1,11 +1,12 @@
+
 import React from 'react';
 import { renderStatusBadge } from '../utils';
 
 interface AssetTableProps {
-  propertyInsights?: any;
+  propertyFeatures?: any;
 }
 
-export const AssetTable: React.FC<AssetTableProps> = ({ propertyInsights }) => {
+export const AssetTable: React.FC<AssetTableProps> = ({ propertyFeatures }) => {
   const assets = [
     { id: 1, name: 'Rooftop Solar Panels', status: 'active', monthlyRevenue: '$250' },
     { id: 2, name: 'Shared Internet Bandwidth', status: 'active', monthlyRevenue: '$180' },
