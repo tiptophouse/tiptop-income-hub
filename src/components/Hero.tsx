@@ -11,7 +11,7 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
-import { Package, Wifi, Plant, Home } from 'lucide-react';
+import { Package, Wifi, Leaf, Home } from 'lucide-react';
 
 const Hero = () => {
   const [address, setAddress] = useState('');
@@ -25,7 +25,7 @@ const Hero = () => {
     },
     { 
       id: "garden", 
-      icon: <Plant className="h-8 w-8 text-green-500" /> 
+      icon: <Leaf className="h-8 w-8 text-green-500" /> 
     },
     { 
       id: "internet", 
