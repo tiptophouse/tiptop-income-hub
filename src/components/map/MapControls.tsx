@@ -1,28 +1,36 @@
 
 import React from 'react';
-import { Satellite, Map as MapIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { Map, Satellite, Layers } from 'lucide-react';
 
 interface MapControlsProps {
   view: 'satellite' | 'map';
   onToggleView: () => void;
 }
 
-const MapControls: React.FC<MapControlsProps> = ({
-  view,
-  onToggleView
-}) => {
+const MapControls: React.FC<MapControlsProps> = ({ view, onToggleView }) => {
   return (
-    <div className="absolute bottom-4 right-4 flex gap-2 justify-end">
-      <Button 
-        variant="secondary" 
-        size="sm" 
-        className="bg-black/70 text-white shadow-md hover:bg-black/80"
+    <motion.div 
+      className="absolute top-4 right-4 flex flex-col gap-2"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.2, duration: 0.5 }}
+    >
+      <button 
         onClick={onToggleView}
+        className="map-control-button"
+        title={view === 'satellite' ? 'Switch to Map View' : 'Switch to Satellite View'}
       >
-        {view === 'satellite' ? <MapIcon className="h-4 w-4" /> : <Satellite className="h-4 w-4" />}
-      </Button>
-    </div>
+        {view === 'satellite' ? <Map size={18} /> : <Satellite size={18} />}
+      </button>
+      
+      <button 
+        className="map-control-button"
+        title="Layer Options"
+      >
+        <Layers size={18} />
+      </button>
+    </motion.div>
   );
 };
 

@@ -10,6 +10,11 @@
     --background: 255 253 237; /* #FFFDED */
     --foreground: 85 43 27; /* #552B1B */
     --title: 170 148 226; /* #AA94E2 */
+    --card: 255 255 255;
+    --card-foreground: 85 43 27;
+    --accent: 139 92 246; /* #8B5CF6 */
+    --accent-light: 170 148 226; /* #AA94E2 */
+    --accent-dark: 110 89 165; /* #6E59A5 */
   }
 
   body {
@@ -42,4 +47,58 @@ button, a {
 .pac-container {
   z-index: 9999 !important;
   position: absolute !important;
+}
+
+/* Glassmorphism effect for cards */
+.glass-card {
+  @apply bg-white/80 backdrop-blur-sm border border-white/50 shadow-lg;
+}
+
+/* Asset card animations */
+.asset-card {
+  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+/* Custom map controls */
+.map-control-button {
+  @apply bg-white/90 hover:bg-white shadow-md rounded-full p-2 text-[#8B5CF6];
+}
+
+/* Custom decorative elements */
+.decorative-dot {
+  @apply w-2 h-2 rounded-full bg-[#AA94E2] opacity-70;
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-[#8B5CF6] to-[#AA94E2] bg-clip-text text-transparent;
+}
+
+/* Analysis section styling */
+.analysis-card {
+  @apply rounded-xl p-6 bg-white/90 backdrop-blur-sm border border-[#E5DEFF] shadow-md;
+}
+
+/* Assets section */
+.asset-info-card {
+  @apply border-l-4 rounded-lg transition-all hover:border-l-[6px];
+}
+
+.asset-info-card.solar {
+  @apply border-yellow-400;
+}
+
+.asset-info-card.internet {
+  @apply border-blue-400;
+}
+
+.asset-info-card.parking {
+  @apply border-purple-400;
+}
+
+.asset-info-card.garden {
+  @apply border-green-400;
+}
+
+.asset-info-card.storage {
+  @apply border-orange-400;
 }

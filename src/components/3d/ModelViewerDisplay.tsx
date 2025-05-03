@@ -27,7 +27,7 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
   rotateModel,
   modelRotation,
   zoomLevel = 100,
-  backgroundColor = "#f5f5f5",
+  backgroundColor = "#F8F7FF",
   showHotspots = true,
   hotspots = []
 }) => {
@@ -70,14 +70,17 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
   if (!isModelViewerLoaded) {
     console.log("[ModelViewerDisplay] 3D viewer not yet loaded");
     return (
-      <div className="w-full aspect-video bg-gray-100 rounded-md flex items-center justify-center">
-        <p className="text-gray-500">Loading 3D viewer...</p>
+      <div className="w-full aspect-video bg-[#F8F7FF] rounded-xl flex items-center justify-center border border-[#E5DEFF] shadow-md">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#8B5CF6] mb-4 mx-auto"></div>
+          <p className="text-[#6E59A5]">Loading 3D viewer...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full aspect-video bg-gray-100 rounded-md overflow-hidden">
+    <div className="relative w-full aspect-video bg-[#F8F7FF] rounded-xl overflow-hidden border border-[#E5DEFF] shadow-lg">
       <model-viewer
         ref={modelViewerRef}
         camera-controls
@@ -115,7 +118,7 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
             box-sizing: border-box;
             pointer-events: none;
             transition: all 0.3s ease;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            box-shadow: 0 0 5px rgba(0,0,0,0.25);
           }
           
           .hotspot.active {
@@ -141,6 +144,7 @@ const ModelViewerDisplay: React.FC<ModelViewerDisplayProps> = memo(({
             display: none;
             pointer-events: none;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #E5DEFF;
           }
           
           .hotspot:hover .annotation {

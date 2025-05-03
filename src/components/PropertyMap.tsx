@@ -6,6 +6,7 @@ import MapControls from './map/MapControls';
 import PropertyMapDisplay from './map/PropertyMapDisplay';
 import ModelJobInfo from './map/ModelJobInfo';
 import ModelGenerationHandler from './map/ModelGenerationHandler';
+import { motion } from 'framer-motion';
 
 interface PropertyMapProps {
   address: string;
@@ -28,7 +29,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
     mapContainerRef,
     address,
     view,
-    initialZoom: 12,
+    initialZoom: 15, // Increased initial zoom for better view
     onZoomComplete: () => {
       setIsAnalyzing(false);
       if (onZoomComplete) onZoomComplete();
@@ -43,18 +44,24 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
   };
 
   return (
-    <>
+    <motion.div
+      className="w-full"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <h2 className="text-xl sm:text-2xl font-semibold text-[#6E59A5] mb-3">Property Details</h2>
       <PropertyMapDisplay
         mapContainerRef={mapContainerRef}
         isLoaded={isLoaded}
         weatherTemp={weatherTemp}
         isAnalyzing={isAnalyzing}
-        analysisText={isAnalyzing ? "Analyzing Property..." : "Check Results"}
+        analysisText={isAnalyzing ? "Analyzing Property..." : "Analysis Complete"}
         view={view}
       />
       
       {isLoaded && (
-        <>
+        <div className="relative z-10">
           <MapControls
             view={view}
             onToggleView={toggleMapType}
@@ -65,9 +72,9 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, onZoomComplete }) =>
             mapContainerRef={mapContainerRef} 
             handleModelGeneration={handleModelGeneration} 
           />
-        </>
+        </div>
       )}
-    </>
+    </motion.div>
   );
 };
 
