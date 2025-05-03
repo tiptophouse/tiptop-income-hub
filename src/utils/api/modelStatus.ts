@@ -2,7 +2,7 @@
 /**
  * Model status checking and URL retrieval utilities
  */
-import { MESHY_API_URL, getMeshyApiToken } from './meshyConfig';
+import { MESHY_API_URL, MESHY_API_TOKEN } from './meshyConfig';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -95,7 +95,7 @@ export const checkModelStatus = async (jobId: string) => {
       };
     }
     
-    const MESHY_API_TOKEN = "msy_avpp46RPVW7UlyUSsEez6fTuqYvIJgQDg0nM"; // Use the token directly
+    // Use the token directly from meshyConfig
     
     // Check the status using the Meshy API
     const response = await fetch(`${MESHY_API_URL}/task`, {
