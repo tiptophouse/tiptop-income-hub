@@ -34,7 +34,7 @@
 
 /* Improve form input appearance */
 input, textarea, select {
-  @apply font-work-sans;
+  @apply font-work-sans text-sm sm:text-base;
 }
 
 /* Add smooth transitions for all interactive elements */
@@ -60,7 +60,7 @@ button, a {
 
 /* Custom map controls */
 .map-control-button {
-  @apply bg-[#2A2A2A]/90 hover:bg-[#3A3A3A] shadow-md rounded-full p-1.5 sm:p-2 text-white;
+  @apply bg-[#2A2A2A]/90 hover:bg-[#3A3A3A] shadow-md rounded-full p-1 sm:p-1.5 md:p-2 text-white;
 }
 
 /* Brand color */
@@ -91,43 +91,97 @@ button, a {
 
 /* Asset cards in carousel */
 .asset-icon-card {
-  @apply rounded-2xl bg-[#3A3A3A]/80 backdrop-blur-sm p-2 sm:p-4 flex items-center justify-center;
+  @apply rounded-xl sm:rounded-2xl bg-[#3A3A3A]/80 backdrop-blur-sm p-1 sm:p-2 md:p-4 flex items-center justify-center;
 }
 
 /* Analytics section */
 .analytics-card {
-  @apply rounded-xl p-3 sm:p-5 bg-[#2A2A2A]/90 backdrop-blur-sm border border-[#3A3A3A]/50;
+  @apply rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-5 bg-[#2A2A2A]/90 backdrop-blur-sm border border-[#3A3A3A]/50;
 }
 
 /* Bottom info section */
 .info-section {
-  @apply bg-[#2A2A2A]/95 rounded-t-3xl mt-4 sm:mt-8 p-4 sm:p-6;
+  @apply bg-[#2A2A2A]/95 rounded-t-xl sm:rounded-t-2xl md:rounded-t-3xl mt-2 sm:mt-4 md:mt-8 p-3 sm:p-4 md:p-6;
 }
 
 /* Custom zoom controls */
 .zoom-controls {
-  @apply absolute right-2 sm:right-4 bottom-16 sm:bottom-24 bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden;
+  @apply absolute right-1 sm:right-2 md:right-4 bottom-12 sm:bottom-16 md:bottom-24 bg-white/10 backdrop-blur-sm rounded-md md:rounded-lg overflow-hidden;
 }
 
 .zoom-button {
-  @apply p-1.5 sm:p-2 text-white hover:bg-white/20 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10;
+  @apply p-1 sm:p-1.5 md:p-2 text-white hover:bg-white/20 flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10;
+}
+
+/* Additional screen size breakpoint */
+@screen xs {
+  .xs\:text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  .xs\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  .xs\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  .xs\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  .xs\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  .xs\:text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  .xs\:w-24 {
+    width: 6rem;
+  }
+  .xs\:h-5 {
+    height: 1.25rem;
+  }
+  .xs\:w-5 {
+    width: 1.25rem;
+  }
+  .xs\:px-3 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  .xs\:text-\[10px\] {
+    font-size: 10px;
+  }
 }
 
 /* Responsive padding utilities */
 @layer utilities {
   .p-responsive {
-    @apply p-2 sm:p-4;
+    @apply p-1.5 xs:p-2 sm:p-3 md:p-4;
   }
   
   .px-responsive {
-    @apply px-2 sm:px-4;
+    @apply px-1.5 xs:px-2 sm:px-3 md:px-4;
   }
   
   .py-responsive {
-    @apply py-2 sm:py-4;
+    @apply py-1.5 xs:py-2 sm:py-3 md:py-4;
   }
   
   .gap-responsive {
-    @apply gap-2 sm:gap-4;
+    @apply gap-1.5 xs:gap-2 sm:gap-3 md:gap-4;
+  }
+  
+  .text-responsive {
+    @apply text-xs xs:text-sm sm:text-base md:text-lg;
+  }
+  
+  .icon-responsive {
+    @apply h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 md:h-8 md:w-8;
   }
 }
+
+/* Update tailwind.config.ts to include 'xs' breakpoint */

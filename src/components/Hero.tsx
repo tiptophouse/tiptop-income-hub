@@ -21,19 +21,19 @@ const Hero = () => {
   const assetIcons = [
     { 
       id: "storage", 
-      icon: <Package className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500" /> 
+      icon: <Package className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-amber-500" /> 
     },
     { 
       id: "garden", 
-      icon: <Leaf className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" /> 
+      icon: <Leaf className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-green-500" /> 
     },
     { 
       id: "internet", 
-      icon: <Wifi className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" /> 
+      icon: <Wifi className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-blue-500" /> 
     },
     { 
       id: "house", 
-      icon: <Home className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500" /> 
+      icon: <Home className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-purple-500" /> 
     }
   ];
 
@@ -54,20 +54,20 @@ const Hero = () => {
                 <img 
                   src="/lovable-uploads/10603114-d9a7-40ea-afe1-229cb7a86511.png" 
                   alt="3D House" 
-                  className="w-28 sm:w-40 h-auto mx-auto" 
+                  className="w-20 xs:w-24 sm:w-32 md:w-40 h-auto mx-auto" 
                 />
               </div>
             </div>
             
-            <div className="relative z-10 px-3 sm:px-5 pt-6 sm:pt-10 flex-1">
-              <div className="mb-3 sm:mb-4">
-                <h1 className="text-tiptop text-xl sm:text-2xl font-bold mb-1 sm:mb-2">tiptop</h1>
-                <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-5">
+            <div className="relative z-10 px-2 xs:px-3 sm:px-4 pt-4 sm:pt-6 md:pt-10 flex-1">
+              <div className="mb-2 sm:mb-3 md:mb-4">
+                <h1 className="text-tiptop text-lg xs:text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1 md:mb-2">tiptop</h1>
+                <h2 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-5">
                   Monetize Your Home Assets
                 </h2>
               </div>
 
-              <div className="w-full max-w-md mx-auto mb-4 sm:mb-6">
+              <div className="w-full max-w-md mx-auto mb-3 sm:mb-4 md:mb-6">
                 <AddressSearchForm 
                   address={address} 
                   setAddress={setAddress} 
@@ -77,7 +77,7 @@ const Hero = () => {
                 />
               </div>
               
-              <div className="mt-auto mb-3 sm:mb-5 w-full">
+              <div className="mt-auto mb-2 sm:mb-3 md:mb-5 w-full">
                 <Carousel
                   opts={{
                     align: "center",
@@ -88,34 +88,34 @@ const Hero = () => {
                   <CarouselContent>
                     {assetIcons.map((asset) => (
                       <CarouselItem key={asset.id} className="basis-1/4 pl-1 md:pl-2">
-                        <div className="asset-icon-card py-3 sm:py-4">
+                        <div className="asset-icon-card py-2 sm:py-3 md:py-4">
                           {asset.icon}
                         </div>
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="bg-[#2A2A2A]/80 text-white hover:bg-[#3A3A3A]/80 border-none left-1 sm:left-2 w-6 h-6 sm:w-8 sm:h-8" />
-                  <CarouselNext className="bg-[#2A2A2A]/80 text-white hover:bg-[#3A3A3A]/80 border-none right-1 sm:right-2 w-6 h-6 sm:w-8 sm:h-8" />
+                  <CarouselPrevious className="bg-[#2A2A2A]/80 text-white hover:bg-[#3A3A3A]/80 border-none left-0.5 sm:left-1 md:left-2 w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" />
+                  <CarouselNext className="bg-[#2A2A2A]/80 text-white hover:bg-[#3A3A3A]/80 border-none right-0.5 sm:right-1 md:right-2 w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" />
                 </Carousel>
               </div>
               
-              <div className="info-section mt-4 sm:mt-8 pt-4 pb-12 sm:pb-20">
-                <h2 className="text-xl sm:text-2xl font-bold text-center mb-3 sm:mb-4">
+              <div className="info-section mt-3 sm:mt-4 md:mt-8 pt-3 pb-8 sm:pb-12 md:pb-16 lg:pb-20">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-center mb-2 sm:mb-3 md:mb-4">
                   Rent Your Assets, Make Passive Income
                 </h2>
-                <div className="bg-[#B5A887]/90 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
-                  <h3 className="text-lg sm:text-xl font-semibold">Rooftop</h3>
-                  <p className="text-xs sm:text-sm text-white/80">Solar panels, gardens</p>
+                <div className="bg-[#B5A887]/90 rounded-xl p-2 sm:p-3 md:p-4 mb-3 sm:mb-4 md:mb-6">
+                  <h3 className="text-base sm:text-lg md:text-xl font-semibold">Rooftop</h3>
+                  <p className="text-[10px] xs:text-xs sm:text-sm text-white/80">Solar panels, gardens</p>
                 </div>
-                <div className="flex justify-between mt-3 sm:mt-4">
-                  <button className="bg-[#333333]/80 hover:bg-[#444444]/80 rounded-full p-1.5 sm:p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
+                <div className="flex justify-between mt-2 sm:mt-3 md:mt-4">
+                  <button className="bg-[#333333]/80 hover:bg-[#444444]/80 rounded-full p-1 sm:p-1.5 md:p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left sm:w-5 sm:h-5"><path d="m15 18-6-6 6-6"/></svg>
                   </button>
-                  <button className="bg-[#333333]/80 hover:bg-[#444444]/80 rounded-full p-1.5 sm:p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+                  <button className="bg-[#333333]/80 hover:bg-[#444444]/80 rounded-full p-1 sm:p-1.5 md:p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right sm:w-5 sm:h-5"><path d="m9 18 6-6-6-6"/></svg>
                   </button>
                 </div>
-                <p className="text-center text-white/90 text-xs sm:text-sm mt-4 sm:mt-6">
+                <p className="text-center text-white/90 text-[10px] xs:text-xs sm:text-sm mt-3 sm:mt-4 md:mt-6">
                   Check which assets you can start monetizing now! Enter your property address.
                 </p>
               </div>
@@ -129,7 +129,7 @@ const Hero = () => {
                 onZoomComplete={() => console.log("Map zoom completed")} 
               />
             </div>
-            <div className="w-full mt-4 px-4">
+            <div className="w-full mt-3 sm:mt-4 px-2 sm:px-4">
               <AssetOpportunities address={address} />
             </div>
           </div>
