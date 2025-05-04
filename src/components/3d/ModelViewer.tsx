@@ -157,7 +157,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
       </model-viewer>
       
       {showHotspots && (
-        <style jsx>{`
+        <style>{`
           .hotspot {
             display: block;
             width: 24px;

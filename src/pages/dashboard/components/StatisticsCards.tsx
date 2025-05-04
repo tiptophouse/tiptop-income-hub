@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AreaChart, DollarSign, Users, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +15,7 @@ export interface StatisticsCardsProps {
   propertyInsights?: any;
 }
 
-const StatisticsCards: React.FC<StatisticsCardsProps> = ({
+export const StatisticsCards: React.FC<StatisticsCardsProps> = ({
   earnings,
   activeAssets,
   totalPotentialAssets,

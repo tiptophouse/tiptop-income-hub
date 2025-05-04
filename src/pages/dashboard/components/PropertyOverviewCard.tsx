@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { MapPin, Home, Calendar, Award } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

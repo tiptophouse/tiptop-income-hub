@@ -94,3 +94,5 @@ export const DashboardCharts = ({ earnings, aiRevenueDescription }: DashboardCha
     </div>
   );
 };
+
+export default DashboardCharts;

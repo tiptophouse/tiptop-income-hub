@@ -19,7 +19,21 @@ const earningsChartData = [
   { month: 'Apr', revenue: 380 },
 ];
 
-export const EarningsSection = () => {
+interface EarningsSectionProps {
+  userName: string;
+  earnings: {
+    daily: number;
+    monthly: number;
+    yearly: number;
+  };
+  aiRevenueDescription?: string;
+}
+
+export const EarningsSection: React.FC<EarningsSectionProps> = ({ 
+  userName, 
+  earnings, 
+  aiRevenueDescription 
+}) => {
   const isMobile = useIsMobile();
 
   const renderEarningsTable = () => {
@@ -130,3 +144,5 @@ export const EarningsSection = () => {
     </div>
   );
 };
+
+export default EarningsSection;
