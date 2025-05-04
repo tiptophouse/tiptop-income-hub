@@ -1,10 +1,12 @@
 
 /**
  * Model status checking and URL retrieval utilities
+ * Integrated with meshy.ai API: https://docs.meshy.ai/
  */
 import { MESHY_API_URL, getMeshyApiToken } from './meshyConfig';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { saveModelToCache, getModelFromCache } from '../modelCache';
 
 // House model URL as sample
 export const SAMPLE_MODEL_URL = "https://raw.githubusercontent.com/google/model-viewer/master/packages/shared-assets/models/glTF-Sample-Models/2.0/House/glTF/House.gltf";
@@ -57,6 +59,10 @@ const checkPendingJobs = async () => {
       // Get the model URL
       const modelUrl = await getModelDownloadUrl(latestJobId);
       
+      // Cache the model URL
+      const propertyAddress = localStorage.getItem('propertyAddress') || "Property";
+      saveModelToCache(latestJobId, modelUrl, propertyAddress);
+      
       // Dispatch event for any listening components
       const event = new CustomEvent('modelCompleted', {
         detail: {
@@ -89,9 +95,26 @@ export const checkModelStatus = async (jobId: string) => {
       return { 
         state: 'completed',
         status: 'SUCCEEDED',
+        progress: 100,
+        stage: 'finished',
         output: { 
           model_url: SAMPLE_MODEL_URL 
         } 
+      };
+    }
+    
+    // Check if we have a cached model status
+    const cachedModel = getModelFromCache(jobId);
+    if (cachedModel) {
+      console.log(`Using cached status for model ${jobId}`);
+      return {
+        state: 'completed',
+        status: 'SUCCEEDED',
+        progress: 100,
+        stage: 'finished',
+        output: {
+          model_url: cachedModel.modelUrl
+        }
       };
     }
     
@@ -117,9 +140,36 @@ export const checkModelStatus = async (jobId: string) => {
     const data = await response.json();
     console.log(`Model status response for ${jobId}:`, data);
     
+    // Calculate progress based on state from meshy.ai documentation
+    let progress = 0;
+    let stage = 'queue';
+    
+    if (data.result?.state) {
+      const state = data.result.state;
+      
+      if (state === 'PROCESSING') {
+        progress = 30;
+        stage = 'processing';
+      } else if (state === 'MESHING') {
+        progress = 60;
+        stage = 'meshing';
+      } else if (state === 'TEXTURING') {
+        progress = 80;
+        stage = 'texturing';
+      } else if (state === 'FINALIZING') {
+        progress = 90;
+        stage = 'finalizing';
+      } else if (state === 'SUCCEEDED') {
+        progress = 100;
+        stage = 'finished';
+      }
+    }
+    
     return {
-      state: data.result?.state?.toLowerCase() || 'processing',
+      state: data.result?.state?.toLowerCase() === 'succeeded' ? 'completed' : 'processing',
       status: data.result?.state || 'PROCESSING',
+      progress: progress,
+      stage: stage,
       output: data.result?.output ? {
         model_url: data.result.output.model_url || null
       } : null
@@ -140,6 +190,13 @@ export const getModelDownloadUrl = async (jobId: string) => {
       return SAMPLE_MODEL_URL;
     }
     
+    // Check if we have a cached model
+    const cachedModel = getModelFromCache(jobId);
+    if (cachedModel) {
+      console.log(`Using cached URL for model ${jobId}`);
+      return cachedModel.modelUrl;
+    }
+    
     // Check the status first to get the URL
     const status = await checkModelStatus(jobId);
     
@@ -148,7 +205,13 @@ export const getModelDownloadUrl = async (jobId: string) => {
     }
     
     // Return the model URL from the status response
-    return status.output?.model_url || SAMPLE_MODEL_URL;
+    const modelUrl = status.output?.model_url || SAMPLE_MODEL_URL;
+    
+    // Cache the model for future use
+    const propertyAddress = localStorage.getItem('propertyAddress') || "Property";
+    saveModelToCache(jobId, modelUrl, propertyAddress);
+    
+    return modelUrl;
   } catch (error) {
     console.error(`Error getting download URL for model ${jobId}:`, error);
     // Return the sample URL as a fallback

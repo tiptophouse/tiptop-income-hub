@@ -4,6 +4,8 @@ import ModelViewer from "./ModelViewer";
 import ModelControls from "./ModelControls";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { use3DModelControls } from "@/hooks/use3DModelControls";
+import ModelQualitySelector from "./ModelQualitySelector";
+import type { ModelQuality } from "@/hooks/use3DModel";
 
 interface Property3DModelViewerProps {
   modelUrl: string | null;
@@ -42,6 +44,7 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
 }) => {
   const [showHotspots, setShowHotspots] = useState(true);
   const [isModelViewerLoaded, setIsModelViewerLoaded] = useState(false);
+  const [modelQuality, setModelQuality] = useState<ModelQuality>('medium');
   const effectiveModelUrl = modelUrl || DEFAULT_MODEL_URL;
   
   const {
@@ -153,8 +156,15 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
     }
   };
 
+  const handleQualityChange = (quality: ModelQuality) => {
+    setModelQuality(quality);
+    // In a real implementation, this would trigger different model loading or settings
+  };
+
   return (
     <div className="space-y-2 sm:space-y-4 relative">
+      <ModelQualitySelector onQualityChange={handleQualityChange} selectedQuality={modelQuality} />
+      
       <ModelViewer
         modelUrl={effectiveModelUrl}
         isModelViewerLoaded={isModelViewerLoaded}
@@ -173,11 +183,14 @@ const Property3DModelViewer: React.FC<Property3DModelViewerProps> = ({
         jobId={jobId}
       />
       
-      {(hasSatelliteImage || hasAerialImage) && (
-        <div className="text-xs text-center text-muted-foreground">
-          Using {hasSatelliteImage && "satellite"}{hasSatelliteImage && hasAerialImage && " and "}{hasAerialImage && "aerial"} imagery for enhanced accuracy
-        </div>
-      )}
+      <div className="text-xs text-center text-gray-500 mt-2">
+        {(hasSatelliteImage || hasAerialImage) && (
+          <span className="text-tiptop-accent mr-2">
+            Using {hasSatelliteImage && "satellite"}{hasSatelliteImage && hasAerialImage && " and "}{hasAerialImage && "aerial"} imagery
+          </span>
+        )}
+        <span>Powered by <a href="https://meshy.ai" target="_blank" rel="noopener noreferrer" className="text-tiptop-accent hover:underline font-medium">meshy.ai</a></span>
+      </div>
     </div>
   );
 };

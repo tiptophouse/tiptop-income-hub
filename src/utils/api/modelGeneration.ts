@@ -1,6 +1,7 @@
 
 /**
  * 3D model generation utilities using Meshy API
+ * Documentation: https://docs.meshy.ai/
  */
 import { MESHY_API_URL, getMeshyApiToken, SAMPLE_MODEL_URL, canMakeModelApiCall, trackApiCall } from './meshyConfig';
 
@@ -68,7 +69,7 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
     // Format the image data as required by the OpenAPI
     const imageUrl = `data:image/png;base64,${base64Image}`;
     
-    // Make API call to Meshy OpenAPI
+    // Make API call to Meshy OpenAPI with extended parameters from documentation
     const response = await fetch(`${MESHY_API_URL}/image-to-3d`, {
       method: 'POST',
       headers: {
@@ -77,14 +78,21 @@ export const generateModelFromImage = async (imageData: string, propertyFeatures
       },
       body: JSON.stringify({
         image_url: imageUrl,
-        ai_model: "meshy-5",
-        topology: "quad",
-        target_polycount: 100000,
-        symmetry_mode: "auto",
-        should_remesh: true,
-        should_texture: true,
-        enable_pbr: true,
-        texture_prompt: enhancedPrompt
+        ai_model: "meshy-5", // Using their best model as per documentation
+        topology: "quad", // quad topology for better mesh quality
+        target_polycount: 100000, // Higher poly count for better detail
+        symmetry_mode: "auto", // Auto detect symmetry
+        should_remesh: true, // Remeshing for cleaner topology
+        should_texture: true, // Generate textures
+        enable_pbr: true, // Enable PBR materials for better realism
+        texture_prompt: enhancedPrompt, // Using our enhanced prompt
+        texture_resolution: 2048, // Higher resolution textures
+        unwrap_mode: "auto", // Auto UV unwrapping
+        output_format: "glb", // GLB format for web compatibility
+        normal_maps: true, // Generate normal maps
+        roughness_metalness_maps: true, // Generate PBR maps
+        denoising_strength: 0.5, // Moderate denoising to preserve details
+        generate_background: false // No background to focus on the property
       })
     });
 

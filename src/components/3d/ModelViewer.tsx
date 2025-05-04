@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 
 interface ModelViewerProps {
@@ -103,7 +104,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
     return (
       <div className={`w-full ${aspectRatio} bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-violet-400 mx-auto mb-2"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-tiptop-accent mx-auto mb-2"></div>
           <p className="text-sm text-gray-500">Loading 3D viewer...</p>
         </div>
       </div>
@@ -164,7 +165,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
             height: 24px;
             border-radius: 12px;
             border: none;
-            background-color: #8B5CF6;
+            background-color: #9b87f5;
             box-sizing: border-box;
             pointer-events: none;
             transition: all 0.3s ease;
@@ -172,13 +173,13 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
           }
           
           .hotspot.active {
-            background-color: #ef4444;
+            background-color: #6E59A5;
             transform: scale(1.2);
           }
 
           .hotspot[data-visibility-attribute]:not([visible]) {
             background-color: transparent;
-            border: 3px solid #8B5CF6;
+            border: 3px solid #9b87f5;
           }
           
           .annotation {
@@ -201,6 +202,11 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
           }
         `}</style>
       )}
+      
+      {/* Meshy.ai attribution */}
+      <div className="absolute bottom-2 left-2 text-xs text-gray-500 bg-white/80 px-2 py-1 rounded-md">
+        Powered by <a href="https://meshy.ai" target="_blank" rel="noopener noreferrer" className="text-tiptop-accent hover:underline font-medium">meshy.ai</a>
+      </div>
     </div>
   );
 };

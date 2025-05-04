@@ -1,164 +1,169 @@
 
 import { useState, useEffect } from 'react';
-import { checkModelStatus, getModelDownloadUrl, startPeriodicStatusCheck } from '@/utils/api/modelStatus';
+import { checkModelStatus, getModelDownloadUrl } from '@/utils/api/modelStatus';
+import { getModelFromCache } from '@/utils/modelCache';
 
-type ModelStatus = 'loading' | 'processing' | 'completed' | 'failed';
+export type ModelQuality = 'low' | 'medium' | 'high';
 
-// Sample model URL as fallback
-const SAMPLE_MODEL_URL = "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb";
-// House model URL for demo purposes
-const HOUSE_MODEL_URL = "https://raw.githubusercontent.com/google/model-viewer/master/packages/shared-assets/models/glTF-Sample-Models/2.0/House/glTF/House.gltf";
+interface ModelOptions {
+  quality?: ModelQuality;
+}
 
-export const use3DModel = (jobId: string) => {
-  const [modelStatus, setModelStatus] = useState<ModelStatus>('loading');
+export const use3DModel = (jobId: string | null, options?: ModelOptions) => {
+  const [modelStatus, setModelStatus] = useState<'processing' | 'completed' | 'failed'>('processing');
   const [modelUrl, setModelUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [statusMessage, setStatusMessage] = useState<string>('Initializing model...');
-  const [progress, setProgress] = useState<number>(0);
-  const [lastCheckTime, setLastCheckTime] = useState<Date>(new Date());
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState('Initializing 3D model...');
+  const [progress, setProgress] = useState(0);
+  const [stage, setStage] = useState('queue');
+  const [quality, setQuality] = useState<ModelQuality>(options?.quality || 'medium');
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<number | null>(null);
 
+  // Load model on jobId change
   useEffect(() => {
-    let isMounted = true;
-    let timer: NodeJS.Timeout;
-    
-    console.log("use3DModel: Initializing with jobId:", jobId);
-    
-    // Function to fetch model status
-    const fetchModelStatus = async () => {
+    if (!jobId) {
+      setIsLoading(false);
+      setError('No model job ID provided');
+      setModelStatus('failed');
+      return;
+    }
+
+    const loadModel = async () => {
       try {
-        if (!jobId) {
+        setIsLoading(true);
+        setError(null);
+        console.log("Loading model for job ID:", jobId);
+        
+        // Check if we have a cached model first
+        const cachedModel = getModelFromCache(jobId);
+        if (cachedModel) {
+          console.log("Found cached model:", cachedModel);
+          setModelUrl(cachedModel.modelUrl);
+          setModelStatus('completed');
+          setProgress(100);
+          setStage('finished');
+          setStatusMessage('3D model loaded from cache');
           setIsLoading(false);
           return;
         }
-
-        // Update progress based on time passed (estimated 5 minute completion time)
-        const now = new Date();
-        const elapsedTime = (now.getTime() - lastCheckTime.getTime()) / 1000; // in seconds
-        const estimatedTotalTime = 300; // 5 minutes in seconds
-        let newProgress = Math.min(95, (elapsedTime / estimatedTotalTime) * 100);
         
-        setStatusMessage('Checking model status...');
+        // If not cached, check the status
         const status = await checkModelStatus(jobId);
-        setLastCheckTime(new Date());
-
-        console.log("use3DModel: Model status check result:", status);
-
-        if (!isMounted) return;
-
-        if (status.state === 'processing') {
-          setModelStatus('processing');
-          setStatusMessage('Building 3D model... This can take up to 5 minutes.');
-          setProgress(Math.min(newProgress, 95));
-          
-          // Check again in 30 seconds
-          timer = setTimeout(fetchModelStatus, 30000);
-        } else if (status.state === 'completed') {
-          setModelStatus('completed');
-          setStatusMessage('3D model ready!');
-          setProgress(100);
-          
-          try {
-            console.log("use3DModel: Getting model download URL for jobId:", jobId);
-            const url = await getModelDownloadUrl(jobId);
-            if (isMounted) {
-              console.log("use3DModel: Model URL retrieved:", url);
-              setModelUrl(url);
-              setIsLoading(false);
-            }
-          } catch (urlError) {
-            if (isMounted) {
-              console.error("use3DModel: Error getting URL:", urlError);
-              // Use house model as fallback
-              setModelUrl(HOUSE_MODEL_URL);
-              setError(urlError instanceof Error ? urlError : new Error('Failed to get model URL'));
-              setIsLoading(false);
+        console.log("Model status:", status);
+        
+        // Update UI based on status
+        setProgress(status.progress || 0);
+        setStage(status.stage || 'processing');
+        
+        // Set time remaining based on progress
+        if (status.progress && status.progress < 100) {
+          // Rough estimate: if we're at X% progress and it took Y seconds to get here,
+          // then the remaining time is (100-X)/X * Y seconds
+          const jobStartTime = localStorage.getItem('meshy_job_created_at');
+          if (jobStartTime) {
+            const startTime = new Date(jobStartTime).getTime();
+            const currentTime = new Date().getTime();
+            const elapsedSeconds = (currentTime - startTime) / 1000;
+            
+            if (status.progress > 0) {
+              const estimatedTotal = elapsedSeconds * 100 / status.progress;
+              const remaining = estimatedTotal - elapsedSeconds;
+              setEstimatedTimeRemaining(Math.max(0, remaining));
             }
           }
-        } else if (status.state === 'failed') {
-          setModelStatus('failed');
-          setStatusMessage('Model generation failed.');
-          setError(new Error('Model generation failed'));
-          // Use house model as fallback
-          setModelUrl(HOUSE_MODEL_URL);
-          setIsLoading(false);
+        }
+        
+        if (status.state === 'completed') {
+          // For completed models, get the URL
+          const url = await getModelDownloadUrl(jobId);
+          console.log("Model URL:", url);
+          setModelUrl(url);
+          setModelStatus('completed');
+          setStatusMessage('3D model ready');
         } else {
-          // Unknown state, treat as processing
+          // Update status message based on stage
           setModelStatus('processing');
-          setStatusMessage(`Processing model (${status.state || 'unknown'})...`);
-          setProgress(Math.min(newProgress, 90));
+          switch (status.stage) {
+            case 'queue':
+              setStatusMessage('Queued for processing...');
+              break;
+            case 'processing':
+              setStatusMessage('Processing property images...');
+              break;
+            case 'meshing':
+              setStatusMessage('Creating 3D mesh structure...');
+              break;
+            case 'texturing':
+              setStatusMessage('Applying textures and materials...');
+              break;
+            case 'finalizing':
+              setStatusMessage('Finalizing 3D model...');
+              break;
+            default:
+              setStatusMessage('Processing 3D model...');
+          }
           
-          // Check again in 30 seconds
-          timer = setTimeout(fetchModelStatus, 30000);
+          // Set a timeout to check again
+          const checkAgainTimeout = setTimeout(() => loadModel(), 15000); // Check every 15 seconds
+          return () => clearTimeout(checkAgainTimeout);
         }
       } catch (error) {
-        if (!isMounted) return;
-        console.error("Error fetching 3D model status:", error);
+        console.error("Error loading model:", error);
+        setError(error instanceof Error ? error.message : 'Unknown error loading model');
+        setModelStatus('failed');
         
-        // For demo models or errors, show house model
-        if (jobId.startsWith('demo-')) {
-          setModelStatus('completed');
-          setStatusMessage('Demo model ready!');
-          setProgress(100);
-          setModelUrl(HOUSE_MODEL_URL);
-          setIsLoading(false);
-        } else {
-          setError(error instanceof Error ? error : new Error('Failed to get model status'));
-          setModelStatus('failed');
-          setModelUrl(HOUSE_MODEL_URL);
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchModelStatus();
-    
-    // Listen for model completed events from the periodic checker
-    const handleModelCompleted = (event: CustomEvent) => {
-      if (event.detail && event.detail.jobId === jobId) {
-        console.log("use3DModel: Received modelCompleted event:", event.detail);
-        setModelStatus('completed');
-        setStatusMessage('3D model ready!');
-        setProgress(100);
-        setModelUrl(event.detail.modelUrl || HOUSE_MODEL_URL);
+        // Use a demo model URL for fallback
+        setModelUrl("https://raw.githubusercontent.com/google/model-viewer/master/packages/shared-assets/models/glTF-Sample-Models/2.0/House/glTF/House.gltf");
+      } finally {
         setIsLoading(false);
       }
     };
-    
-    document.addEventListener('modelCompleted', handleModelCompleted as EventListener);
-    
-    // Start periodic status checking when this hook is used
-    const stopStatusCheck = startPeriodicStatusCheck();
 
-    return () => {
-      isMounted = false;
-      if (timer) clearTimeout(timer);
-      document.removeEventListener('modelCompleted', handleModelCompleted as EventListener);
-      stopStatusCheck();
-    };
-  }, [jobId, lastCheckTime]);
+    loadModel();
+  }, [jobId, quality]);
 
   // Function to manually refresh the model status
   const handleRefresh = async () => {
-    setIsLoading(true);
-    setError(null);
-    setProgress(0);
-    setStatusMessage('Refreshing model status...');
     try {
-      console.log("use3DModel: Refreshing model for jobId:", jobId);
-      const url = await getModelDownloadUrl(jobId);
-      setModelUrl(url);
-      setModelStatus('completed');
-      setStatusMessage('3D model ready!');
-      setProgress(100);
+      setIsLoading(true);
+      setError(null);
+      console.log("Refreshing model status for job ID:", jobId);
+      
+      if (!jobId) {
+        throw new Error("No job ID provided");
+      }
+      
+      // Check the current status
+      const status = await checkModelStatus(jobId);
+      console.log("Refreshed model status:", status);
+      
+      // Update the UI based on status
+      setProgress(status.progress || 0);
+      
+      if (status.state === 'completed') {
+        const url = await getModelDownloadUrl(jobId);
+        setModelUrl(url);
+        setModelStatus('completed');
+        setStatusMessage('3D model ready');
+      } else {
+        setModelStatus('processing');
+        setStatusMessage('Processing 3D model...');
+      }
     } catch (error) {
-      console.error("use3DModel: Refresh error:", error);
-      setError(error instanceof Error ? error : new Error('Failed to refresh model'));
-      setModelStatus('failed');
-      // Use house model as fallback
-      setModelUrl(HOUSE_MODEL_URL);
+      console.error("Error refreshing model:", error);
+      setError(error instanceof Error ? error.message : 'Unknown error refreshing model');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Function to change quality settings
+  const changeQuality = (newQuality: ModelQuality) => {
+    if (quality !== newQuality) {
+      setQuality(newQuality);
+      // Quality change might require processing adjustments in a real implementation
+      console.log(`Model quality changed to ${newQuality}`);
     }
   };
 
@@ -169,6 +174,10 @@ export const use3DModel = (jobId: string) => {
     error,
     statusMessage,
     progress,
-    handleRefresh,
+    stage,
+    quality,
+    estimatedTimeRemaining,
+    changeQuality,
+    handleRefresh
   };
 };
