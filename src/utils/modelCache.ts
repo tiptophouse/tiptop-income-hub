@@ -4,7 +4,7 @@
  * This helps to avoid redundant API calls and improve load times
  */
 
-interface CachedModel {
+export interface CachedModel {
   modelUrl: string;
   jobId: string;
   address: string;
